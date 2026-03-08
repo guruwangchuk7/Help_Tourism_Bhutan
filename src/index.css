@@ -1,0 +1,135 @@
+@import "tailwindcss";
+
+@theme {
+  --font-heading: "Playfair Display", serif;
+  --font-body: "Inter", sans-serif;
+
+  --color-primary: #1A1A1D;
+  --color-secondary: #5A5A5C;
+  --color-accent: #C2A878;
+  --color-accent-dark: #A38A5C;
+  --color-bg-light: #FAFAFA;
+  --color-bg-alt: #F3F1ED;
+  --color-white: #FFFFFF;
+
+  --shadow-minimal: 0 4px 20px rgba(0, 0, 0, 0.03);
+  --shadow-premium: 0 12px 40px rgba(0, 0, 0, 0.06);
+  --shadow-hover: 0 20px 50px rgba(0, 0, 0, 0.1);
+  --shadow-glass: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+@layer base {
+  body {
+    @apply font-body bg-bg-light text-primary antialiased leading-relaxed;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-heading tracking-tight;
+  }
+}
+
+@layer components {
+
+  /* Buttons */
+  .btn-primary {
+    @apply relative overflow-hidden px-8 py-4 rounded-full font-medium text-xs transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer select-none active:scale-[0.98] bg-primary text-white hover:bg-black hover:shadow-premium tracking-widest uppercase;
+  }
+
+  .btn-accent {
+    @apply relative overflow-hidden px-8 py-4 rounded-full font-medium text-xs transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer select-none active:scale-[0.98] bg-accent text-white hover:bg-accent-dark hover:shadow-premium tracking-widest uppercase;
+  }
+
+  .btn-outline {
+    @apply relative overflow-hidden px-8 py-4 rounded-full font-medium text-xs transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer select-none active:scale-[0.98] bg-transparent border border-primary/20 text-primary hover:bg-primary/5 tracking-widest uppercase;
+  }
+
+  .btn-ghost {
+    @apply relative overflow-hidden px-6 py-4 rounded-full font-medium text-xs transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer select-none active:scale-[0.98] bg-transparent text-primary hover:bg-black/5 uppercase tracking-widest;
+  }
+
+  /* Glassmorphism */
+  .glass-panel {
+    @apply bg-white/75 backdrop-blur-2xl border border-white/50 shadow-glass rounded-3xl;
+  }
+
+  /* Cards */
+  .card-minimal {
+    @apply bg-white rounded-3xl shadow-minimal overflow-hidden transition-all duration-500 hover:shadow-hover border border-primary/5;
+  }
+
+  /* Layout Helpers */
+  .section-padding {
+    @apply py-24 md:py-32;
+  }
+}
+
+/* Custom Minimalist Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #C2A878;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #A38A5C;
+}
+
+/* Global Responsive Adjustments */
+@layer base {
+  html, body {
+    overflow-x: hidden;
+    width: 100%;
+    @apply scroll-smooth;
+  }
+}
+
+@layer components {
+  /* Fluid Typography for large headings */
+  .fluid-h1 {
+    @apply text-4xl md:text-7xl lg:text-9xl font-heading leading-tight md:leading-none tracking-tight;
+  }
+}
+
+/* Specific overrides for mobile/tablet visibility and layout */
+@media (max-width: 1024px) {
+  .section-padding {
+    @apply py-16 md:py-24;
+  }
+  
+  .glass-panel {
+    @apply rounded-2xl p-6;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Prevent large containers from feeling too tight */
+  .container-padding {
+    @apply px-4 sm:px-6;
+  }
+
+  /* Improve touch accessibility */
+  button, a {
+    @apply min-h-[44px];
+  }
+
+  /* Scale down large paddings */
+  .p-10, .p-16 {
+    @apply p-6 md:p-10;
+  }
+  
+  .rounded-\[3rem\] {
+    @apply rounded-[2rem];
+  }
+}
