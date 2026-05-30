@@ -1,12 +1,35 @@
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { CheckCircle2, CreditCard, Gift, User, ArrowRight, ArrowLeft, ShieldCheck, Zap } from "lucide-react"
+import { CheckCircle2, CreditCard, Gift, User, ArrowRight, ArrowLeft, ShieldCheck, Zap, Loader2 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import PageTransition from "../components/common/PageTransition"
+import { loadStripe } from "@stripe/stripe-js"
 
 const Booking = () => {
     const [step, setStep] = useState(1)
+    const [selectedAddons, setSelectedAddons] = useState<string[]>([])
+    const [paymentMethod, setPaymentMethod] = useState<'card' | 'stripe' | 'whatsapp' | 'offline'>('card')
+    const [isProcessingStripe, setIsProcessingStripe] = useState(false)
     const navigate = useNavigate()
+
+    const addonPrices: { [key: string]: number } = {
+        'Spiritual Concierge': 150,
+        'Luxury Aviation': 850,
+        'Gourmet Wilderness': 120
+    }
+
+    const toggleAddon = (title: string) => {
+        if (selectedAddons.includes(title)) {
+            setSelectedAddons(selectedAddons.filter(item => item !== title))
+        } else {
+            setSelectedAddons([...selectedAddons, title])
+        }
+    }
+
+    const addonTotal = selectedAddons.reduce((sum, title) => sum + (addonPrices[title] || 0), 0)
+    const basePrice = 1798.00
+    const tax = 400.00
+    const totalPrice = basePrice + tax + addonTotal
 
     useEffect(() => {
         window.scrollTo(0, 0)
@@ -15,15 +38,57 @@ const Booking = () => {
     const steps = [
         { title: 'Identity', icon: User, id: 1 },
         { title: 'Enhancements', icon: Gift, id: 2 },
-        { title: 'Liquidation', icon: CreditCard, id: 3 },
+        { title: 'Payment', icon: CreditCard, id: 3 },
     ]
+
+    const handleStripeCheckout = async () => {
+        setIsProcessingStripe(true)
+        try {
+            const stripeKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || ''
+            const stripePriceId = import.meta.env.VITE_STRIPE_PRICE_ID || ''
+            const stripe = await loadStripe(stripeKey)
+            if (stripe) {
+                const { error } = await (stripe as any).redirectToCheckout({
+                    lineItems: [{
+                        price: stripePriceId, 
+                        quantity: 1,
+                    }],
+                    mode: 'payment',
+                    successUrl: `${window.location.origin}/`,
+                    cancelUrl: `${window.location.origin}/booking`,
+                })
+                if (error) {
+                    console.error('Stripe redirect error:', error)
+                    alert(`Stripe checkout error: ${error.message}`)
+                }
+            } else {
+                alert('Stripe SDK failed to load.')
+            }
+        } catch (err) {
+            console.error('Stripe checkout error:', err)
+            alert('Stripe redirect simulated. Make sure Client-only integration is enabled in your Stripe Dashboard, and replace the placeholder Price ID and Publishable Key in Booking.tsx.')
+            navigate('/')
+        } finally {
+            setIsProcessingStripe(false)
+        }
+    }
 
     const handleNext = () => {
         if (step < 3) setStep(step + 1)
         else {
-            // Mock Final Action
-            alert('Your journey has been secured. Welcome to Bhutan.')
-            navigate('/')
+            if (paymentMethod === 'card') {
+                alert('Your journey has been secured. Welcome to Bhutan.')
+                navigate('/')
+            } else if (paymentMethod === 'stripe') {
+                handleStripeCheckout()
+            } else if (paymentMethod === 'whatsapp') {
+                window.open('https://wa.me/97517609800', '_blank')
+                alert('Opening WhatsApp support...')
+                navigate('/')
+            } else {
+                alert('Booking inquiry sent. A Thimphu travel architect will contact you shortly with localized payment instructions.')
+                navigate('/')
+            }
         }
     }
 
@@ -106,7 +171,13 @@ const Booking = () => {
                                                     { title: 'Luxury Aviation', price: '$850', desc: 'Chartered helicopter flight over the peaks.', icon: '🚁' },
                                                     { title: 'Gourmet Wilderness', price: '$120', desc: '5-course private dinner in a pine forest.', icon: '🍷' }
                                                 ].map(addon => (
-                                                    <div key={addon.title} className="group flex flex-col md:flex-row md:items-center justify-between p-8 bg-bg-alt rounded-[2rem] border border-primary/5 hover:border-accent hover:bg-white transition-all cursor-pointer shadow-none hover:shadow-premium gap-6">
+                                                    <div 
+                                                        key={addon.title} 
+                                                        onClick={() => toggleAddon(addon.title)}
+                                                        className={`group flex flex-col md:flex-row md:items-center justify-between p-6 sm:p-8 bg-bg-alt rounded-[2rem] border transition-all cursor-pointer shadow-none hover:shadow-premium gap-6 ${
+                                                            selectedAddons.includes(addon.title) ? 'border-accent bg-white shadow-premium' : 'border-primary/5'
+                                                        }`}
+                                                    >
                                                         <div className="flex items-center space-x-6">
                                                             <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-3xl shadow-minimal group-hover:scale-110 transition-transform duration-500 border border-primary/5">{addon.icon}</div>
                                                             <div>
@@ -116,8 +187,12 @@ const Booking = () => {
                                                         </div>
                                                         <div className="flex flex-row md:flex-col items-center justify-between md:items-end">
                                                             <span className="font-heading font-semibold text-accent text-2xl">{addon.price}</span>
-                                                            <div className="mt-0 md:mt-2 w-6 h-6 rounded-full border border-primary/20 flex items-center justify-center group-hover:border-accent group-hover:bg-accent/10 transition-colors duration-300">
-                                                                <div className="w-3 h-3 rounded-full bg-accent scale-0 group-hover:scale-100 transition-transform duration-300" />
+                                                            <div className={`mt-0 md:mt-2 w-6 h-6 rounded-full border flex items-center justify-center transition-colors duration-300 ${
+                                                                selectedAddons.includes(addon.title) ? 'border-accent bg-accent/10' : 'border-primary/20 group-hover:border-accent group-hover:bg-accent/10'
+                                                            }`}>
+                                                                <div className={`w-3 h-3 rounded-full bg-accent transition-transform duration-300 ${
+                                                                    selectedAddons.includes(addon.title) ? 'scale-100' : 'scale-0 group-hover:scale-100'
+                                                                }`} />
                                                             </div>
                                                         </div>
                                                     </div>
@@ -133,13 +208,123 @@ const Booking = () => {
                                             animate={{ opacity: 1, y: 0 }}
                                             className="flex-1"
                                         >
-                                            <h2 className="text-3xl md:text-5xl lg:text-6xl font-heading font-medium text-primary mb-12 tracking-tight leading-none">Liquidation <br className="hidden md:block" /> <span className="text-accent italic font-normal">Protocol</span></h2>
+                                            <h2 className="text-3xl md:text-5xl lg:text-6xl font-heading font-medium text-primary mb-12 tracking-tight leading-none">Choose <br className="hidden md:block" /> <span className="text-accent italic font-normal">Payment</span></h2>
 
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
-                                                <input type="text" className="md:col-span-2 bg-bg-alt border border-primary/5 rounded-2xl px-6 py-5 outline-none focus:ring-2 focus:ring-accent/20 transition-all font-light text-primary placeholder-secondary/50 tracking-widest text-lg" placeholder="Card Identity Number" />
-                                                <input type="text" className="bg-bg-alt border border-primary/5 rounded-2xl px-6 py-5 outline-none focus:ring-2 focus:ring-accent/20 transition-all font-light text-primary placeholder-secondary/50 text-center tracking-widest" placeholder="Horizon MM/YY" />
-                                                <input type="text" className="bg-bg-alt border border-primary/5 rounded-2xl px-6 py-5 outline-none focus:ring-2 focus:ring-accent/20 transition-all font-light text-primary placeholder-secondary/50 text-center tracking-widest" placeholder="Security CVV" />
+                                            {/* Payment Option Tabs Grid */}
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setPaymentMethod('card')}
+                                                    className={`py-4 px-6 rounded-2xl font-bold uppercase tracking-wider text-[10px] border transition-all cursor-pointer ${
+                                                        paymentMethod === 'card' 
+                                                            ? 'bg-primary border-primary text-white shadow-md' 
+                                                            : 'bg-bg-alt border-primary/5 text-primary hover:bg-white'
+                                                    }`}
+                                                >
+                                                    Credit / Debit Card
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setPaymentMethod('stripe')}
+                                                    className={`py-4 px-6 rounded-2xl font-bold uppercase tracking-wider text-[10px] border transition-all cursor-pointer ${
+                                                        paymentMethod === 'stripe' 
+                                                            ? 'bg-primary border-primary text-white shadow-md' 
+                                                            : 'bg-bg-alt border-primary/5 text-primary hover:bg-white'
+                                                    }`}
+                                                >
+                                                    Pay with Stripe
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setPaymentMethod('whatsapp')}
+                                                    className={`py-4 px-6 rounded-2xl font-bold uppercase tracking-wider text-[10px] border transition-all cursor-pointer ${
+                                                        paymentMethod === 'whatsapp' 
+                                                            ? 'bg-primary border-primary text-white shadow-md' 
+                                                            : 'bg-bg-alt border-primary/5 text-primary hover:bg-white'
+                                                    }`}
+                                                >
+                                                    Pay via WhatsApp Chat
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setPaymentMethod('offline')}
+                                                    className={`py-4 px-6 rounded-2xl font-bold uppercase tracking-wider text-[10px] border transition-all cursor-pointer ${
+                                                        paymentMethod === 'offline' 
+                                                            ? 'bg-primary border-primary text-white shadow-md' 
+                                                            : 'bg-bg-alt border-primary/5 text-primary hover:bg-white'
+                                                    }`}
+                                                >
+                                                    Bank Wire / Support
+                                                </button>
                                             </div>
+
+                                            {paymentMethod === 'card' && (
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
+                                                    <input type="text" className="md:col-span-2 bg-bg-alt border border-primary/5 rounded-2xl px-6 py-5 outline-none focus:ring-2 focus:ring-accent/20 transition-all font-light text-primary placeholder-secondary/50 tracking-widest text-lg" placeholder="Card Identity Number" />
+                                                    <input type="text" className="bg-bg-alt border border-primary/5 rounded-2xl px-6 py-5 outline-none focus:ring-2 focus:ring-accent/20 transition-all font-light text-primary placeholder-secondary/50 text-center tracking-widest" placeholder="Horizon MM/YY" />
+                                                    <input type="text" className="bg-bg-alt border border-primary/5 rounded-2xl px-6 py-5 outline-none focus:ring-2 focus:ring-accent/20 transition-all font-light text-primary placeholder-secondary/50 text-center tracking-widest" placeholder="Security CVV" />
+                                                </div>
+                                            )}
+
+                                            {paymentMethod === 'stripe' && (
+                                                <div className="bg-bg-alt rounded-2xl p-6 border border-primary/5 space-y-6">
+                                                    <div className="flex items-center justify-between border-b border-primary/5 pb-3">
+                                                        <h4 className="font-heading font-medium text-lg text-primary">Stripe Secure Checkout</h4>
+                                                        <span className="text-[9px] font-bold text-accent tracking-widest uppercase">Secured</span>
+                                                    </div>
+                                                    
+                                                    {isProcessingStripe ? (
+                                                        <div className="py-12 flex flex-col items-center justify-center space-y-4">
+                                                            <Loader2 className="w-12 h-12 text-accent animate-spin" />
+                                                            <p className="text-primary font-medium text-sm">Connecting to Stripe Checkout gateway...</p>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="space-y-4">
+                                                            <p className="text-secondary text-sm font-light leading-relaxed">
+                                                                Click below to proceed to Stripe's secure payment page. You will be able to complete your transaction using credit/debit card, Apple Pay, Google Pay, or other localized methods.
+                                                            </p>
+                                                            <div className="bg-white rounded-xl p-4 border border-primary/5 flex justify-between items-center">
+                                                                <div className="flex flex-col">
+                                                                    <span className="text-[10px] text-secondary font-medium uppercase tracking-widest leading-none mb-1">Total Price</span>
+                                                                    <span className="text-xl font-heading font-semibold text-primary">${totalPrice.toFixed(2)}</span>
+                                                                </div>
+                                                                <span className="text-[9px] font-bold bg-green-100 text-green-800 px-3 py-1 rounded-full uppercase tracking-wider">Ready</span>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {paymentMethod === 'whatsapp' && (
+                                                <div className="bg-bg-alt rounded-2xl p-6 border border-primary/5 space-y-4">
+                                                    <h4 className="font-heading font-medium text-lg text-primary">Instant Booking via WhatsApp</h4>
+                                                    <p className="text-secondary text-sm font-light leading-relaxed">
+                                                        Prefer to coordinate billing with a live agent? Click below to start a secure chat. We will format a direct invoice, handle currency exchanges, and secure your permits instantly.
+                                                    </p>
+                                                    <a 
+                                                        href="https://wa.me/97517609800" 
+                                                        target="_blank" 
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center justify-center bg-[#25D366] text-white font-bold text-xs uppercase tracking-wider px-6 py-3 rounded-full hover:bg-[#20ba5a] transition-colors"
+                                                    >
+                                                        💬 Start WhatsApp Conversation
+                                                    </a>
+                                                </div>
+                                            )}
+
+                                            {paymentMethod === 'offline' && (
+                                                <div className="bg-bg-alt rounded-2xl p-6 border border-primary/5 space-y-4">
+                                                    <h4 className="font-heading font-medium text-lg text-primary">Need bank transfer details?</h4>
+                                                    <p className="text-secondary text-sm font-light leading-relaxed">
+                                                        We support international bank wire transfers, offline deposits, and customized corporate billing protocols. Reach out to our Thimphu base for support:
+                                                    </p>
+                                                    <div className="pt-2 text-xs font-medium space-y-2 text-primary">
+                                                        <p>📞 Phone: <span className="font-semibold text-accent">+975 2 334567</span></p>
+                                                        <p>💬 WhatsApp: <span className="font-semibold text-accent">+975 17 609800</span></p>
+                                                        <p>✉️ Email: <a href="mailto:explore@wandervista.bt" className="font-semibold text-accent underline">explore@wandervista.bt</a></p>
+                                                    </div>
+                                                </div>
+                                            )}
 
                                             {/* Minimal Visual Hint */}
                                             <div className="mt-12 flex items-center justify-center space-x-6 text-secondary/40">
@@ -166,7 +351,7 @@ const Booking = () => {
                                         onClick={handleNext}
                                         className="btn-primary"
                                     >
-                                        <span>{step === 3 ? 'Finalize Order' : 'Proceed System'}</span>
+                                        <span>{step === 3 ? (paymentMethod === 'card' ? 'Finalize Order' : paymentMethod === 'stripe' ? 'Pay with Stripe' : paymentMethod === 'whatsapp' ? 'Pay via WhatsApp' : 'Initiate Inquiry') : 'Proceed System'}</span>
                                         <ArrowRight className="w-4 h-4 ml-1" />
                                     </button>
                                 </div>
@@ -201,6 +386,12 @@ const Booking = () => {
                                             <span className="text-secondary font-light text-sm tracking-wide group-hover:text-primary transition-colors">SDF Government Tax</span>
                                             <span className="font-heading font-semibold text-primary tracking-wide">$400.00</span>
                                         </div>
+                                        {selectedAddons.map(addon => (
+                                            <div key={addon} className="flex justify-between items-center group">
+                                                <span className="text-secondary font-light text-sm tracking-wide group-hover:text-primary transition-colors">{addon}</span>
+                                                <span className="font-heading font-semibold text-accent tracking-wide">+${addonPrices[addon]}.00</span>
+                                            </div>
+                                        ))}
                                         <div className="flex justify-between items-center group">
                                             <span className="text-secondary font-light text-sm tracking-wide group-hover:text-primary transition-colors">Concierge Assistance</span>
                                             <span className="font-heading font-semibold text-accent tracking-wide">FREE</span>
@@ -211,7 +402,7 @@ const Booking = () => {
                                         <div className="flex justify-between items-end">
                                             <div className="flex flex-col gap-1">
                                                 <span className="block text-[9px] font-medium text-secondary/60 uppercase tracking-[0.2em]">Total Expedition Debt</span>
-                                                <span className="text-3xl font-heading font-semibold text-primary tracking-tight">$2,198.00</span>
+                                                <span className="text-3xl font-heading font-semibold text-primary tracking-tight">${totalPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                             </div>
                                             <div className="bg-bg-alt p-3 rounded-full border border-primary/5">
                                                 <ShieldCheck className="w-5 h-5 text-accent" />

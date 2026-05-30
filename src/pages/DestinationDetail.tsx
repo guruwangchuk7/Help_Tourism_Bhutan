@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
-import { MapPin, ArrowLeft, Calendar, Users, Shield, Clock, MessageSquare, Heart, Share2, Star, Globe, ArrowRight } from "lucide-react"
+import { MapPin, ArrowLeft, Calendar, Users, Shield, Clock, MessageSquare, Heart, Share2, Star, Globe, ArrowRight, Wifi, Mountain, Bath, Car, Utensils, Sparkles } from "lucide-react"
 import { destinations } from "../data/destinations"
 import { useState, useEffect } from "react"
 import PageTransition from "../components/common/PageTransition"
@@ -164,6 +164,70 @@ const DestinationDetail = () => {
                           </h4>
                           <p className="text-secondary font-light text-sm leading-relaxed tracking-wide">{item.detail}</p>
                         </div>
+                      </div>
+                    ))}
+                  </motion.div>
+                )}
+
+                {activeTab === 'amenities' && (
+                  <motion.div
+                    key="amenities"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3 }}
+                    className="grid grid-cols-1 md:grid-cols-2 gap-8"
+                  >
+                    {[
+                      { icon: Sparkles, label: "Heritage Sanctuary", desc: "Private meditation room overlooking the valley with local incense." },
+                      { icon: Wifi, label: "High-Speed Wi-Fi", desc: "Satellite internet connection throughout the premises for connectivity." },
+                      { icon: Mountain, label: "Panoramic Terraces", desc: "Elevated viewing balconies with views of local Himalayan ridges." },
+                      { icon: Bath, label: "Organic Spa & Baths", desc: "Traditional hot stone bath facilities using fresh mountain herbs." },
+                      { icon: Car, label: "Bespoke Transfers", desc: "Assigned luxury SUV and driver for all localized tours and day trips." },
+                      { icon: Utensils, label: "Artisanal Kitchen", desc: "In-house culinary experiences focusing on organic farm-to-table cuisine." }
+                    ].map((amenity, idx) => (
+                      <div key={idx} className="flex items-start space-x-6 p-6 bg-white rounded-[2rem] shadow-minimal border border-primary/5 hover:shadow-premium transition-shadow duration-500">
+                        <div className="w-16 h-16 bg-bg-alt rounded-full flex items-center justify-center text-primary shrink-0 border border-primary/5">
+                          <amenity.icon className="w-6 h-6 text-primary" />
+                        </div>
+                        <div>
+                          <h4 className="font-heading font-medium text-xl text-primary mb-2">{amenity.label}</h4>
+                          <p className="text-secondary font-light text-sm leading-relaxed tracking-wide">{amenity.desc}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </motion.div>
+                )}
+
+                {activeTab === 'reviews' && (
+                  <motion.div
+                    key="reviews"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3 }}
+                    className="space-y-8"
+                  >
+                    {[
+                      { name: "Elena Rostova", date: "April 2026", rating: 5, avatar: "https://i.pravatar.cc/150?u=elena", text: "Beyond luxury. The silence here is healing. Watching the sunrise from the terrace with hot butter tea is an experience I will carry with me forever. The staff treated us like royalty." },
+                      { name: "Marcus Thorne", date: "March 2026", rating: 5, avatar: "https://i.pravatar.cc/150?u=marcus", text: "Incredibly well organized. The local guides are extremely knowledgeable. We got access to temple corridors that are usually closed to the public. Fully worth the journey." }
+                    ].map((review, idx) => (
+                      <div key={idx} className="p-8 bg-white rounded-[2rem] shadow-minimal border border-primary/5 space-y-6">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-4">
+                            <img src={review.avatar} alt={review.name} className="w-12 h-12 rounded-full object-cover grayscale" />
+                            <div>
+                              <h5 className="font-heading font-semibold text-primary text-base">{review.name}</h5>
+                              <span className="text-[10px] uppercase text-secondary/60 tracking-wider">{review.date}</span>
+                            </div>
+                          </div>
+                          <div className="flex space-x-1">
+                            {[...Array(review.rating)].map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-gold text-gold" />)}
+                          </div>
+                        </div>
+                        <p className="text-secondary font-light text-sm leading-relaxed tracking-wide italic">
+                          "{review.text}"
+                        </p>
                       </div>
                     ))}
                   </motion.div>
