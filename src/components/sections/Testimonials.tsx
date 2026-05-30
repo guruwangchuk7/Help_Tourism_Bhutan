@@ -1,5 +1,5 @@
 import { motion } from "framer-motion"
-import { Quote } from "lucide-react"
+import { Star } from "lucide-react"
 
 const testimonials = [
     {
@@ -7,21 +7,24 @@ const testimonials = [
         name: "Dr. Tashi Wangdi",
         role: "Cultural Historian",
         content: "The level of authenticity WanderVista brings to their itineraries is unparalleled. They don't just show you the Dzongs; they introduce you to the spirit and the building blocks of Bhutan.",
-        avatar: "https://i.pravatar.cc/200?u=bhutan1"
+        avatar: "https://i.pravatar.cc/200?u=bhutan1",
+        rating: 5
     },
     {
         id: 2,
         name: "Jameson Brooks",
         role: "Visual Artist",
         content: "Lighting is everything. My guide was so well-trained that he knew the exact minute the sun would hit the Tiger's Nest waterfall for that perfect frame. Truly exceptional local knowledge.",
-        avatar: "https://i.pravatar.cc/200?u=photog"
+        avatar: "https://i.pravatar.cc/200?u=photog",
+        rating: 5
     },
     {
         id: 3,
         name: "Anya Petrova",
         role: "Solo Traveler",
         content: "Safety and soul. These are the two things I found. As a solo female traveler, I felt completely protected and spiritually recharged. The homestays were the highlight of my life.",
-        avatar: "https://i.pravatar.cc/200?u=anya"
+        avatar: "https://i.pravatar.cc/200?u=anya",
+        rating: 5
     }
 ]
 
@@ -32,7 +35,7 @@ const Testimonials = () => {
                 <div className="text-center mb-24 max-w-4xl mx-auto">
                     <span className="text-primary font-semibold tracking-[0.4em] uppercase text-[10px] mb-8 block">Voice of the Valley</span>
                     <h2 className="text-5xl md:text-7xl font-heading font-medium tracking-tight leading-none text-primary">
-                        The World’s <span className="italic font-normal">Seekers</span>
+                        Customer <span className="italic font-normal">Reviews</span>
                     </h2>
                 </div>
 
@@ -45,7 +48,11 @@ const Testimonials = () => {
                             transition={{ delay: idx * 0.1 }}
                             className="flex flex-col h-full bg-[#FAFAFA] p-12 rounded-3xl group"
                         >
-                            <Quote className="w-10 h-10 text-primary/10 mb-10 group-hover:text-accent transition-colors duration-500" />
+                            <div className="flex items-center gap-1 mb-8">
+                                {[...Array(t.rating)].map((_, i) => (
+                                    <Star key={i} className="w-4 h-4 text-accent fill-accent" />
+                                ))}
+                            </div>
 
                             <p className="text-secondary text-lg font-light tracking-wide leading-relaxed mb-12 flex-1">
                                 "{t.content}"

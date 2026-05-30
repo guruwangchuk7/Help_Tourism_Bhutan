@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { MapPin, Calendar, User, Search, ChevronDown, Plus, Minus } from "lucide-react"
+import { MapPin, Calendar, User, Search, ChevronDown, Plus, Minus, Star, Check } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 
 const Hero = () => {
@@ -37,7 +37,7 @@ const Hero = () => {
   }
 
   return (
-    <section className="relative min-h-[90vh] flex flex-col items-center justify-center overflow-visible">
+    <section className="relative min-h-[95vh] flex flex-col items-center justify-center overflow-visible">
       {/* Background Image with Overlay */}
       <div className="absolute inset-0 z-0">
         <img
@@ -49,27 +49,67 @@ const Hero = () => {
       </div>
 
       {/* Hero Copy */}
-      <div className="relative z-20 max-w-5xl mx-auto px-6 text-center pt-32 pb-16 lg:pb-48">
+      <div className="relative z-20 max-w-5xl mx-auto px-6 text-center pt-32 pb-16 lg:pb-36">
         <motion.h1
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, ease: "easeOut" }}
           className="text-white text-4xl md:text-7xl lg:text-8xl font-heading mb-6 leading-[1.1] font-medium"
         >
-          Experience the <br className="hidden md:block" /> Unforgettable
+          Discover Bhutan <br className="hidden md:block" /> Like Never Before
         </motion.h1>
 
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
-          className="text-white/80 text-sm md:text-base font-light max-w-2xl mx-auto leading-relaxed tracking-[0.2em] uppercase"
+          className="text-white/80 text-sm md:text-base font-light max-w-2xl mx-auto leading-relaxed tracking-[0.1em] uppercase mb-8"
         >
-          Curated luxury stays & bespoke adventures in the Dragon Kingdom.
+          Customized Tours, Luxury Stays, Cultural Experiences & Adventure Trips
         </motion.p>
-      </div>
 
-      {/* The Booking Search Card (Glassmorphism) */}
+        {/* CTA Buttons */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
+          className="flex flex-wrap justify-center gap-4 mb-10"
+        >
+          <button
+            onClick={() => navigate('/booking')}
+            className="btn-accent !px-8 !py-4 !rounded-full shadow-lg text-sm font-semibold tracking-wide"
+          >
+            Plan My Trip
+          </button>
+          <button
+            onClick={() => navigate('/tours')}
+            className="bg-white/15 hover:bg-white/25 text-white border border-white/35 !px-8 !py-4 !rounded-full text-sm font-semibold tracking-wide backdrop-blur-sm transition-all"
+          >
+            Explore Tours
+          </button>
+        </motion.div>
+
+        {/* Trust Indicators */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
+          className="flex flex-wrap justify-center gap-6 text-white/90 text-xs font-medium"
+        >
+          <div className="flex items-center gap-1.5 bg-black/20 px-3.5 py-2 rounded-full backdrop-blur-sm border border-white/5">
+            <Star className="w-4 h-4 text-accent fill-accent" />
+            <span>4.9/5 Guest Rating</span>
+          </div>
+          <div className="flex items-center gap-1.5 bg-black/20 px-3.5 py-2 rounded-full backdrop-blur-sm border border-white/5">
+            <Check className="w-4 h-4 text-accent" />
+            <span>Local Travel Experts</span>
+          </div>
+          <div className="flex items-center gap-1.5 bg-black/20 px-3.5 py-2 rounded-full backdrop-blur-sm border border-white/5">
+            <Check className="w-4 h-4 text-accent" />
+            <span>24/7 Support</span>
+          </div>
+        </motion.div>
+      </div>      {/* The Booking Search Card (Glassmorphism) */}
       <div className="lg:absolute lg:-bottom-16 relative bottom-auto left-0 w-full z-40 px-6 mt-6 lg:mt-0">
         <motion.form
           initial={{ opacity: 0, y: 40 }}

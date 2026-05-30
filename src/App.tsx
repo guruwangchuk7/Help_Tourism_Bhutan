@@ -7,6 +7,8 @@ import Booking from "./pages/Booking"
 import Tours from "./pages/Tours"
 import About from "./pages/About"
 import Contact from "./pages/Contact"
+import Hotels from "./pages/Hotels"
+import Flights from "./pages/Flights"
 import ScrollToTop from "./components/layout/ScrollToTop"
 
 const App = () => (
@@ -21,6 +23,8 @@ const App = () => (
         <Route path="about" element={<About />} />
         <Route path="contact" element={<Contact />} />
         <Route path="booking" element={<Booking />} />
+        <Route path="hotels" element={<Hotels />} />
+        <Route path="flights" element={<Flights />} />
       </Route>
     </Routes>
   </>

@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, Compass, Globe } from 'lucide-react'
+import { Menu, X, Compass, Globe, User } from 'lucide-react'
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -32,11 +32,12 @@ const Header = () => {
   }, [mobileMenuOpen])
 
   const navLinks = [
-    { name: 'Home', path: '/' },
-    { name: 'Stays', path: '/destinations' },
-    { name: 'Flights', path: '/tours' },
-    { name: 'Packages', path: '/about' },
-    { name: 'Contact Us', path: '/contact' },
+    { name: 'Destinations', path: '/destinations' },
+    { name: 'Tours', path: '/tours' },
+    { name: 'Hotels', path: '/hotels' },
+    { name: 'Flights', path: '/flights' },
+    { name: 'About Us', path: '/about' },
+    { name: 'Contact', path: '/contact' },
   ]
 
   // Animation variants for smooth sticky transition
@@ -72,7 +73,7 @@ const Header = () => {
         </Link>
 
         {/* Center: Navigation Links */}
-        <nav className="hidden lg:flex items-center space-x-12">
+        <nav className="hidden lg:flex items-center space-x-10">
           {navLinks.map((link) => (
             <Link
               key={link.name}
@@ -88,22 +89,24 @@ const Header = () => {
         </nav>
 
         {/* Right: Actions */}
-        <div className="hidden lg:flex items-center space-x-8">
-          <div className={`flex items-center space-x-2 cursor-pointer transition-colors ${activeHeader ? 'text-primary hover:text-accent' : 'text-white hover:text-white/80'}`}>
+        <div className="hidden lg:flex items-center space-x-6">
+          <div className={`flex items-center space-x-1 cursor-pointer transition-colors ${activeHeader ? 'text-primary hover:text-accent' : 'text-white hover:text-white/80'}`}>
             <Globe className="w-4 h-4" />
             <span className="text-[10px] font-bold uppercase tracking-widest">EN</span>
+            <span className="text-[8px]">▼</span>
           </div>
           <Link
             to="#"
-            className={`text-[10px] font-bold uppercase tracking-widest transition-colors ${activeHeader ? 'text-primary hover:text-accent' : 'text-white hover:text-white/80'}`}
+            className={`transition-colors ${activeHeader ? 'text-primary hover:text-accent' : 'text-white hover:text-white/80'}`}
+            title="Log In"
           >
-            Log In
+            <User className="w-4.5 h-4.5" />
           </Link>
           <Link
             to="/booking"
-            className={`btn-accent !px-8 !py-3 !rounded-full shadow-none ${activeHeader ? '' : 'bg-white text-primary hover:bg-white hover:text-primary'}`}
+            className={`btn-accent !px-6 !py-3 !rounded-full shadow-none ${activeHeader ? '' : 'bg-white text-primary hover:bg-white hover:text-primary'}`}
           >
-            Sign Up
+            Get Free Itinerary
           </Link>
         </div>
 
@@ -137,7 +140,7 @@ const Header = () => {
                 </Link>
               ))}
               <div className="pt-10 flex flex-col space-y-4">
-                <Link to="/booking" className="btn-primary w-full text-lg">Sign Up</Link>
+                <Link to="/booking" className="btn-accent w-full text-lg">Get Free Itinerary</Link>
                 <Link to="#" className="btn-outline w-full text-lg">Log In</Link>
               </div>
             </div>
