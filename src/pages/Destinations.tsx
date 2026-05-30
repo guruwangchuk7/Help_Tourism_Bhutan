@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, SlidersHorizontal, Compass, FilterX, ArrowRight } from 'lucide-react'
+import { Search, SlidersHorizontal, FilterX, ArrowRight } from 'lucide-react'
 import { destinations } from '../data/destinations'
 import DestinationCard from '../components/destinations/DestinationCard'
 import PageTransition from '../components/common/PageTransition'
@@ -31,17 +31,9 @@ const Destinations = () => {
             className="absolute inset-0 w-full h-full object-cover brightness-[0.7]"
             alt="Bhutan Archives"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-black/20" />
+          <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-black/25" />
 
           <div className="relative z-10 text-center px-6">
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-md text-white px-4 py-1.5 rounded-full mb-6 border border-white/20"
-            >
-              <Compass className="w-4 h-4" />
-              <span className="text-[10px] font-bold uppercase tracking-[0.3em]">Kingdom Inventory</span>
-            </motion.div>
             <motion.h1
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}

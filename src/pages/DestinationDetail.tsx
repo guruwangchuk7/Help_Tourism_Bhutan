@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
-import { MapPin, ArrowLeft, Calendar, Users, Shield, Clock, MessageSquare, Heart, Share2, Star, Globe, ArrowRight, Wifi, Mountain, Bath, Car, Utensils, Sparkles } from "lucide-react"
+import { MapPin, ArrowLeft, Calendar, Users, Clock, MessageSquare, Heart, Share2, Star, Globe, ArrowRight, Wifi, Mountain, Bath, Car, Utensils, Sparkles, Minus, Plus } from "lucide-react"
 import { destinations } from "../data/destinations"
 import { useState, useEffect } from "react"
 import PageTransition from "../components/common/PageTransition"
@@ -10,6 +10,23 @@ const DestinationDetail = () => {
   const navigate = useNavigate()
   const destination = destinations.find(d => d.id === Number(id))
   const [activeTab, setActiveTab] = useState('overview')
+  const [startDate, setStartDate] = useState("")
+  const [endDate, setEndDate] = useState("")
+  const [adults, setAdults] = useState(2)
+
+  const calculateNights = () => {
+    if (!startDate || !endDate) return 1
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) return 1
+    const diffTime = end.getTime() - start.getTime()
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    return diffDays > 0 ? diffDays : 1
+  }
+
+  const nights = calculateNights()
+  const priceNumber = destination ? Number(destination.price.replace(/[^0-9.-]+/g,"")) || 120 : 120
+  const totalPrice = priceNumber * nights * adults
 
   // Smooth scroll to top on enter
   useEffect(() => {
@@ -244,34 +261,66 @@ const DestinationDetail = () => {
                 <div className="absolute top-[-50px] right-[-50px] w-48 h-48 bg-white/5 rounded-full blur-2xl" />
 
                 <div className="relative z-10">
-                  <div className="flex items-end justify-between mb-10 pb-8 border-b border-white/10">
+                  <div className="flex items-end justify-between mb-8 pb-6 border-b border-white/10">
                     <div className="flex flex-col">
-                      <span className="text-white/40 text-[9px] font-semibold uppercase tracking-[0.2em] mb-2">Standard Rate</span>
-                      <span className="text-5xl font-heading font-semibold text-white leading-none tracking-tight">$899</span>
+                      <span className="text-white/40 text-[9px] font-semibold uppercase tracking-[0.2em] mb-2">Total Stay Cost</span>
+                      <span className="text-4xl font-heading font-semibold text-white leading-none tracking-tight">${totalPrice}</span>
                     </div>
                     <div className="text-right flex flex-col justify-end">
-                      <span className="block font-medium text-[10px] uppercase tracking-widest text-white/80">Total / Pers.</span>
-                      <span className="text-white/40 text-[10px] italic mt-1 font-light">Inclusive of SDF Tax</span>
+                      <span className="block font-medium text-[10px] uppercase tracking-widest text-white/80">{nights} Night{nights > 1 ? 's' : ''} / {adults} Guest{adults > 1 ? 's' : ''}</span>
+                      <span className="text-white/40 text-[9px] italic mt-1 font-light">{destination.price} per night</span>
                     </div>
                   </div>
 
-                  <div className="space-y-5 mb-10">
-                    <div className="flex items-center space-x-4 text-white/70">
-                      <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
-                        <Users className="w-4 h-4 text-white" />
-                      </div>
-                      <span className="font-light text-sm tracking-wide">2 Adult Travelers</span>
+                  {/* Date Selectors */}
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[8px] font-bold uppercase tracking-wider text-white/50 pl-1">Check In</label>
+                      <input 
+                        type="date" 
+                        value={startDate} 
+                        onChange={(e) => setStartDate(e.target.value)} 
+                        className="w-full bg-white/10 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white outline-none focus:border-white/30 cursor-pointer"
+                      />
                     </div>
-                    <div className="flex items-center space-x-4 text-white/70">
-                      <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
-                        <Shield className="w-4 h-4 text-white" />
-                      </div>
-                      <span className="font-light text-sm tracking-wide">Premium Medical Insurance</span>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[8px] font-bold uppercase tracking-wider text-white/50 pl-1">Check Out</label>
+                      <input 
+                        type="date" 
+                        value={endDate} 
+                        onChange={(e) => setEndDate(e.target.value)} 
+                        className="w-full bg-white/10 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white outline-none focus:border-white/30 cursor-pointer"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Travelers Selector */}
+                  <div className="flex items-center justify-between bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 mb-6">
+                    <div className="flex items-center gap-2">
+                      <Users className="w-4 h-4 text-accent" />
+                      <span className="text-xs font-medium text-white">Travelers</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => { if (adults > 1) setAdults(adults - 1); }}
+                        className="w-6 h-6 rounded-full border border-white/20 flex items-center justify-center text-white hover:bg-white/10 text-xs transition-colors"
+                      >
+                        <Minus className="w-2.5 h-2.5" />
+                      </button>
+                      <span className="font-semibold text-sm text-white min-w-[12px] text-center">{adults}</span>
+                      <button
+                        type="button"
+                        onClick={() => setAdults(adults + 1)}
+                        className="w-6 h-6 rounded-full border border-white/20 flex items-center justify-center text-white hover:bg-white/10 text-xs transition-colors"
+                      >
+                        <Plus className="w-2.5 h-2.5" />
+                      </button>
                     </div>
                   </div>
 
                   <button
-                    onClick={() => navigate('/booking')}
+                    onClick={() => navigate('/booking', { state: { adults, nights, startDate, endDate, destinationName: destination.name, totalPrice } })}
                     className="w-full btn-accent py-5 text-sm shadow-glass"
                   >
                     Secure Trip

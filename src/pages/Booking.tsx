@@ -1,16 +1,25 @@
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { CheckCircle2, CreditCard, Gift, User, ArrowRight, ArrowLeft, ShieldCheck, Zap, Loader2 } from "lucide-react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import PageTransition from "../components/common/PageTransition"
 import { loadStripe } from "@stripe/stripe-js"
 
 const Booking = () => {
+    const navigate = useNavigate()
+    const locationState = useLocation().state as {
+        adults?: number
+        nights?: number
+        startDate?: string
+        endDate?: string
+        destinationName?: string
+        totalPrice?: number
+    } | null
+
     const [step, setStep] = useState(1)
     const [selectedAddons, setSelectedAddons] = useState<string[]>([])
     const [paymentMethod, setPaymentMethod] = useState<'card' | 'stripe' | 'whatsapp' | 'offline'>('card')
     const [isProcessingStripe, setIsProcessingStripe] = useState(false)
-    const navigate = useNavigate()
 
     const addonPrices: { [key: string]: number } = {
         'Spiritual Concierge': 150,
@@ -27,8 +36,8 @@ const Booking = () => {
     }
 
     const addonTotal = selectedAddons.reduce((sum, title) => sum + (addonPrices[title] || 0), 0)
-    const basePrice = 1798.00
-    const tax = 400.00
+    const basePrice = locationState?.totalPrice || 1798.00
+    const tax = locationState ? 0 : 400.00
     const totalPrice = basePrice + tax + addonTotal
 
     useEffect(() => {
@@ -139,6 +148,11 @@ const Booking = () => {
                                             className="flex-1"
                                         >
                                             <h2 className="text-3xl md:text-5xl lg:text-6xl font-heading font-medium text-primary mb-12 tracking-tight leading-none">Primary <span className="text-accent italic font-normal">Travelers</span></h2>
+                                            {locationState && (
+                                                <div className="bg-bg-alt border border-accent/20 rounded-2xl p-5 mb-8 text-sm text-primary font-medium">
+                                                    Booking: <span className="text-accent font-semibold">{locationState.destinationName}</span> for <span className="font-semibold">{locationState.nights} Night{locationState.nights && locationState.nights > 1 ? 's' : ''}</span> with <span className="font-semibold">{locationState.adults} Guest{locationState.adults && locationState.adults > 1 ? 's' : ''}</span>.
+                                                </div>
+                                            )}
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                                 <div className="flex flex-col space-y-3">
                                                     <label className="text-[10px] font-medium text-secondary uppercase tracking-[0.2em] pl-4">First Designation</label>

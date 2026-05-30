@@ -1,4 +1,4 @@
-import { Compass, Plane } from 'lucide-react'
+import { Compass } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import PageTransition from '../components/common/PageTransition'
 
@@ -25,10 +25,6 @@ const Flights = () => {
           <div className="absolute inset-0 bg-gradient-to-t from-bg-light via-transparent to-black/25" />
 
           <div className="relative z-10 text-center px-6">
-            <div className="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-md text-white px-4 py-1.5 rounded-full mb-4 border border-white/20">
-              <Plane className="w-4 h-4 text-accent" />
-              <span className="text-[10px] font-bold uppercase tracking-[0.3em]">Royal Skies</span>
-            </div>
             <h1 className="text-4xl sm:text-6xl md:text-7xl font-heading font-medium text-white tracking-tight">
               Bhutan Flights
             </h1>
