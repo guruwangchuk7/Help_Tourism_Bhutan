@@ -8,7 +8,7 @@ const Tours = () => {
 
   return (
     <PageTransition>
-      <div className="pt-24 bg-bg-light min-h-screen border-t border-primary/5">
+      <div className="pt-24 bg-bg-light min-h-[100dvh] border-t border-primary/5">
         {/* Luxury Intro */}
         <section className="py-24 px-6 md:py-40 relative flex flex-col items-center justify-center text-center overflow-hidden">
           <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-accent/5 rounded-full blur-[150px] -z-10" />

@@ -5,9 +5,9 @@ import PageTransition from "../components/common/PageTransition"
 const About = () => {
   return (
     <PageTransition>
-      <div className="pt-24 bg-white min-h-screen">
+      <div className="pt-24 bg-white min-h-[100dvh]">
         {/* Hero */}
-        <section className="relative h-[60vh] flex items-center justify-center overflow-hidden">
+        <section className="relative h-[60dvh] flex items-center justify-center overflow-hidden">
           <img src="/monk.jpg" className="absolute inset-0 w-full h-full object-cover" alt="About Bhutan" />
           <div className="absolute inset-0 bg-primary/60 mix-blend-multiply" />
           <div className="relative z-10 text-center px-6">

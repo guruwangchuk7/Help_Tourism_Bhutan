@@ -20,9 +20,9 @@ const Destinations = () => {
 
   return (
     <PageTransition>
-      <div className="pt-24 bg-white min-h-screen">
+      <div className="pt-24 bg-white min-h-[100dvh]">
         {/* Cinematic Header - Minimalist */}
-        <section className="relative h-[50vh] flex items-center justify-center overflow-hidden">
+        <section className="relative h-[50dvh] flex items-center justify-center overflow-hidden">
           <motion.img
             initial={{ scale: 1.1 }}
             animate={{ scale: 1 }}

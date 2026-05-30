@@ -5,7 +5,7 @@ import PageTransition from "../components/common/PageTransition"
 const Contact = () => {
   return (
     <PageTransition>
-      <div className="pt-24 bg-white min-h-screen border-t border-primary/5">
+      <div className="pt-24 bg-white min-h-[100dvh] border-t border-primary/5">
         {/* Visual Header */}
         <section className="py-24 px-6 relative overflow-hidden flex flex-col items-center justify-center text-center">
           <div className="absolute top-0 left-0 w-full h-full opacity-[0.02] pointer-events-none select-none overflow-hidden whitespace-nowrap">

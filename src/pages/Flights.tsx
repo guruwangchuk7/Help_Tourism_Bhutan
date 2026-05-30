@@ -14,9 +14,9 @@ const Flights = () => {
 
   return (
     <PageTransition>
-      <div className="pt-24 bg-bg-light min-h-screen">
+      <div className="pt-24 bg-bg-light min-h-[100dvh]">
         {/* Hero Section */}
-        <section className="relative h-[45vh] flex items-center justify-center overflow-hidden">
+        <section className="relative h-[45dvh] flex items-center justify-center overflow-hidden">
           <img
             src="/dochula-pass.jpg"
             className="absolute inset-0 w-full h-full object-cover brightness-[0.6]"

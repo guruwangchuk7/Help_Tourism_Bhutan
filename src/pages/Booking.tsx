@@ -103,7 +103,7 @@ const Booking = () => {
 
     return (
         <PageTransition>
-            <div className="pt-32 pb-32 bg-bg-light min-h-screen border-t border-primary/5">
+            <div className="pt-32 pb-32 bg-bg-light min-h-[100dvh] border-t border-primary/5">
                 <div className="max-w-6xl mx-auto px-6">
                     {/* Superior Progress Bar */}
                     <div className="flex items-center justify-between mb-16 md:mb-24 max-w-3xl mx-auto relative px-6 md:px-10">

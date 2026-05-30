@@ -44,9 +44,9 @@ const DestinationDetail = () => {
 
   return (
     <PageTransition>
-      <div className="bg-bg-light min-h-screen">
+      <div className="bg-bg-light min-h-[100dvh]">
         {/* Immersive Header */}
-        <div className="relative h-[80vh] w-full overflow-hidden">
+        <div className="relative h-[80dvh] w-full overflow-hidden">
           <motion.img
             initial={{ scale: 1.1 }}
             animate={{ scale: 1 }}
