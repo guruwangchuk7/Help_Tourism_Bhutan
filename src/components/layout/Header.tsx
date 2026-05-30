@@ -64,9 +64,9 @@ const Header = () => {
     >
       <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
         {/* Left: Brand Logo */}
-        <Link to="/" className="flex items-center space-x-3 group">
-          <Compass className={`w-7 h-7 transition-all duration-300 group-hover:rotate-45 ${activeHeader ? 'text-accent' : 'text-white'}`} />
-          <span className={`text-2xl font-heading font-semibold tracking-wide ${activeHeader ? 'text-primary' : 'text-white'}`}>
+        <Link to="/" className="flex items-center space-x-3 group relative z-[130]">
+          <Compass className={`w-7 h-7 transition-all duration-300 group-hover:rotate-45 ${activeHeader || mobileMenuOpen ? 'text-accent' : 'text-white'}`} />
+          <span className={`text-2xl font-heading font-semibold tracking-wide ${activeHeader || mobileMenuOpen ? 'text-primary' : 'text-white'}`}>
             WanderVista
           </span>
         </Link>

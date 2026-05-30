@@ -9,7 +9,7 @@ const Contact = () => {
         {/* Visual Header */}
         <section className="py-24 px-6 relative overflow-hidden flex flex-col items-center justify-center text-center">
           <div className="absolute top-0 left-0 w-full h-full opacity-[0.02] pointer-events-none select-none overflow-hidden whitespace-nowrap">
-            <span className="text-[250px] font-heading font-medium uppercase text-primary leading-none block">TALK TALK TALK</span>
+            <span className="text-[120px] sm:text-[180px] md:text-[250px] font-heading font-medium uppercase text-primary leading-none block">TALK TALK TALK</span>
           </div>
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}

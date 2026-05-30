@@ -32,7 +32,7 @@ const Booking = () => {
             <div className="pt-32 pb-32 bg-bg-light min-h-screen border-t border-primary/5">
                 <div className="max-w-6xl mx-auto px-6">
                     {/* Superior Progress Bar */}
-                    <div className="flex items-center justify-between mb-16 md:mb-24 max-w-3xl mx-auto relative px-4 md:px-10">
+                    <div className="flex items-center justify-between mb-16 md:mb-24 max-w-3xl mx-auto relative px-6 md:px-10">
                         <div className="absolute top-1/2 left-0 w-full h-[2px] bg-primary/5 -translate-y-1/2 -z-10 rounded-full" />
                         <div
                             className="absolute top-1/2 left-0 h-[2px] bg-primary transition-all duration-700 -translate-y-1/2 -z-10 rounded-full"
@@ -52,7 +52,7 @@ const Booking = () => {
                                 >
                                     {step > s.id ? <CheckCircle2 className="w-6 h-6" /> : <s.icon className="w-5 h-5" />}
                                 </motion.div>
-                                <span className={`absolute -bottom-8 whitespace-nowrap text-[9px] font-medium uppercase tracking-[0.2em] transition-colors ${step >= s.id ? 'text-primary' : 'text-secondary/60'
+                                <span className={`absolute -bottom-8 whitespace-nowrap text-[8px] sm:text-[9px] font-medium uppercase tracking-[0.1em] sm:tracking-[0.2em] transition-colors ${step >= s.id ? 'text-primary' : 'text-secondary/60'
                                     }`}>
                                     {s.title}
                                 </span>
@@ -63,7 +63,7 @@ const Booking = () => {
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
                         {/* Main Content Area (8 cols) */}
                         <div className="lg:col-span-8">
-                            <div className="bg-white rounded-[3rem] p-10 md:p-16 shadow-minimal border border-primary/5 min-h-[600px] flex flex-col relative overflow-hidden">
+                            <div className="bg-white rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-10 md:p-16 shadow-minimal border border-primary/5 min-h-[600px] flex flex-col relative overflow-hidden">
                                 <AnimatePresence mode="wait">
                                     {step === 1 && (
                                         <motion.div
@@ -176,7 +176,7 @@ const Booking = () => {
                         {/* Superior Order Sidebar (4 cols) */}
                         <aside className="lg:col-span-4">
                             <div className="sticky top-32 space-y-8">
-                                <div className="bg-white rounded-[3rem] p-8 md:p-10 shadow-minimal border border-primary/5 overflow-hidden relative">
+                                <div className="bg-white rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-8 md:p-10 shadow-minimal border border-primary/5 overflow-hidden relative">
                                     <h3 className="text-2xl font-heading font-medium text-primary mb-8 tracking-wide">Expedition <span className="text-accent italic font-normal">Manifest</span></h3>
 
                                     <div className="flex flex-col gap-6 mb-10 pb-8 border-b border-primary/5">

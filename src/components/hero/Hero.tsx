@@ -1,4 +1,4 @@
-﻿import { useState } from "react"
+import { useState } from "react"
 import { motion } from "framer-motion"
 import { MapPin, Calendar, User, Search, ChevronDown } from "lucide-react"
 import { useNavigate } from "react-router-dom"
@@ -25,7 +25,7 @@ const Hero = () => {
       </div>
 
       {/* Hero Copy */}
-      <div className="relative z-20 max-w-5xl mx-auto px-6 text-center pt-32 pb-48">
+      <div className="relative z-20 max-w-5xl mx-auto px-6 text-center pt-32 pb-16 lg:pb-48">
         <motion.h1
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -46,7 +46,7 @@ const Hero = () => {
       </div>
 
       {/* The Booking Search Card (Glassmorphism) */}
-      <div className="absolute -bottom-16 left-0 w-full z-40 px-6">
+      <div className="lg:absolute lg:-bottom-16 relative bottom-auto left-0 w-full z-40 px-6 mt-6 lg:mt-0">
         <motion.form
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}

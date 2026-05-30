@@ -41,7 +41,7 @@ const DestinationDetail = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-primary/90" />
 
           {/* Navigation Overlays */}
-          <div className="absolute top-32 left-10 md:left-20 z-30">
+          <div className="absolute top-28 left-6 md:left-20 z-30">
             <button
               onClick={() => navigate(-1)}
               className="flex items-center space-x-3 text-white/70 hover:text-white transition-colors duration-300 group"
@@ -53,7 +53,7 @@ const DestinationDetail = () => {
             </button>
           </div>
 
-          <div className="absolute bottom-20 left-10 md:left-20 right-10 md:right-20 z-30">
+          <div className="absolute bottom-12 md:bottom-20 left-6 md:left-20 right-6 md:right-20 z-30">
             <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-10">
               <div>
                 <motion.div
@@ -70,7 +70,7 @@ const DestinationDetail = () => {
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
-                  className="text-5xl md:text-8xl lg:text-9xl text-white font-heading font-medium tracking-tight leading-tight md:leading-none"
+                  className="text-3xl sm:text-5xl md:text-8xl lg:text-9xl text-white font-heading font-medium tracking-tight leading-tight md:leading-none"
                 >
                   {destination.name}
                 </motion.h1>
@@ -152,7 +152,7 @@ const DestinationDetail = () => {
                     className="space-y-8"
                   >
                     {itinerary.map((item) => (
-                      <div key={item.day} className="group flex flex-col md:flex-row space-y-6 md:space-y-0 md:space-x-10 p-8 md:p-10 bg-white rounded-[2.5rem] shadow-minimal border border-primary/5 hover:shadow-premium transition-all duration-500 relative overflow-hidden">
+                      <div key={item.day} className="group flex flex-col md:flex-row space-y-6 md:space-y-0 md:space-x-10 p-6 sm:p-8 md:p-10 bg-white rounded-[2rem] md:rounded-[2.5rem] shadow-minimal border border-primary/5 hover:shadow-premium transition-all duration-500 relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                         <div className="flex flex-col items-center shrink-0">
                           <span className="text-accent font-heading font-medium text-4xl italic leading-none">{item.day}</span>
@@ -176,7 +176,7 @@ const DestinationDetail = () => {
           <div className="lg:col-span-4">
             <div className="sticky top-32 space-y-8">
               {/* Booking Widget */}
-              <div className="bg-primary rounded-[3rem] p-10 text-white shadow-premium relative overflow-hidden group">
+              <div className="bg-primary rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-10 text-white shadow-premium relative overflow-hidden group">
                 <div className="absolute top-[-50px] right-[-50px] w-48 h-48 bg-white/5 rounded-full blur-2xl" />
 
                 <div className="relative z-10">

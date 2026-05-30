@@ -20,7 +20,7 @@ const Tours = () => {
             className="flex flex-col items-center"
           >
             <div className="w-12 h-[2px] bg-accent mb-10" />
-            <h1 className="text-6xl md:text-8xl lg:text-9xl font-heading font-medium text-primary leading-[1] tracking-tight mb-10">
+            <h1 className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-heading font-medium text-primary leading-[1] tracking-tight mb-10">
               Signature <br /> <span className="text-accent italic font-normal">Expeditions</span>
             </h1>
             <p className="max-w-xl text-secondary font-light text-xl mb-16 leading-relaxed tracking-wide">
@@ -60,7 +60,7 @@ const Tours = () => {
                     <tour.icon className="w-4 h-4" />
                     <span className="text-[9px] font-semibold uppercase tracking-[0.2em] font-body">{tour.period}</span>
                   </div>
-                  <h3 className="text-3xl font-heading font-medium text-primary leading-tight mb-4 tracking-wide">{tour.title}</h3>
+                  <h3 className="text-2xl sm:text-3xl font-heading font-medium text-primary leading-tight mb-4 tracking-wide">{tour.title}</h3>
                   <p className="text-secondary font-light mb-8 leading-relaxed text-sm tracking-wide">Experience Bhutan in its peak glory with exclusive access to local festivals.</p>
 
                   <div className="flex items-center justify-between pt-6 border-t border-primary/5">
@@ -87,7 +87,7 @@ const Tours = () => {
           <div className="max-w-7xl mx-auto relative z-10">
             <div className="text-center mb-24">
               <span className="text-accent font-semibold tracking-[0.3em] uppercase text-[10px] mb-6 block">Our Standards</span>
-              <h2 className="text-5xl md:text-7xl text-white font-heading font-medium tracking-tight leading-tight mb-8">What’s <span className="text-accent italic font-normal">Enveloped</span></h2>
+              <h2 className="text-4xl sm:text-5xl md:text-7xl text-white font-heading font-medium tracking-tight leading-tight mb-8">What’s <span className="text-accent italic font-normal">Enveloped</span></h2>
               <p className="text-white/60 font-light max-w-xl mx-auto tracking-wide text-lg">Every expedition we curate includes the following premium protocols.</p>
             </div>
 
@@ -97,7 +97,7 @@ const Tours = () => {
                 { icon: Compass, title: "Expert Guides", desc: "A personal heritage architect assigned to your journey from start to finish." },
                 { icon: Zap, title: "Local Flights", desc: "Domestic transfers within the kingdom, ensuring zero logistical stress." },
               ].map((inc, i) => (
-                <div key={i} className="glass-panel !bg-white/5 !border-white/10 p-12 rounded-[3rem] flex flex-col items-center text-center group hover:bg-white/10 transition-colors duration-500">
+                <div key={i} className="glass-panel !bg-white/5 !border-white/10 p-6 sm:p-10 md:p-12 rounded-[2rem] sm:rounded-[3rem] flex flex-col items-center text-center group hover:bg-white/10 transition-colors duration-500">
                   <div className="w-20 h-20 bg-accent/20 border border-accent/20 rounded-full flex items-center justify-center text-accent mb-10 group-hover:bg-accent group-hover:text-primary transition-all duration-500">
                     <inc.icon className="w-8 h-8 transition-colors" />
                   </div>

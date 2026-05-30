@@ -43,7 +43,7 @@ const About = () => {
               <div className="aspect-[4/5] rounded-[2rem] overflow-hidden shadow-premium relative z-10 border border-primary/5">
                 <img src="/paro-taksang.jpg" className="w-full h-full object-cover" alt="Heritage" />
               </div>
-              <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-bg-alt rounded-[2rem] -z-10 flex items-center justify-center text-primary/10 border border-primary/5">
+              <div className="hidden sm:flex absolute -bottom-10 -left-10 w-64 h-64 bg-bg-alt rounded-[2rem] -z-10 items-center justify-center text-primary/10 border border-primary/5">
                 <History className="w-20 h-20" />
               </div>
             </div>
