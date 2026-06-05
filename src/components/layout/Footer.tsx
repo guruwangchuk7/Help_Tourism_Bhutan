@@ -99,26 +99,6 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Accreditation Badges Row */}
-        <div className="pt-8 pb-8 border-t border-gray-100 flex flex-wrap items-center justify-between gap-6 text-sm text-secondary font-light">
-          <div className="flex flex-wrap items-center gap-6">
-            {/* TCB Badge */}
-            <div className="flex items-center gap-2 bg-[#FAFAFA] border border-primary/5 px-4 py-2 rounded-xl">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="font-heading font-semibold text-xs text-primary uppercase tracking-wider">TCB Licensed Agency</span>
-              <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">#TCB-102948</span>
-            </div>
-            {/* ABTO Badge */}
-            <div className="flex items-center gap-2 bg-[#FAFAFA] border border-primary/5 px-4 py-2 rounded-xl">
-              <span className="w-2.5 h-2.5 rounded-full bg-accent" />
-              <span className="font-heading font-semibold text-xs text-primary uppercase tracking-wider">ABTO Member</span>
-              <span className="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold">Active</span>
-            </div>
-          </div>
-          <p className="text-[11px] font-medium text-secondary/60 uppercase tracking-widest">
-            Certified Member of Tourism Council of Bhutan & ABTO
-          </p>
-        </div>
 
         {/* Minimalist Bottom Bar */}
         <div className="pt-12 flex flex-col md:flex-row justify-between items-center text-[10px] font-bold uppercase tracking-[0.2em] text-primary/20">
