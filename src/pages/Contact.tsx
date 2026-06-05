@@ -81,11 +81,11 @@ const Contact = () => {
 
                 <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); alert('Message sent to Thimphu.') }}>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <input type="text" placeholder="Identity Name" className="w-full bg-white border border-primary/5 rounded-xl px-6 py-5 outline-none focus:ring-2 focus:ring-accent/20 transition-all font-light placeholder-secondary/50" required />
-                    <input type="email" placeholder="Digital Address" className="w-full bg-white border border-primary/5 rounded-xl px-6 py-5 outline-none focus:ring-2 focus:ring-accent/20 transition-all font-light placeholder-secondary/50" required />
+                    <input type="text" placeholder="Full Name" className="w-full bg-white border border-primary/5 rounded-xl px-6 py-5 outline-none focus:ring-2 focus:ring-accent/20 transition-all font-light placeholder-secondary/50" required />
+                    <input type="email" placeholder="Email Address" className="w-full bg-white border border-primary/5 rounded-xl px-6 py-5 outline-none focus:ring-2 focus:ring-accent/20 transition-all font-light placeholder-secondary/50" required />
                   </div>
                   <select className="w-full bg-white border border-primary/5 rounded-xl px-6 py-5 outline-none focus:ring-2 focus:ring-accent/20 transition-all font-light text-secondary appearance-none">
-                    <option>General Enlightenment</option>
+                    <option>General Inquiry</option>
                     <option>Luxury Booking Request</option>
                     <option>Partnership Protocol</option>
                     <option>Cultural Sponsorship</option>
@@ -93,7 +93,7 @@ const Contact = () => {
                   <textarea placeholder="Your Intentions..." rows={5} className="w-full bg-white border border-primary/5 rounded-xl px-6 py-5 outline-none focus:ring-2 focus:ring-accent/20 transition-all font-light placeholder-secondary/50 resize-none" required></textarea>
 
                   <button className="btn-accent w-full py-5 text-sm shadow-premium mt-4">
-                    Send Transmission
+                    Send Inquiry
                     <Send className="w-4 h-4 ml-2" />
                   </button>
                 </form>

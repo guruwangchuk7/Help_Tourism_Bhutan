@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { MapPin, Calendar, User, Search, ChevronDown, Plus, Minus } from "lucide-react"
+import { MapPin, Calendar, User, Search, ChevronDown, Plus, Minus, Star, ShieldCheck } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 
 const Hero = () => {
@@ -87,6 +87,27 @@ const Hero = () => {
           >
             Explore Tours
           </button>
+        </motion.div>
+
+        {/* Sleek Trust Indicators */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
+          className="flex flex-wrap justify-center items-center gap-4 mt-6 text-white/95 text-[10px] font-semibold uppercase tracking-[0.2em]"
+        >
+          <div className="flex items-center gap-1.5 bg-black/30 border border-white/10 px-4 py-2 rounded-full backdrop-blur-md shadow-minimal">
+            <Star className="w-3.5 h-3.5 text-accent fill-accent" />
+            <span>4.9/5 Guest Rating</span>
+          </div>
+          <div className="flex items-center gap-1.5 bg-black/30 border border-white/10 px-4 py-2 rounded-full backdrop-blur-md shadow-minimal">
+            <ShieldCheck className="w-3.5 h-3.5 text-accent" />
+            <span>TCB Licensed Operator</span>
+          </div>
+          <div className="flex items-center gap-1.5 bg-black/30 border border-white/10 px-4 py-2 rounded-full backdrop-blur-md shadow-minimal">
+            <ShieldCheck className="w-3.5 h-3.5 text-accent" />
+            <span>24/7 Thimphu Support</span>
+          </div>
         </motion.div>
       </div>      {/* The Booking Search Card (Glassmorphism) */}
       <div className="lg:absolute lg:-bottom-16 relative bottom-auto left-0 w-full z-40 px-6 mt-6 lg:mt-0">

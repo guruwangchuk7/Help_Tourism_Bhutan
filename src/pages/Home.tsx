@@ -16,6 +16,7 @@ const popularDestinations = [
 
 const topTours = [
   {
+    id: "bhutan-highlights",
     title: "4 Days Bhutan Highlights",
     duration: "4 Days",
     price: "$999",
@@ -23,6 +24,7 @@ const topTours = [
     desc: "A brief but immersive escape covering Tiger's Nest and Thimphu's key attractions."
   },
   {
+    id: "cultural-journey",
     title: "7 Days Cultural Journey",
     duration: "7 Days",
     price: "$1,699",
@@ -30,6 +32,7 @@ const topTours = [
     desc: "Unveil the cultural heritage, majestic dzongs, and scenic passes across three valleys."
   },
   {
+    id: "adventure-bhutan",
     title: "10 Days Adventure Bhutan",
     duration: "10 Days",
     price: "$2,499",
@@ -37,6 +40,7 @@ const topTours = [
     desc: "A combination of standard sightseeing, pristine day hikes, and local river rafting."
   },
   {
+    id: "luxury-escape",
     title: "Luxury Bhutan Escape",
     duration: "6 Days",
     price: "$3,299",
@@ -129,7 +133,8 @@ const Home = () => {
                 <motion.div
                   key={idx}
                   whileHover={{ y: -6 }}
-                  className="bg-white rounded-[2.5rem] overflow-hidden shadow-minimal hover:shadow-premium group border border-primary/5 p-5 flex flex-col transition-all duration-300"
+                  onClick={() => navigate(`/tours/${tour.id}`)}
+                  className="bg-white rounded-[2.5rem] overflow-hidden shadow-minimal hover:shadow-premium group border border-primary/5 p-5 flex flex-col transition-all duration-300 cursor-pointer"
                 >
                   <div className="relative aspect-[4/3] rounded-3xl overflow-hidden shrink-0">
                     <img src={tour.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={tour.title} />
@@ -147,10 +152,10 @@ const Home = () => {
                         <span className="text-lg font-heading font-semibold text-primary">{tour.price}</span>
                       </div>
                       <button
-                        onClick={() => navigate('/booking')}
-                        className="btn-accent !px-5 !py-2.5 !text-[10px] !rounded-full font-bold uppercase tracking-wider"
+                        onClick={(e) => { e.stopPropagation(); navigate(`/tours/${tour.id}`); }}
+                        className="btn-accent !px-5 !py-2.5 !text-[10px] !rounded-full font-bold uppercase tracking-wider cursor-pointer"
                       >
-                        Plan Trip
+                        Explore Tour
                       </button>
                     </div>
                   </div>

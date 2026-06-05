@@ -94,7 +94,7 @@ const Hotels = () => {
 
                   <div className="flex items-center justify-between pt-4 border-t border-primary/5">
                     <div className="flex flex-col">
-                      <span className="text-[9px] font-semibold text-secondary/60 uppercase tracking-wider mb-0.5">Est. Rate</span>
+                      <span className="text-[9px] font-semibold text-rose-500 uppercase tracking-wider mb-0.5">Excludes $100/night government SDF</span>
                       <span className="text-xl font-heading font-semibold text-primary">{hotel.price} <span className="text-xs font-normal text-secondary">/ night</span></span>
                     </div>
                     <button

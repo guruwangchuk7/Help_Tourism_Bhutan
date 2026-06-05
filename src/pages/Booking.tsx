@@ -155,15 +155,15 @@ const Booking = () => {
                                             )}
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                                 <div className="flex flex-col space-y-3">
-                                                    <label className="text-[10px] font-medium text-secondary uppercase tracking-[0.2em] pl-4">First Designation</label>
+                                                    <label className="text-[10px] font-medium text-secondary uppercase tracking-[0.2em] pl-4">First Name</label>
                                                     <input type="text" className="w-full bg-bg-alt border border-primary/5 rounded-2xl px-6 py-5 outline-none focus:ring-2 focus:ring-accent/20 transition-all font-light text-primary text-base placeholder-secondary/50" placeholder="e.g. Tenzin" />
                                                 </div>
                                                 <div className="flex flex-col space-y-3">
-                                                    <label className="text-[10px] font-medium text-secondary uppercase tracking-[0.2em] pl-4">Last Designation</label>
+                                                    <label className="text-[10px] font-medium text-secondary uppercase tracking-[0.2em] pl-4">Last Name</label>
                                                     <input type="text" className="w-full bg-bg-alt border border-primary/5 rounded-2xl px-6 py-5 outline-none focus:ring-2 focus:ring-accent/20 transition-all font-light text-primary text-base placeholder-secondary/50" placeholder="e.g. Dorji" />
                                                 </div>
                                                 <div className="flex flex-col space-y-3 md:col-span-2 mt-4">
-                                                    <label className="text-[10px] font-medium text-secondary uppercase tracking-[0.2em] pl-4">Digital Identity (Email)</label>
+                                                    <label className="text-[10px] font-medium text-secondary uppercase tracking-[0.2em] pl-4">Email Address</label>
                                                     <input type="email" className="w-full bg-bg-alt border border-primary/5 rounded-2xl px-6 py-5 outline-none focus:ring-2 focus:ring-accent/20 transition-all font-light text-primary text-base placeholder-secondary/50" placeholder="tenzin@bhutan.com" />
                                                 </div>
                                             </div>
@@ -274,9 +274,9 @@ const Booking = () => {
 
                                             {paymentMethod === 'card' && (
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
-                                                    <input type="text" className="md:col-span-2 bg-bg-alt border border-primary/5 rounded-2xl px-6 py-5 outline-none focus:ring-2 focus:ring-accent/20 transition-all font-light text-primary placeholder-secondary/50 tracking-widest text-lg" placeholder="Card Identity Number" />
-                                                    <input type="text" className="bg-bg-alt border border-primary/5 rounded-2xl px-6 py-5 outline-none focus:ring-2 focus:ring-accent/20 transition-all font-light text-primary placeholder-secondary/50 text-center tracking-widest" placeholder="Horizon MM/YY" />
-                                                    <input type="text" className="bg-bg-alt border border-primary/5 rounded-2xl px-6 py-5 outline-none focus:ring-2 focus:ring-accent/20 transition-all font-light text-primary placeholder-secondary/50 text-center tracking-widest" placeholder="Security CVV" />
+                                                    <input type="text" className="md:col-span-2 bg-bg-alt border border-primary/5 rounded-2xl px-6 py-5 outline-none focus:ring-2 focus:ring-accent/20 transition-all font-light text-primary placeholder-secondary/50 tracking-widest text-lg" placeholder="Card Number" />
+                                                    <input type="text" className="bg-bg-alt border border-primary/5 rounded-2xl px-6 py-5 outline-none focus:ring-2 focus:ring-accent/20 transition-all font-light text-primary placeholder-secondary/50 text-center tracking-widest" placeholder="Expiration Date (MM/YY)" />
+                                                    <input type="text" className="bg-bg-alt border border-primary/5 rounded-2xl px-6 py-5 outline-none focus:ring-2 focus:ring-accent/20 transition-all font-light text-primary placeholder-secondary/50 text-center tracking-widest" placeholder="CVV (Security Code)" />
                                                 </div>
                                             )}
 
@@ -357,7 +357,7 @@ const Booking = () => {
                                             className="flex items-center space-x-2 text-secondary font-medium uppercase tracking-[0.2em] text-[10px] hover:text-primary transition-colors group"
                                         >
                                             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                                            <span>Revisit</span>
+                                            <span>Back</span>
                                         </button>
                                     ) : <div />}
 
@@ -365,7 +365,7 @@ const Booking = () => {
                                         onClick={handleNext}
                                         className="btn-primary"
                                     >
-                                        <span>{step === 3 ? (paymentMethod === 'card' ? 'Finalize Order' : paymentMethod === 'stripe' ? 'Pay with Stripe' : paymentMethod === 'whatsapp' ? 'Pay via WhatsApp' : 'Initiate Inquiry') : 'Proceed System'}</span>
+                                        <span>{step === 3 ? (paymentMethod === 'card' ? 'Finalize Order' : paymentMethod === 'stripe' ? 'Pay with Stripe' : paymentMethod === 'whatsapp' ? 'Pay via WhatsApp' : 'Initiate Inquiry') : (step === 1 ? 'Proceed to Enhancements' : 'Proceed to Payment')}</span>
                                         <ArrowRight className="w-4 h-4 ml-1" />
                                     </button>
                                 </div>
@@ -415,7 +415,7 @@ const Booking = () => {
                                     <div className="mt-8 pt-8 border-t border-primary/10">
                                         <div className="flex justify-between items-end">
                                             <div className="flex flex-col gap-1">
-                                                <span className="block text-[9px] font-medium text-secondary/60 uppercase tracking-[0.2em]">Total Expedition Debt</span>
+                                                <span className="block text-[9px] font-medium text-secondary/60 uppercase tracking-[0.2em]">Grand Total / Total Price</span>
                                                 <span className="text-3xl font-heading font-semibold text-primary tracking-tight">${totalPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                             </div>
                                             <div className="bg-bg-alt p-3 rounded-full border border-primary/5">

@@ -79,6 +79,27 @@ const About = () => {
             ))}
           </div>
         </section>
+
+        {/* Accreditation & Trust */}
+        <section className="py-24 bg-white border-t border-primary/5 px-6">
+          <div className="max-w-4xl mx-auto text-center">
+            <span className="text-accent font-semibold tracking-[0.3em] uppercase text-[10px] mb-4 block">Official Partner</span>
+            <h3 className="text-3xl md:text-4xl font-heading font-medium text-primary mb-6">Fully Licensed & Certified Operator</h3>
+            <p className="text-secondary font-light text-base leading-relaxed mb-10 max-w-2xl mx-auto">
+              WanderVista is officially registered with the Department of Tourism, Royal Government of Bhutan under license number <strong>#TCB-102948</strong>, and is an active member of the Association of Bhutanese Tour Operators (ABTO).
+            </p>
+            <div className="flex flex-wrap justify-center gap-6">
+              <div className="flex items-center gap-3 bg-bg-alt border border-primary/5 px-6 py-3 rounded-2xl">
+                <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="font-heading font-semibold text-sm text-primary uppercase tracking-wider">TCB Licensed Operator</span>
+              </div>
+              <div className="flex items-center gap-3 bg-bg-alt border border-primary/5 px-6 py-3 rounded-2xl">
+                <div className="w-3 h-3 rounded-full bg-accent" />
+                <span className="font-heading font-semibold text-sm text-primary uppercase tracking-wider">Active ABTO Member</span>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     </PageTransition>
   )

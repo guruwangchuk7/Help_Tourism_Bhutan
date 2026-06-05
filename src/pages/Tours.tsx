@@ -42,15 +42,16 @@ const Tours = () => {
         <div className="max-w-7xl mx-auto px-6 py-20 pb-32">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
             {[
-              { title: "The Paro Tshechu Edition", period: "Spring (March-May)", icon: Sun, color: "bg-primary/5", text: "text-primary", img: "/paro-taksang.jpg", price: "$3,499" },
-              { title: "Snow Lion High Trek", period: "Summer (June-Aug)", icon: CloudRain, color: "bg-primary/5", text: "text-primary", img: "/monk.jpg", price: "$2,899" },
-              { title: "Punakha Riverside Gala", period: "Fall (Sept-Nov)", icon: Heart, color: "bg-primary/5", text: "text-primary", img: "/punakha-dzong.jpg", price: "$4,199" },
-              { title: "Black-Necked Crane Haven", period: "Winter (Dec-Feb)", icon: Snowflake, color: "bg-primary/5", text: "text-primary", img: "/dochula-pass.jpg", price: "$2,299" },
+              { id: "bhutan-highlights", title: "The Paro Tshechu Edition", period: "Spring (March-May)", icon: Sun, color: "bg-primary/5", text: "text-primary", img: "/paro-taksang.jpg", price: "$3,499" },
+              { id: "adventure-bhutan", title: "Snow Lion High Trek", period: "Summer (June-Aug)", icon: CloudRain, color: "bg-primary/5", text: "text-primary", img: "/airport.jpg", price: "$2,899" },
+              { id: "cultural-journey", title: "Punakha Riverside Gala", period: "Fall (Sept-Nov)", icon: Heart, color: "bg-primary/5", text: "text-primary", img: "/punakha-dzong.jpg", price: "$4,199" },
+              { id: "luxury-escape", title: "Black-Necked Crane Haven", period: "Winter (Dec-Feb)", icon: Snowflake, color: "bg-primary/5", text: "text-primary", img: "/monk.jpg", price: "$2,299" },
             ].map((tour, idx) => (
               <motion.div
                 key={idx}
                 whileHover={{ y: -10 }}
-                className="bg-white rounded-[3rem] overflow-hidden shadow-minimal hover:shadow-premium group border border-primary/5 p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center transition-all duration-500"
+                onClick={() => navigate(`/tours/${tour.id}`)}
+                className="bg-white rounded-[3rem] overflow-hidden shadow-minimal hover:shadow-premium group border border-primary/5 p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center transition-all duration-500 cursor-pointer"
               >
                 <div className="w-full md:w-56 h-56 rounded-[2rem] overflow-hidden shrink-0 shadow-glass border border-primary/5">
                   <img src={tour.img} className="w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" alt="" />
@@ -65,12 +66,12 @@ const Tours = () => {
 
                   <div className="flex items-center justify-between pt-6 border-t border-primary/5">
                     <div className="flex flex-col">
-                      <span className="text-[9px] font-medium text-secondary/60 uppercase tracking-[0.2em] mb-1">All-Inclusive</span>
+                      <span className="text-[9px] font-semibold text-accent uppercase tracking-[0.2em] mb-0.5">Includes $100/night SDF + Visa</span>
                       <span className="text-2xl font-heading font-semibold text-primary">{tour.price}</span>
                     </div>
                     <button
-                      onClick={() => navigate('/booking')}
-                      className="w-12 h-12 bg-bg-alt text-primary rounded-full flex items-center justify-center group-hover:bg-accent group-hover:text-white transition-all duration-500 shadow-minimal group-hover:shadow-lg"
+                      onClick={(e) => { e.stopPropagation(); navigate(`/tours/${tour.id}`); }}
+                      className="w-12 h-12 bg-bg-alt text-primary rounded-full flex items-center justify-center group-hover:bg-accent group-hover:text-white transition-all duration-500 shadow-minimal group-hover:shadow-lg cursor-pointer"
                     >
                       <ArrowRight className="w-5 h-5" />
                     </button>

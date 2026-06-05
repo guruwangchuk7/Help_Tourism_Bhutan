@@ -110,7 +110,7 @@ const Header = () => {
             <User className="w-4.5 h-4.5" />
           </Link>
           <Link
-            to="/booking"
+            to="/plan"
             className={`btn-accent !px-6 !py-3 !rounded-full shadow-none ${activeHeader ? '' : 'bg-white text-primary hover:bg-white hover:text-primary'}`}
           >
             Get Free Itinerary
@@ -147,7 +147,7 @@ const Header = () => {
                 </Link>
               ))}
               <div className="pt-10 flex flex-col space-y-4">
-                <Link to="/booking" className="btn-accent w-full text-lg">Get Free Itinerary</Link>
+                <Link to="/plan" className="btn-accent w-full text-lg">Get Free Itinerary</Link>
                 <Link to="#" className="btn-outline w-full text-lg">Log In</Link>
               </div>
             </div>
