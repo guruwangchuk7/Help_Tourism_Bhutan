@@ -101,7 +101,7 @@ const Footer = () => {
 
 
         {/* Minimalist Bottom Bar */}
-        <div className="pt-12 flex flex-col md:flex-row justify-between items-center text-[10px] font-bold tracking-[0.2em] text-primary/40 gap-4">
+        <div className="pt-12 flex flex-col md:flex-row justify-between items-center text-[10px] font-normal tracking-[0.2em] text-primary/40 gap-4">
           <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4">
             <p>© {new Date().getFullYear()} WanderVista Bhutan. All rights reserved.</p>
             <span className="hidden md:inline">|</span>
