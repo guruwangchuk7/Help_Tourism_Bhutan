@@ -47,7 +47,7 @@ const About = () => {
               <span className="text-accent font-semibold uppercase tracking-[0.3em] text-[10px] mb-6 block">Our Philosophy</span>
               <h2 className="text-5xl md:text-7xl font-heading font-medium text-primary tracking-tight leading-none mb-10">Travel as a <br /> <span className="text-accent italic font-normal">Spiritual Act.</span></h2>
               <p className="text-secondary text-lg leading-relaxed font-light mb-10 tracking-wide">
-                At WanderVista Bhutan, we believe travel shouldn't just change your location—it should change your perspective. We focus on "Deep Travel"—engaging with local communities, respecting sacred traditions, and ensuring every journey contributes to Bhutan's sustainable growth.
+                At Help Tourism Bhutan, we believe travel shouldn't just change your location—it should change your perspective. We focus on "Deep Travel"—engaging with local communities, respecting sacred traditions, and ensuring every journey contributes to Bhutan's sustainable growth.
               </p>
               <div className="grid grid-cols-2 gap-10">
                 {[
@@ -79,7 +79,7 @@ const About = () => {
           <div className="max-w-7xl mx-auto text-center mb-24">
             <span className="text-accent font-semibold tracking-[0.3em] uppercase text-[10px] mb-6 block">Our Standards</span>
             <h2 className="text-5xl font-heading font-medium text-primary tracking-tight mb-6">Built on <span className="italic font-normal text-accent">Integrity</span></h2>
-            <p className="text-secondary font-light tracking-wide max-w-xl mx-auto">Four pillars that define every WanderVista experience.</p>
+            <p className="text-secondary font-light tracking-wide max-w-xl mx-auto">Four pillars that define every Help Tourism Bhutan experience.</p>
           </div>
 
           <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">

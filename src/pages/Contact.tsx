@@ -74,7 +74,7 @@ const Contact = () => {
                   {
                     icon: Mail,
                     title: "Electronic Mail",
-                    lines: ["explore@wandervista.bt", "concierge@wandervista.bt"]
+                    lines: ["explore@helptourismbhutan.bt", "concierge@helptourismbhutan.bt"]
                   }
                 ].map((item, idx) => (
                   <motion.div

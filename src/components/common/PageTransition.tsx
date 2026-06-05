@@ -36,39 +36,39 @@ const PageTransition = ({ children }: Props) => {
     const location = useLocation()
 
     useEffect(() => {
-        let title = "WanderVista | Bhutan Tours & Luxury Travel Operator"
-        let desc = "WanderVista is a premier licensed tour operator in Bhutan. Explore cultural dzongs, high-altitude treks, and custom luxury itineraries."
+        let title = "Help Tourism Bhutan | Bhutan Tours & Luxury Travel Operator"
+        let desc = "Help Tourism Bhutan is a premier licensed tour operator in Bhutan. Explore cultural dzongs, high-altitude treks, and custom luxury itineraries."
         
         const path = location.pathname
         if (path === "/destinations") {
-            title = "Bhutan Travel Destinations & Valleys | WanderVista"
+            title = "Bhutan Travel Destinations & Valleys | Help Tourism Bhutan"
             desc = "Discover Bhutan's legendary valleys, from Tiger's Nest in Paro to Punakha Dzong and the spiritual heartlands."
         } else if (path === "/tours") {
-            title = "Signature Bhutan Tour Packages & Expeditions | WanderVista"
+            title = "Signature Bhutan Tour Packages & Expeditions | Help Tourism Bhutan"
             desc = "View our curated cultural festival tours, high altitude treks, and luxury escapes to the Kingdom of Happiness."
         } else if (path === "/hotels") {
-            title = "Luxury Hotels & Boutique Lodges in Bhutan | WanderVista"
+            title = "Luxury Hotels & Boutique Lodges in Bhutan | Help Tourism Bhutan"
             desc = "Stay at five-star luxury retreats in Bhutan including Amankora, Six Senses, and COMO Uma Paro."
         } else if (path === "/flights") {
-            title = "Book Flights to Paro International Airport | WanderVista"
+            title = "Book Flights to Paro International Airport | Help Tourism Bhutan"
             desc = "Find direct routes, carrier info, flight frequencies, and visa support for entry into Bhutan."
         } else if (path === "/about") {
-            title = "Our Legacy & Sustainability Philosophy | WanderVista Bhutan"
+            title = "Our Legacy & Sustainability Philosophy | Help Tourism Bhutan"
             desc = "Learn about our community-first standards, carbon-negative guidelines, and local guides."
         } else if (path === "/contact") {
-            title = "Contact Our Thimphu Travel Architects | WanderVista"
+            title = "Contact Our Thimphu Travel Architects | Help Tourism Bhutan"
             desc = "Get in touch with local guides in Thimphu to schedule your custom itinerary to Bhutan."
         } else if (path === "/plan") {
-            title = "Design Your Custom Bhutan Itinerary | WanderVista"
+            title = "Design Your Custom Bhutan Itinerary | Help Tourism Bhutan"
             desc = "Use our interactive trip builder for an instant travel budget estimate and customized itinerary plan."
         } else if (path === "/faq") {
-            title = "Bhutan Travel FAQ: Visas, SDF Fee & Guidelines | WanderVista"
+            title = "Bhutan Travel FAQ: Visas, SDF Fee & Guidelines | Help Tourism Bhutan"
             desc = "Get answers to frequently asked questions on Bhutan visas, Sustainable Development Fee (SDF), currency, and dress codes."
         } else if (path === "/sdf") {
-            title = "Bhutan SDF Fee Explained: Rates & Regulations | WanderVista"
+            title = "Bhutan SDF Fee Explained: Rates & Regulations | Help Tourism Bhutan"
             desc = "All you need to know about the daily $100 Sustainable Development Fee (SDF) and visa fees for Bhutan."
         } else if (path.startsWith("/tours/")) {
-            title = "Experience Bhutanese Luxury Tour | WanderVista"
+            title = "Experience Bhutanese Luxury Tour | Help Tourism Bhutan"
         }
 
         document.title = title
@@ -82,7 +82,7 @@ const PageTransition = ({ children }: Props) => {
         metaDesc.setAttribute('content', desc)
 
         // Inject JSON-LD Schema
-        const schemaId = "wandervista-jsonld"
+        const schemaId = "helptourismbhutan-jsonld"
         let scriptTag = document.getElementById(schemaId) as HTMLScriptElement
         if (!scriptTag) {
             scriptTag = document.createElement("script")
@@ -94,10 +94,10 @@ const PageTransition = ({ children }: Props) => {
         const schemaObj = {
             "@context": "https://schema.org",
             "@type": "TravelAgency",
-            "name": "WanderVista Bhutan",
-            "image": "https://wandervista.bt/paro-taksang.jpg",
-            "@id": "https://wandervista.bt/#agency",
-            "url": "https://wandervista.bt",
+            "name": "Help Tourism Bhutan",
+            "image": "https://helptourismbhutan.bt/paro-taksang.jpg",
+            "@id": "https://helptourismbhutan.bt/#agency",
+            "url": "https://helptourismbhutan.bt",
             "telephone": "+975-2-334567",
             "priceRange": "$$$$",
             "address": {
@@ -112,7 +112,7 @@ const PageTransition = ({ children }: Props) => {
                 "longitude": "89.6339"
             },
             "sameAs": [
-                "https://www.instagram.com/wandervista"
+                "https://www.instagram.com/helptourismbhutan"
             ]
         }
         scriptTag.text = JSON.stringify(schemaObj)

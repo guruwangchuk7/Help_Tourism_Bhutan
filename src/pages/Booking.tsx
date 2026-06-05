@@ -420,7 +420,7 @@ const Booking = () => {
                                                     <div className="pt-2 text-xs font-medium space-y-2 text-primary">
                                                         <p>📞 Phone: <span className="font-semibold text-accent">+975 2 334567</span></p>
                                                         <p>💬 WhatsApp: <span className="font-semibold text-accent">+975 17 609800</span></p>
-                                                        <p>✉️ Email: <a href="mailto:explore@wandervista.bt" className="font-semibold text-accent underline">explore@wandervista.bt</a></p>
+                                                        <p>✉️ Email: <a href="mailto:explore@helptourismbhutan.bt" className="font-semibold text-accent underline">explore@helptourismbhutan.bt</a></p>
                                                     </div>
                                                 </div>
                                             )}
@@ -566,7 +566,7 @@ const Booking = () => {
                                 {/* Secure Transaction Hint */}
                                 <div className="flex justify-center items-center space-x-2 text-[9px] font-medium text-secondary/40 uppercase tracking-[0.2em]">
                                     <ShieldCheck className="w-3 h-3" />
-                                    <span>Encrypted by WanderVista Protocol</span>
+                                    <span>Encrypted by Help Tourism Bhutan Protocol</span>
                                 </div>
                             </div>
                         </aside>

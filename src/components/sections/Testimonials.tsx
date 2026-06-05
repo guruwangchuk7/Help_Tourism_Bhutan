@@ -6,7 +6,7 @@ const testimonials = [
         id: 1,
         name: "Dr. Tashi Wangdi",
         role: "Cultural Historian • Thimphu Resident",
-        content: "The level of authenticity WanderVista brings to their itineraries is unparalleled. They don't just show you the Dzongs; they introduce you to the spirit and the building blocks of Bhutan.",
+        content: "The level of authenticity Help Tourism Bhutan brings to their itineraries is unparalleled. They don't just show you the Dzongs; they introduce you to the spirit and the building blocks of Bhutan.",
         avatar: "https://i.pravatar.cc/200?u=bhutan1",
         rating: 5
     },

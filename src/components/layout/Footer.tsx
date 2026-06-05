@@ -10,7 +10,7 @@ const Footer = () => {
           <div className="lg:col-span-3">
             <Link to="/" className="flex items-center space-x-3 group mb-6">
               <Compass className="w-8 h-8 text-accent transition-all duration-500 group-hover:rotate-45" />
-              <span className="text-3xl font-heading font-semibold text-primary tracking-wide">WanderVista</span>
+              <span className="text-3xl font-heading font-semibold text-primary tracking-wide">Help Tourism Bhutan</span>
             </Link>
             <p className="text-secondary text-sm font-light leading-relaxed max-w-sm tracking-wide">
               Your gateway to authentic Bhutanese luxury. We curate experiences that connect you with the soul of the Dragon Kingdom.
@@ -63,7 +63,7 @@ const Footer = () => {
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-accent shrink-0" />
-                <a href="mailto:explore@wandervista.bt" className="hover:text-accent transition-colors truncate">explore@wandervista.bt</a>
+                <a href="mailto:explore@helptourismbhutan.bt" className="hover:text-accent transition-colors truncate">explore@helptourismbhutan.bt</a>
               </li>
               <li className="flex items-center gap-2">
                 <MessageCircle className="w-4 h-4 text-accent shrink-0" />
@@ -103,7 +103,7 @@ const Footer = () => {
         {/* Minimalist Bottom Bar */}
         <div className="pt-12 flex flex-col md:flex-row justify-between items-center text-[10px] font-normal tracking-[0.2em] text-primary/40 gap-4">
           <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4">
-            <p>© {new Date().getFullYear()} WanderVista Bhutan. All rights reserved.</p>
+            <p>© {new Date().getFullYear()} Help Tourism Bhutan. All rights reserved.</p>
             <span className="hidden md:inline">|</span>
             <p className="text-secondary/60">Developed by KodaDev</p>
           </div>

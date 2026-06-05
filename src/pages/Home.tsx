@@ -169,7 +169,7 @@ const Home = () => {
         <section className="section-padding py-24 px-6 bg-white">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-20">
-              <span className="text-accent font-semibold tracking-[0.3em] uppercase text-[10px] mb-4 block">The WanderVista Way</span>
+              <span className="text-accent font-semibold tracking-[0.3em] uppercase text-[10px] mb-4 block">The Help Tourism Bhutan Way</span>
               <h2 className="text-3xl md:text-5xl text-primary font-heading font-medium leading-tight">Why Choose Us</h2>
               <p className="text-secondary max-w-2xl mx-auto mt-4 font-light text-base md:text-lg tracking-wide leading-relaxed">
                 We craft moments, not just schedules. Discover how our localized experience changes your journey.

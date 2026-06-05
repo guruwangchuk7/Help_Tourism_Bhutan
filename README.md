@@ -1,4 +1,4 @@
-# WanderVista - Luxury Bhutan Travel 🏔️
+# Help Tourism Bhutan - Luxury Bhutan Travel 🏔️
 
 A premium travel experience platform designed to showcase the beauty and serenity of Bhutan. Built with cutting-edge web technologies to provide a fluid, immersive, and high-performance user experience.
 
