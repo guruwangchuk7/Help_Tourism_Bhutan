@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { CheckCircle2, CreditCard, Gift, User, ArrowRight, ArrowLeft, ShieldCheck, Zap, Loader2, Sparkles, Plane, Utensils } from "lucide-react"
+import { CreditCard, Gift, User, ArrowRight, ArrowLeft, ShieldCheck, Zap, Loader2, Sparkles, Plane, Utensils, Mail, Calendar, Lock, Check } from "lucide-react"
 import { useNavigate, useLocation } from "react-router-dom"
 import PageTransition from "../components/common/PageTransition"
 import { loadStripe } from "@stripe/stripe-js"
@@ -22,6 +22,12 @@ const Booking = () => {
     const [selectedAddons, setSelectedAddons] = useState<string[]>([])
     const [paymentMethod, setPaymentMethod] = useState<'card' | 'stripe' | 'whatsapp' | 'offline'>('card')
     const [isProcessingStripe, setIsProcessingStripe] = useState(false)
+    const [firstName, setFirstName] = useState("")
+    const [lastName, setLastName] = useState("")
+    const [email, setEmail] = useState("")
+    const [cardNumber, setCardNumber] = useState("")
+    const [cardExpiry, setCardExpiry] = useState("")
+    const [cardCvv, setCardCvv] = useState("")
 
     const addonPrices: { [key: string]: number } = {
         'Spiritual Concierge': 150,
@@ -66,7 +72,7 @@ const Booking = () => {
             if (stripe) {
                 const { error } = await (stripe as any).redirectToCheckout({
                     lineItems: [{
-                        price: stripePriceId, 
+                        price: stripePriceId,
                         quantity: 1,
                     }],
                     mode: 'payment',
@@ -112,33 +118,50 @@ const Booking = () => {
         <PageTransition>
             <div className="pt-32 pb-32 bg-bg-light min-h-[100dvh] border-t border-primary/5">
                 <div className="max-w-6xl mx-auto px-6">
-                    {/* Superior Progress Bar */}
-                    <div className="flex items-center justify-between mb-16 md:mb-24 max-w-3xl mx-auto relative px-6 md:px-10">
-                        <div className="absolute top-1/2 left-0 w-full h-[2px] bg-primary/5 -translate-y-1/2 -z-10 rounded-full" />
-                        <div
-                            className="absolute top-1/2 left-0 h-[2px] bg-primary transition-all duration-700 -translate-y-1/2 -z-10 rounded-full"
-                            style={{ width: `${((step - 1) / (steps.length - 1)) * 100}%` }}
-                        />
+                    {/* Redesigned Minimalist Stepper */}
+                    <div className="mb-20 md:mb-28 max-w-3xl mx-auto relative px-8 md:px-12 z-10">
+                        {/* Thin Connective Line */}
+                        <div className="absolute top-[14px] md:top-[16px] left-[46px] right-[46px] md:left-[64px] md:right-[64px] h-[1px] bg-primary/10 -translate-y-1/2 -z-10 rounded-full">
+                            <div
+                                className="h-full bg-accent transition-all duration-700 rounded-full"
+                                style={{ width: `${((step - 1) / (steps.length - 1)) * 100}%` }}
+                            />
+                        </div>
 
-                        {steps.map((s) => (
-                            <div key={s.id} className="relative flex flex-col items-center group">
-                                <motion.div
-                                    animate={{
-                                        scale: step >= s.id ? 1 : 0.9,
-                                        backgroundColor: step >= s.id ? "var(--color-primary)" : "var(--color-white)",
-                                        color: step >= s.id ? "var(--color-white)" : "var(--color-secondary)",
-                                        borderColor: step === s.id ? "var(--color-accent)" : step > s.id ? "transparent" : "var(--color-primary)/5"
-                                    }}
-                                    className={`w-10 h-10 md:w-14 md:h-14 rounded-full flex items-center justify-center transition-all z-10 border-2 shadow-minimal group-hover:shadow-premium`}
-                                >
-                                    {step > s.id ? <CheckCircle2 className="w-6 h-6" /> : <s.icon className="w-5 h-5" />}
-                                </motion.div>
-                                <span className={`absolute -bottom-8 whitespace-nowrap text-[8px] sm:text-[9px] font-medium uppercase tracking-[0.1em] sm:tracking-[0.2em] transition-colors ${step >= s.id ? 'text-primary' : 'text-secondary/60'
-                                    }`}>
-                                    {s.title}
-                                </span>
-                            </div>
-                        ))}
+                        <div className="flex items-center justify-between">
+                            {steps.map((s) => {
+                                const isCompleted = step > s.id
+                                const isActive = step === s.id
+                                return (
+                                    <div key={s.id} className="relative flex flex-col items-center group">
+                                        <motion.div
+                                            animate={{
+                                                scale: isActive ? 1.05 : 1,
+                                            }}
+                                            className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-all z-10 border text-[10px] md:text-[11px] font-bold relative duration-300
+                                                ${isCompleted 
+                                                    ? 'bg-accent border-accent text-white shadow-glass' 
+                                                    : isActive 
+                                                        ? 'bg-primary border-accent text-white ring-4 ring-accent/20' 
+                                                        : 'bg-white border-primary/10 text-secondary/30'
+                                                }`}
+                                        >
+                                            {isCompleted ? <Check className="w-3.5 h-3.5" /> : s.id}
+                                        </motion.div>
+                                        <span className={`absolute -bottom-7 whitespace-nowrap text-[8px] md:text-[9px] font-normal uppercase tracking-[0.15em] transition-colors duration-300
+                                            ${isActive 
+                                                ? 'text-primary font-normal' 
+                                                : isCompleted 
+                                                    ? 'text-accent' 
+                                                    : 'text-secondary/40'
+                                            }`}
+                                        >
+                                            {s.title}
+                                        </span>
+                                    </div>
+                                )
+                            })}
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
@@ -161,17 +184,47 @@ const Booking = () => {
                                                 </div>
                                             )}
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                                <div className="flex flex-col space-y-3">
-                                                    <label className="text-[10px] font-medium text-secondary uppercase tracking-[0.2em] pl-4">First Name</label>
-                                                    <input type="text" className="w-full bg-bg-alt border border-primary/5 rounded-2xl px-6 py-5 outline-none focus:ring-2 focus:ring-accent/20 transition-all font-light text-primary text-base placeholder-secondary/50" placeholder="e.g. Tenzin" />
+                                                <div className="flex flex-col space-y-3 relative">
+                                                    <label className="text-[10px] font-bold text-secondary uppercase tracking-[0.2em] pl-4">First Name</label>
+                                                    <div className="relative">
+                                                        <User className="absolute left-6 top-1/2 -translate-y-1/2 text-accent/60 w-5 h-5 pointer-events-none" />
+                                                        <input 
+                                                            type="text" 
+                                                            value={firstName}
+                                                            onChange={(e) => setFirstName(e.target.value)}
+                                                            className="w-full bg-bg-alt border border-primary/5 rounded-2xl pl-14 pr-6 py-5 outline-none focus:bg-white focus:ring-2 focus:ring-accent/20 transition-all font-light text-primary text-base placeholder-secondary/30" 
+                                                            placeholder="e.g. Tenzin" 
+                                                            required
+                                                        />
+                                                    </div>
                                                 </div>
-                                                <div className="flex flex-col space-y-3">
-                                                    <label className="text-[10px] font-medium text-secondary uppercase tracking-[0.2em] pl-4">Last Name</label>
-                                                    <input type="text" className="w-full bg-bg-alt border border-primary/5 rounded-2xl px-6 py-5 outline-none focus:ring-2 focus:ring-accent/20 transition-all font-light text-primary text-base placeholder-secondary/50" placeholder="e.g. Dorji" />
+                                                <div className="flex flex-col space-y-3 relative">
+                                                    <label className="text-[10px] font-bold text-secondary uppercase tracking-[0.2em] pl-4">Last Name</label>
+                                                    <div className="relative">
+                                                        <User className="absolute left-6 top-1/2 -translate-y-1/2 text-accent/60 w-5 h-5 pointer-events-none" />
+                                                        <input 
+                                                            type="text" 
+                                                            value={lastName}
+                                                            onChange={(e) => setLastName(e.target.value)}
+                                                            className="w-full bg-bg-alt border border-primary/5 rounded-2xl pl-14 pr-6 py-5 outline-none focus:bg-white focus:ring-2 focus:ring-accent/20 transition-all font-light text-primary text-base placeholder-secondary/30" 
+                                                            placeholder="e.g. Dorji" 
+                                                            required
+                                                        />
+                                                    </div>
                                                 </div>
-                                                <div className="flex flex-col space-y-3 md:col-span-2 mt-4">
-                                                    <label className="text-[10px] font-medium text-secondary uppercase tracking-[0.2em] pl-4">Email Address</label>
-                                                    <input type="email" className="w-full bg-bg-alt border border-primary/5 rounded-2xl px-6 py-5 outline-none focus:ring-2 focus:ring-accent/20 transition-all font-light text-primary text-base placeholder-secondary/50" placeholder="tenzin@bhutan.com" />
+                                                <div className="flex flex-col space-y-3 md:col-span-2 mt-4 relative">
+                                                    <label className="text-[10px] font-bold text-secondary uppercase tracking-[0.2em] pl-4">Email Address</label>
+                                                    <div className="relative">
+                                                        <Mail className="absolute left-6 top-1/2 -translate-y-1/2 text-accent/60 w-5 h-5 pointer-events-none" />
+                                                        <input 
+                                                            type="email" 
+                                                            value={email}
+                                                            onChange={(e) => setEmail(e.target.value)}
+                                                            className="w-full bg-bg-alt border border-primary/5 rounded-2xl pl-14 pr-6 py-5 outline-none focus:bg-white focus:ring-2 focus:ring-accent/20 transition-all font-light text-primary text-base placeholder-secondary/30" 
+                                                            placeholder="tenzin@bhutan.com" 
+                                                            required
+                                                        />
+                                                    </div>
                                                 </div>
                                             </div>
                                         </motion.div>
@@ -194,12 +247,11 @@ const Booking = () => {
                                                 ].map(addon => {
                                                     const IconComponent = addon.icon
                                                     return (
-                                                        <div 
-                                                            key={addon.title} 
+                                                        <div
+                                                            key={addon.title}
                                                             onClick={() => toggleAddon(addon.title)}
-                                                            className={`group flex flex-col md:flex-row md:items-center justify-between p-6 sm:p-8 bg-bg-alt rounded-[2rem] border transition-all cursor-pointer shadow-none hover:shadow-premium gap-6 ${
-                                                                selectedAddons.includes(addon.title) ? 'border-accent bg-white shadow-premium' : 'border-primary/5'
-                                                            }`}
+                                                            className={`group flex flex-col md:flex-row md:items-center justify-between p-6 sm:p-8 bg-bg-alt rounded-[2rem] border transition-all cursor-pointer shadow-none hover:shadow-premium gap-6 ${selectedAddons.includes(addon.title) ? 'border-accent bg-white shadow-premium' : 'border-primary/5'
+                                                                }`}
                                                         >
                                                             <div className="flex items-center space-x-6">
                                                                 <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-accent shadow-minimal group-hover:scale-110 transition-transform duration-500 border border-primary/5">
@@ -212,12 +264,10 @@ const Booking = () => {
                                                             </div>
                                                             <div className="flex flex-row md:flex-col items-center justify-between md:items-end">
                                                                 <span className="font-heading font-semibold text-accent text-2xl">{addon.price}</span>
-                                                                <div className={`mt-0 md:mt-2 w-6 h-6 rounded-full border flex items-center justify-center transition-colors duration-300 ${
-                                                                    selectedAddons.includes(addon.title) ? 'border-accent bg-accent/10' : 'border-primary/20 group-hover:border-accent group-hover:bg-accent/10'
-                                                                }`}>
-                                                                    <div className={`w-3 h-3 rounded-full bg-accent transition-transform duration-300 ${
-                                                                        selectedAddons.includes(addon.title) ? 'scale-100' : 'scale-0 group-hover:scale-100'
-                                                                    }`} />
+                                                                <div className={`mt-0 md:mt-2 w-6 h-6 rounded-full border flex items-center justify-center transition-colors duration-300 ${selectedAddons.includes(addon.title) ? 'border-accent bg-accent/10' : 'border-primary/20 group-hover:border-accent group-hover:bg-accent/10'
+                                                                    }`}>
+                                                                    <div className={`w-3 h-3 rounded-full bg-accent transition-transform duration-300 ${selectedAddons.includes(addon.title) ? 'scale-100' : 'scale-0 group-hover:scale-100'
+                                                                        }`} />
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -241,44 +291,40 @@ const Booking = () => {
                                                 <button
                                                     type="button"
                                                     onClick={() => setPaymentMethod('card')}
-                                                    className={`py-4 px-6 rounded-2xl font-bold uppercase tracking-wider text-[10px] border transition-all cursor-pointer ${
-                                                        paymentMethod === 'card' 
-                                                            ? 'bg-primary border-primary text-white shadow-md' 
+                                                    className={`py-4 px-6 rounded-2xl font-bold uppercase tracking-wider text-[10px] border transition-all cursor-pointer ${paymentMethod === 'card'
+                                                            ? 'bg-primary border-primary text-white shadow-md'
                                                             : 'bg-bg-alt border-primary/5 text-primary hover:bg-white'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     Credit / Debit Card
                                                 </button>
                                                 <button
                                                     type="button"
                                                     onClick={() => setPaymentMethod('stripe')}
-                                                    className={`py-4 px-6 rounded-2xl font-bold uppercase tracking-wider text-[10px] border transition-all cursor-pointer ${
-                                                        paymentMethod === 'stripe' 
-                                                            ? 'bg-primary border-primary text-white shadow-md' 
+                                                    className={`py-4 px-6 rounded-2xl font-bold uppercase tracking-wider text-[10px] border transition-all cursor-pointer ${paymentMethod === 'stripe'
+                                                            ? 'bg-primary border-primary text-white shadow-md'
                                                             : 'bg-bg-alt border-primary/5 text-primary hover:bg-white'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     Pay with Stripe
                                                 </button>
                                                 <button
                                                     type="button"
                                                     onClick={() => setPaymentMethod('whatsapp')}
-                                                    className={`py-4 px-6 rounded-2xl font-bold uppercase tracking-wider text-[10px] border transition-all cursor-pointer ${
-                                                        paymentMethod === 'whatsapp' 
-                                                            ? 'bg-primary border-primary text-white shadow-md' 
+                                                    className={`py-4 px-6 rounded-2xl font-bold uppercase tracking-wider text-[10px] border transition-all cursor-pointer ${paymentMethod === 'whatsapp'
+                                                            ? 'bg-primary border-primary text-white shadow-md'
                                                             : 'bg-bg-alt border-primary/5 text-primary hover:bg-white'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     Pay via WhatsApp Chat
                                                 </button>
                                                 <button
                                                     type="button"
                                                     onClick={() => setPaymentMethod('offline')}
-                                                    className={`py-4 px-6 rounded-2xl font-bold uppercase tracking-wider text-[10px] border transition-all cursor-pointer ${
-                                                        paymentMethod === 'offline' 
-                                                            ? 'bg-primary border-primary text-white shadow-md' 
+                                                    className={`py-4 px-6 rounded-2xl font-bold uppercase tracking-wider text-[10px] border transition-all cursor-pointer ${paymentMethod === 'offline'
+                                                            ? 'bg-primary border-primary text-white shadow-md'
                                                             : 'bg-bg-alt border-primary/5 text-primary hover:bg-white'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     Bank Wire / Support
                                                 </button>
@@ -286,9 +332,36 @@ const Booking = () => {
 
                                             {paymentMethod === 'card' && (
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
-                                                    <input type="text" className="md:col-span-2 bg-bg-alt border border-primary/5 rounded-2xl px-6 py-5 outline-none focus:ring-2 focus:ring-accent/20 transition-all font-light text-primary placeholder-secondary/50 tracking-widest text-lg" placeholder="Card Number" />
-                                                    <input type="text" className="bg-bg-alt border border-primary/5 rounded-2xl px-6 py-5 outline-none focus:ring-2 focus:ring-accent/20 transition-all font-light text-primary placeholder-secondary/50 text-center tracking-widest" placeholder="Expiration Date (MM/YY)" />
-                                                    <input type="text" className="bg-bg-alt border border-primary/5 rounded-2xl px-6 py-5 outline-none focus:ring-2 focus:ring-accent/20 transition-all font-light text-primary placeholder-secondary/50 text-center tracking-widest" placeholder="CVV (Security Code)" />
+                                                    <div className="md:col-span-2 relative">
+                                                        <CreditCard className="absolute left-6 top-1/2 -translate-y-1/2 text-accent/60 w-5 h-5 pointer-events-none" />
+                                                        <input 
+                                                            type="text" 
+                                                            value={cardNumber}
+                                                            onChange={(e) => setCardNumber(e.target.value)}
+                                                            className="w-full bg-bg-alt border border-primary/5 rounded-2xl pl-14 pr-6 py-5 outline-none focus:bg-white focus:ring-2 focus:ring-accent/20 transition-all font-light text-primary placeholder-secondary/30 tracking-widest text-lg" 
+                                                            placeholder="Card Number" 
+                                                        />
+                                                    </div>
+                                                    <div className="relative">
+                                                        <Calendar className="absolute left-6 top-1/2 -translate-y-1/2 text-accent/60 w-5 h-5 pointer-events-none" />
+                                                        <input 
+                                                            type="text" 
+                                                            value={cardExpiry}
+                                                            onChange={(e) => setCardExpiry(e.target.value)}
+                                                            className="w-full bg-bg-alt border border-primary/5 rounded-2xl pl-14 pr-6 py-5 outline-none focus:bg-white focus:ring-2 focus:ring-accent/20 transition-all font-light text-primary placeholder-secondary/30 text-center tracking-widest" 
+                                                            placeholder="MM / YY" 
+                                                        />
+                                                    </div>
+                                                    <div className="relative">
+                                                        <Lock className="absolute left-6 top-1/2 -translate-y-1/2 text-accent/60 w-5 h-5 pointer-events-none" />
+                                                        <input 
+                                                            type="text" 
+                                                            value={cardCvv}
+                                                            onChange={(e) => setCardCvv(e.target.value)}
+                                                            className="w-full bg-bg-alt border border-primary/5 rounded-2xl pl-14 pr-6 py-5 outline-none focus:bg-white focus:ring-2 focus:ring-accent/20 transition-all font-light text-primary placeholder-secondary/30 text-center tracking-widest" 
+                                                            placeholder="CVV" 
+                                                        />
+                                                    </div>
                                                 </div>
                                             )}
 
@@ -298,7 +371,7 @@ const Booking = () => {
                                                         <h4 className="font-heading font-medium text-lg text-primary">Stripe Secure Checkout</h4>
                                                         <span className="text-[9px] font-bold text-accent tracking-widest uppercase">Secured</span>
                                                     </div>
-                                                    
+
                                                     {isProcessingStripe ? (
                                                         <div className="py-12 flex flex-col items-center justify-center space-y-4">
                                                             <Loader2 className="w-12 h-12 text-accent animate-spin" />
@@ -327,9 +400,9 @@ const Booking = () => {
                                                     <p className="text-secondary text-sm font-light leading-relaxed">
                                                         Prefer to coordinate billing with a live agent? Click below to start a secure chat. We will format a direct invoice, handle currency exchanges, and secure your permits instantly.
                                                     </p>
-                                                    <a 
-                                                        href="https://wa.me/97517609800" 
-                                                        target="_blank" 
+                                                    <a
+                                                        href="https://wa.me/97517609800"
+                                                        target="_blank"
                                                         rel="noopener noreferrer"
                                                         className="inline-flex items-center justify-center bg-[#25D366] text-white font-bold text-xs uppercase tracking-wider px-6 py-3 rounded-full hover:bg-[#20ba5a] transition-colors"
                                                     >
