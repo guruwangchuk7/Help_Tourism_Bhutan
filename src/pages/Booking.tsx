@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { CreditCard, Gift, User, ArrowRight, ArrowLeft, ShieldCheck, Zap, Loader2, Sparkles, Plane, Utensils, Mail, Calendar, Lock, Check } from "lucide-react"
+import { User, ArrowRight, ArrowLeft, ShieldCheck, Zap, Mail, Check } from "lucide-react"
 import { useNavigate, useLocation } from "react-router-dom"
 import PageTransition from "../components/common/PageTransition"
-import { loadStripe } from "@stripe/stripe-js"
 import { destinations } from "../data/destinations"
 import { tours } from "../data/tours"
 
@@ -19,39 +18,57 @@ const Booking = () => {
     } | null
 
     const [step, setStep] = useState(1)
-    const [selectedAddons, setSelectedAddons] = useState<string[]>([])
-    const [paymentMethod, setPaymentMethod] = useState<'card' | 'stripe' | 'whatsapp' | 'offline'>('card')
-    const [isProcessingStripe, setIsProcessingStripe] = useState(false)
+    const basePrice = locationState?.totalPrice || 1798.00
+    const tax = locationState ? 0 : 400.00
+    const totalPrice = basePrice + tax
+
+    const [paymentMethod, setPaymentMethod] = useState<'email' | 'whatsapp' | 'offline'>('email')
     const [firstName, setFirstName] = useState("")
     const [lastName, setLastName] = useState("")
     const [email, setEmail] = useState("")
-    const [cardNumber, setCardNumber] = useState("")
-    const [cardExpiry, setCardExpiry] = useState("")
-    const [cardCvv, setCardCvv] = useState("")
-
-    const addonPrices: { [key: string]: number } = {
-        'Spiritual Concierge': 150,
-        'Luxury Aviation': 850,
-        'Gourmet Wilderness': 120
-    }
-
-    const toggleAddon = (title: string) => {
-        if (selectedAddons.includes(title)) {
-            setSelectedAddons(selectedAddons.filter(item => item !== title))
-        } else {
-            setSelectedAddons([...selectedAddons, title])
-        }
-    }
-
-    const addonTotal = selectedAddons.reduce((sum, title) => sum + (addonPrices[title] || 0), 0)
-    const basePrice = locationState?.totalPrice || 1798.00
-    const tax = locationState ? 0 : 400.00
-    const totalPrice = basePrice + tax + addonTotal
 
     const matchedDestination = destinations.find(d => d.name === locationState?.destinationName)
     const matchedTour = tours.find(t => t.title === locationState?.destinationName)
     const displayImage = matchedDestination?.image || matchedTour?.image || "/punakha-dzong.jpg"
     const displayTitle = locationState?.destinationName || "Punakha Sacred Grounds Tour"
+
+    const getWhatsAppUrl = () => {
+        const baseText = `Kuzu zangpo la! I would like to book a trip to Bhutan.
+
+📋 *Booking Details:*
+- *Destination/Tour:* ${displayTitle}
+- *Traveler Name:* ${firstName || 'Not provided'} ${lastName || ''}
+- *Email:* ${email || 'Not provided'}
+- *Guests:* ${locationState?.adults || 2} Guest(s)
+- *Duration:* ${locationState?.nights || 1} Night(s)
+- *Estimated Total:* $${totalPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+
+Please assist me with finalizing this booking and completing the payment via bank wire/invoice.`
+
+        return `https://wa.me/97517609800?text=${encodeURIComponent(baseText)}`
+    }
+
+    const getEmailUrl = () => {
+        const subject = `Booking Inquiry: ${displayTitle}`
+        const baseText = `Kuzu zangpo la!
+
+I would like to book a trip to Bhutan.
+
+📋 Booking Details:
+- Destination/Tour: ${displayTitle}
+- Traveler Name: ${firstName || 'Not provided'} ${lastName || ''}
+- Email: ${email || 'Not provided'}
+- Guests: ${locationState?.adults || 2} Guest(s)
+- Duration: ${locationState?.nights || 1} Night(s)
+- Estimated Total: $${totalPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+
+Please contact me to finalize the booking and coordinate payment.
+
+Thank you!`
+
+        return `https://mail.google.com/mail/?view=cm&fs=1&to=explore@helptourismbhutan.bt&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(baseText)}`
+    }
+
 
     useEffect(() => {
         window.scrollTo(0, 0)
@@ -59,53 +76,19 @@ const Booking = () => {
 
     const steps = [
         { title: 'Identity', icon: User, id: 1 },
-        { title: 'Enhancements', icon: Gift, id: 2 },
-        { title: 'Payment', icon: CreditCard, id: 3 },
+        { title: 'Payment', icon: ShieldCheck, id: 2 },
     ]
 
-    const handleStripeCheckout = async () => {
-        setIsProcessingStripe(true)
-        try {
-            const stripeKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || ''
-            const stripePriceId = import.meta.env.VITE_STRIPE_PRICE_ID || ''
-            const stripe = await loadStripe(stripeKey)
-            if (stripe) {
-                const { error } = await (stripe as any).redirectToCheckout({
-                    lineItems: [{
-                        price: stripePriceId,
-                        quantity: 1,
-                    }],
-                    mode: 'payment',
-                    successUrl: `${window.location.origin}/`,
-                    cancelUrl: `${window.location.origin}/booking`,
-                })
-                if (error) {
-                    console.error('Stripe redirect error:', error)
-                    alert(`Stripe checkout error: ${error.message}`)
-                }
-            } else {
-                alert('Stripe SDK failed to load.')
-            }
-        } catch (err) {
-            console.error('Stripe checkout error:', err)
-            alert('Stripe redirect simulated. Make sure Client-only integration is enabled in your Stripe Dashboard, and replace the placeholder Price ID and Publishable Key in Booking.tsx.')
-            navigate('/')
-        } finally {
-            setIsProcessingStripe(false)
-        }
-    }
-
     const handleNext = () => {
-        if (step < 3) setStep(step + 1)
+        if (step < 2) setStep(step + 1)
         else {
-            if (paymentMethod === 'card') {
-                alert('Your journey has been secured. Welcome to Bhutan.')
+            if (paymentMethod === 'email') {
+                window.open(getEmailUrl(), '_blank')
+                alert('Opening Gmail composer with your booking details...')
                 navigate('/')
-            } else if (paymentMethod === 'stripe') {
-                handleStripeCheckout()
             } else if (paymentMethod === 'whatsapp') {
-                window.open('https://wa.me/97517609800', '_blank')
-                alert('Opening WhatsApp support...')
+                window.open(getWhatsAppUrl(), '_blank')
+                alert('Opening WhatsApp support with your booking details...')
                 navigate('/')
             } else {
                 alert('Booking inquiry sent. A Thimphu travel architect will contact you shortly with localized payment instructions.')
@@ -228,85 +211,26 @@ const Booking = () => {
                                                 </div>
                                             </div>
                                         </motion.div>
-                                    )}
-
-                                    {step === 2 && (
+                                    )}                                     {step === 2 && (
                                         <motion.div
                                             key="step2"
-                                            initial={{ opacity: 0, scale: 0.95 }}
-                                            animate={{ opacity: 1, scale: 1 }}
-                                            exit={{ opacity: 0, scale: 1.05 }}
-                                            className="flex-1"
-                                        >
-                                            <h2 className="text-3xl md:text-5xl lg:text-6xl font-heading font-medium text-primary mb-12 tracking-tight leading-none">Refine Your <br className="hidden md:block" /> <span className="text-accent italic font-normal">Experience</span></h2>
-                                            <div className="space-y-6">
-                                                {[
-                                                    { title: 'Spiritual Concierge', price: '$150', desc: 'Private sessions with local Rinpoches.', icon: Sparkles },
-                                                    { title: 'Luxury Aviation', price: '$850', desc: 'Chartered helicopter flight over the peaks.', icon: Plane },
-                                                    { title: 'Gourmet Wilderness', price: '$120', desc: '5-course private dinner in a pine forest.', icon: Utensils }
-                                                ].map(addon => {
-                                                    const IconComponent = addon.icon
-                                                    return (
-                                                        <div
-                                                            key={addon.title}
-                                                            onClick={() => toggleAddon(addon.title)}
-                                                            className={`group flex flex-col md:flex-row md:items-center justify-between p-6 sm:p-8 bg-bg-alt rounded-[2rem] border transition-all cursor-pointer shadow-none hover:shadow-premium gap-6 ${selectedAddons.includes(addon.title) ? 'border-accent bg-white shadow-premium' : 'border-primary/5'
-                                                                }`}
-                                                        >
-                                                            <div className="flex items-center space-x-6">
-                                                                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-accent shadow-minimal group-hover:scale-110 transition-transform duration-500 border border-primary/5">
-                                                                    <IconComponent className="w-6 h-6" />
-                                                                </div>
-                                                                <div>
-                                                                    <h4 className="font-heading font-medium text-2xl text-primary tracking-wide mb-1">{addon.title}</h4>
-                                                                    <p className="text-secondary font-light text-sm tracking-wide">{addon.desc}</p>
-                                                                </div>
-                                                            </div>
-                                                            <div className="flex flex-row md:flex-col items-center justify-between md:items-end">
-                                                                <span className="font-heading font-semibold text-accent text-2xl">{addon.price}</span>
-                                                                <div className={`mt-0 md:mt-2 w-6 h-6 rounded-full border flex items-center justify-center transition-colors duration-300 ${selectedAddons.includes(addon.title) ? 'border-accent bg-accent/10' : 'border-primary/20 group-hover:border-accent group-hover:bg-accent/10'
-                                                                    }`}>
-                                                                    <div className={`w-3 h-3 rounded-full bg-accent transition-transform duration-300 ${selectedAddons.includes(addon.title) ? 'scale-100' : 'scale-0 group-hover:scale-100'
-                                                                        }`} />
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    )
-                                                })}
-                                            </div>
-                                        </motion.div>
-                                    )}
-
-                                    {step === 3 && (
-                                        <motion.div
-                                            key="step3"
                                             initial={{ opacity: 0, y: 20 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             className="flex-1"
                                         >
                                             <h2 className="text-3xl md:text-5xl lg:text-6xl font-heading font-medium text-primary mb-12 tracking-tight leading-none">Choose <br className="hidden md:block" /> <span className="text-accent italic font-normal">Payment</span></h2>
 
-                                            {/* Payment Option Tabs Grid */}
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                                            {/* Payment Option Tabs Grid                                            {/* Payment Option Tabs Grid */}
+                                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
                                                 <button
                                                     type="button"
-                                                    onClick={() => setPaymentMethod('card')}
-                                                    className={`py-4 px-6 rounded-2xl font-bold uppercase tracking-wider text-[10px] border transition-all cursor-pointer ${paymentMethod === 'card'
+                                                    onClick={() => setPaymentMethod('email')}
+                                                    className={`py-4 px-6 rounded-2xl font-bold uppercase tracking-wider text-[10px] border transition-all cursor-pointer ${paymentMethod === 'email'
                                                             ? 'bg-primary border-primary text-white shadow-md'
                                                             : 'bg-bg-alt border-primary/5 text-primary hover:bg-white'
                                                         }`}
                                                 >
-                                                    Credit / Debit Card
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setPaymentMethod('stripe')}
-                                                    className={`py-4 px-6 rounded-2xl font-bold uppercase tracking-wider text-[10px] border transition-all cursor-pointer ${paymentMethod === 'stripe'
-                                                            ? 'bg-primary border-primary text-white shadow-md'
-                                                            : 'bg-bg-alt border-primary/5 text-primary hover:bg-white'
-                                                        }`}
-                                                >
-                                                    Pay with Stripe
+                                                    Pay via Email (Gmail)
                                                 </button>
                                                 <button
                                                     type="button"
@@ -330,67 +254,20 @@ const Booking = () => {
                                                 </button>
                                             </div>
 
-                                            {paymentMethod === 'card' && (
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
-                                                    <div className="md:col-span-2 relative">
-                                                        <CreditCard className="absolute left-6 top-1/2 -translate-y-1/2 text-accent/60 w-5 h-5 pointer-events-none" />
-                                                        <input 
-                                                            type="text" 
-                                                            value={cardNumber}
-                                                            onChange={(e) => setCardNumber(e.target.value)}
-                                                            className="w-full bg-bg-alt border border-primary/5 rounded-2xl pl-14 pr-6 py-5 outline-none focus:bg-white focus:ring-2 focus:ring-accent/20 transition-all font-light text-primary placeholder-secondary/30 tracking-widest text-lg" 
-                                                            placeholder="Card Number" 
-                                                        />
-                                                    </div>
-                                                    <div className="relative">
-                                                        <Calendar className="absolute left-6 top-1/2 -translate-y-1/2 text-accent/60 w-5 h-5 pointer-events-none" />
-                                                        <input 
-                                                            type="text" 
-                                                            value={cardExpiry}
-                                                            onChange={(e) => setCardExpiry(e.target.value)}
-                                                            className="w-full bg-bg-alt border border-primary/5 rounded-2xl pl-14 pr-6 py-5 outline-none focus:bg-white focus:ring-2 focus:ring-accent/20 transition-all font-light text-primary placeholder-secondary/30 text-center tracking-widest" 
-                                                            placeholder="MM / YY" 
-                                                        />
-                                                    </div>
-                                                    <div className="relative">
-                                                        <Lock className="absolute left-6 top-1/2 -translate-y-1/2 text-accent/60 w-5 h-5 pointer-events-none" />
-                                                        <input 
-                                                            type="text" 
-                                                            value={cardCvv}
-                                                            onChange={(e) => setCardCvv(e.target.value)}
-                                                            className="w-full bg-bg-alt border border-primary/5 rounded-2xl pl-14 pr-6 py-5 outline-none focus:bg-white focus:ring-2 focus:ring-accent/20 transition-all font-light text-primary placeholder-secondary/30 text-center tracking-widest" 
-                                                            placeholder="CVV" 
-                                                        />
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {paymentMethod === 'stripe' && (
-                                                <div className="bg-bg-alt rounded-2xl p-6 border border-primary/5 space-y-6">
-                                                    <div className="flex items-center justify-between border-b border-primary/5 pb-3">
-                                                        <h4 className="font-heading font-medium text-lg text-primary">Stripe Secure Checkout</h4>
-                                                        <span className="text-[9px] font-bold text-accent tracking-widest uppercase">Secured</span>
-                                                    </div>
-
-                                                    {isProcessingStripe ? (
-                                                        <div className="py-12 flex flex-col items-center justify-center space-y-4">
-                                                            <Loader2 className="w-12 h-12 text-accent animate-spin" />
-                                                            <p className="text-primary font-medium text-sm">Connecting to Stripe Checkout gateway...</p>
-                                                        </div>
-                                                    ) : (
-                                                        <div className="space-y-4">
-                                                            <p className="text-secondary text-sm font-light leading-relaxed">
-                                                                Click below to proceed to Stripe's secure payment page. You will be able to complete your transaction using credit/debit card, Apple Pay, Google Pay, or other localized methods.
-                                                            </p>
-                                                            <div className="bg-white rounded-xl p-4 border border-primary/5 flex justify-between items-center">
-                                                                <div className="flex flex-col">
-                                                                    <span className="text-[10px] text-secondary font-medium uppercase tracking-widest leading-none mb-1">Total Price</span>
-                                                                    <span className="text-xl font-heading font-semibold text-primary">${totalPrice.toFixed(2)}</span>
-                                                                </div>
-                                                                <span className="text-[9px] font-bold bg-green-100 text-green-800 px-3 py-1 rounded-full uppercase tracking-wider">Ready</span>
-                                                            </div>
-                                                        </div>
-                                                    )}
+                                            {paymentMethod === 'email' && (
+                                                <div className="bg-bg-alt rounded-2xl p-6 border border-primary/5 space-y-4">
+                                                    <h4 className="font-heading font-medium text-lg text-primary">Email Invoice Request</h4>
+                                                    <p className="text-secondary text-sm font-light leading-relaxed">
+                                                        Prefer to coordinate billing and booking confirmations over email? Click below to send your booking details to our team. We will format a direct invoice and coordinate your payment.
+                                                    </p>
+                                                    <a
+                                                        href={getEmailUrl()}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center justify-center bg-accent text-white font-bold text-xs uppercase tracking-wider px-6 py-3 rounded-full hover:bg-accent/80 transition-colors"
+                                                    >
+                                                        ✉️ Request Invoice via Gmail
+                                                    </a>
                                                 </div>
                                             )}
 
@@ -399,9 +276,9 @@ const Booking = () => {
                                                     <h4 className="font-heading font-medium text-lg text-primary">Instant Booking via WhatsApp</h4>
                                                     <p className="text-secondary text-sm font-light leading-relaxed">
                                                         Prefer to coordinate billing with a live agent? Click below to start a secure chat. We will format a direct invoice, handle currency exchanges, and secure your permits instantly.
-                                                    </p>
+                                                     </p>
                                                     <a
-                                                        href="https://wa.me/97517609800"
+                                                        href={getWhatsAppUrl()}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         className="inline-flex items-center justify-center bg-[#25D366] text-white font-bold text-xs uppercase tracking-wider px-6 py-3 rounded-full hover:bg-[#20ba5a] transition-colors"
@@ -425,12 +302,6 @@ const Booking = () => {
                                                 </div>
                                             )}
 
-                                            {/* Minimal Visual Hint */}
-                                            <div className="mt-12 flex items-center justify-center space-x-6 text-secondary/40">
-                                                <CreditCard className="w-8 h-8" />
-                                                <ShieldCheck className="w-8 h-8" />
-                                                <Zap className="w-8 h-8" />
-                                            </div>
                                         </motion.div>
                                     )}
                                 </AnimatePresence>
@@ -450,7 +321,7 @@ const Booking = () => {
                                         onClick={handleNext}
                                         className="btn-primary"
                                     >
-                                        <span>{step === 3 ? (paymentMethod === 'card' ? 'Finalize Order' : paymentMethod === 'stripe' ? 'Pay with Stripe' : paymentMethod === 'whatsapp' ? 'Pay via WhatsApp' : 'Initiate Inquiry') : (step === 1 ? 'Proceed to Enhancements' : 'Proceed to Payment')}</span>
+                                        <span>{step === 2 ? (paymentMethod === 'email' ? 'Pay via Gmail' : paymentMethod === 'whatsapp' ? 'Pay via WhatsApp' : 'Initiate Inquiry') : 'Proceed to Payment'}</span>
                                         <ArrowRight className="w-4 h-4 ml-1" />
                                     </button>
                                 </div>
@@ -538,12 +409,6 @@ const Booking = () => {
                                                 </div>
                                             </>
                                         )}
-                                        {selectedAddons.map(addon => (
-                                            <div key={addon} className="flex justify-between items-center group">
-                                                <span className="text-secondary font-light text-sm tracking-wide group-hover:text-primary transition-colors">{addon}</span>
-                                                <span className="font-heading font-semibold text-accent tracking-wide">+${addonPrices[addon]}.00</span>
-                                            </div>
-                                        ))}
                                         <div className="flex justify-between items-center group">
                                             <span className="text-secondary font-light text-sm tracking-wide group-hover:text-primary transition-colors">Concierge Assistance</span>
                                             <span className="font-heading font-semibold text-accent tracking-wide">FREE</span>
