@@ -327,7 +327,10 @@ const DestinationDetail = () => {
               </div>
 
               {/* Assistance Card */}
-              <div className="bg-white rounded-[2rem] p-8 shadow-minimal border border-primary/5 flex items-center space-x-5 hover:shadow-premium transition-shadow duration-500 group cursor-pointer">
+              <div 
+                onClick={() => navigate('/contact')}
+                className="bg-white rounded-[2rem] p-8 shadow-minimal border border-primary/5 flex items-center space-x-5 hover:shadow-premium transition-shadow duration-500 group cursor-pointer"
+              >
                 <div className="w-14 h-14 rounded-full bg-bg-alt flex items-center justify-center text-primary shrink-0 group-hover:bg-accent group-hover:text-white transition-colors duration-500">
                   <MessageSquare className="w-6 h-6 transition-colors" />
                 </div>

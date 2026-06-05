@@ -4,6 +4,8 @@ import { CheckCircle2, CreditCard, Gift, User, ArrowRight, ArrowLeft, ShieldChec
 import { useNavigate, useLocation } from "react-router-dom"
 import PageTransition from "../components/common/PageTransition"
 import { loadStripe } from "@stripe/stripe-js"
+import { destinations } from "../data/destinations"
+import { tours } from "../data/tours"
 
 const Booking = () => {
     const navigate = useNavigate()
@@ -39,6 +41,11 @@ const Booking = () => {
     const basePrice = locationState?.totalPrice || 1798.00
     const tax = locationState ? 0 : 400.00
     const totalPrice = basePrice + tax + addonTotal
+
+    const matchedDestination = destinations.find(d => d.name === locationState?.destinationName)
+    const matchedTour = tours.find(t => t.title === locationState?.destinationName)
+    const displayImage = matchedDestination?.image || matchedTour?.image || "/punakha-dzong.jpg"
+    const displayTitle = locationState?.destinationName || "Punakha Sacred Grounds Tour"
 
     useEffect(() => {
         window.scrollTo(0, 0)
@@ -385,10 +392,10 @@ const Booking = () => {
 
                                     <div className="flex flex-col gap-6 mb-10 pb-8 border-b border-primary/5">
                                         <div className="w-full h-40 rounded-[2rem] overflow-hidden shadow-glass shrink-0 border border-primary/5">
-                                            <img src="/punakha-dzong.jpg" className="w-full h-full object-cover hover:scale-105 transition-all duration-700" alt="" />
+                                            <img src={displayImage} className="w-full h-full object-cover hover:scale-105 transition-all duration-700" alt={displayTitle} />
                                         </div>
                                         <div>
-                                            <h4 className="font-heading font-semibold text-xl text-primary leading-tight mb-2 tracking-wide">Punakha Sacred Grounds Tour</h4>
+                                            <h4 className="font-heading font-semibold text-xl text-primary leading-tight mb-2 tracking-wide">{displayTitle}</h4>
                                             <p className="text-[9px] font-medium text-accent uppercase tracking-[0.2em] flex items-center">
                                                 <Zap className="w-3 h-3 mr-1" />
                                                 Premium Private Slot
@@ -397,14 +404,67 @@ const Booking = () => {
                                     </div>
 
                                     <div className="space-y-4">
-                                        <div className="flex justify-between items-center group">
-                                            <span className="text-secondary font-light text-sm tracking-wide group-hover:text-primary transition-colors">Base Itinerary (x2)</span>
-                                            <span className="font-heading font-semibold text-primary tracking-wide">$1,798.00</span>
-                                        </div>
-                                        <div className="flex justify-between items-center group">
-                                            <span className="text-secondary font-light text-sm tracking-wide group-hover:text-primary transition-colors">SDF Government Tax</span>
-                                            <span className="font-heading font-semibold text-primary tracking-wide">$400.00</span>
-                                        </div>
+                                        {locationState ? (
+                                            matchedTour ? (
+                                                <>
+                                                    <div className="flex justify-between items-center group">
+                                                        <span className="text-secondary font-light text-sm tracking-wide group-hover:text-primary transition-colors">
+                                                            Tour Package (x{locationState.adults || 2})
+                                                        </span>
+                                                        <span className="font-heading font-semibold text-primary tracking-wide">
+                                                            ${(matchedTour.priceVal * (locationState.adults || 2)).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex justify-between items-center group">
+                                                        <span className="text-secondary font-light text-sm tracking-wide group-hover:text-primary transition-colors">
+                                                            Government SDF & Visa
+                                                        </span>
+                                                        <span className="font-heading font-semibold text-accent tracking-wide">
+                                                            Included
+                                                        </span>
+                                                    </div>
+                                                </>
+                                            ) : matchedDestination ? (
+                                                <>
+                                                    <div className="flex justify-between items-center group">
+                                                        <span className="text-secondary font-light text-sm tracking-wide group-hover:text-primary transition-colors">
+                                                            Stay Cost ({locationState.nights || 1} Night{locationState.nights && locationState.nights > 1 ? 's' : ''} x {locationState.adults || 2} Guest{locationState.adults && locationState.adults > 1 ? 's' : ''})
+                                                        </span>
+                                                        <span className="font-heading font-semibold text-primary tracking-wide">
+                                                            ${(locationState.totalPrice || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex justify-between items-center group">
+                                                        <span className="text-secondary font-light text-sm tracking-wide group-hover:text-primary transition-colors">
+                                                            Government SDF Tax
+                                                        </span>
+                                                        <span className="font-heading font-semibold text-rose-500 tracking-wide">
+                                                            Excluded
+                                                        </span>
+                                                    </div>
+                                                </>
+                                            ) : (
+                                                <div className="flex justify-between items-center group">
+                                                    <span className="text-secondary font-light text-sm tracking-wide group-hover:text-primary transition-colors">
+                                                        Base Itinerary
+                                                    </span>
+                                                    <span className="font-heading font-semibold text-primary tracking-wide">
+                                                        ${(locationState.totalPrice || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                                                    </span>
+                                                </div>
+                                            )
+                                        ) : (
+                                            <>
+                                                <div className="flex justify-between items-center group">
+                                                    <span className="text-secondary font-light text-sm tracking-wide group-hover:text-primary transition-colors">Base Itinerary (x2)</span>
+                                                    <span className="font-heading font-semibold text-primary tracking-wide">$1,798.00</span>
+                                                </div>
+                                                <div className="flex justify-between items-center group">
+                                                    <span className="text-secondary font-light text-sm tracking-wide group-hover:text-primary transition-colors">SDF Government Tax</span>
+                                                    <span className="font-heading font-semibold text-primary tracking-wide">$400.00</span>
+                                                </div>
+                                            </>
+                                        )}
                                         {selectedAddons.map(addon => (
                                             <div key={addon} className="flex justify-between items-center group">
                                                 <span className="text-secondary font-light text-sm tracking-wide group-hover:text-primary transition-colors">{addon}</span>
