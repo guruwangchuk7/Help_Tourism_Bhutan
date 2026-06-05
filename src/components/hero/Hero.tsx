@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { MapPin, Calendar, User, Search, ChevronDown, Plus, Minus, Star, Check } from "lucide-react"
+import { MapPin, Calendar, User, Search, ChevronDown, Plus, Minus } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 
 const Hero = () => {
@@ -87,27 +87,6 @@ const Hero = () => {
           >
             Explore Tours
           </button>
-        </motion.div>
-
-        {/* Trust Indicators */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
-          className="flex flex-wrap justify-center gap-6 text-white/90 text-xs font-medium"
-        >
-          <div className="flex items-center gap-1.5 bg-black/20 px-3.5 py-2 rounded-full backdrop-blur-sm border border-white/5">
-            <Star className="w-4 h-4 text-accent fill-accent" />
-            <span>4.9/5 Guest Rating</span>
-          </div>
-          <div className="flex items-center gap-1.5 bg-black/20 px-3.5 py-2 rounded-full backdrop-blur-sm border border-white/5">
-            <Check className="w-4 h-4 text-accent" />
-            <span>Local Travel Experts</span>
-          </div>
-          <div className="flex items-center gap-1.5 bg-black/20 px-3.5 py-2 rounded-full backdrop-blur-sm border border-white/5">
-            <Check className="w-4 h-4 text-accent" />
-            <span>24/7 Support</span>
-          </div>
         </motion.div>
       </div>      {/* The Booking Search Card (Glassmorphism) */}
       <div className="lg:absolute lg:-bottom-16 relative bottom-auto left-0 w-full z-40 px-6 mt-6 lg:mt-0">

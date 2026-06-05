@@ -42,7 +42,14 @@ const Header = () => {
 
   // Animation variants for smooth sticky transition
   const headerVariants = {
-    initial: { backgroundColor: 'rgba(255, 255, 255, 0)', boxShadow: 'none', borderBottom: '1px solid transparent' },
+    initial: { 
+      backgroundColor: 'rgba(255, 255, 255, 0)', 
+      boxShadow: 'none', 
+      borderBottom: '1px solid transparent',
+      paddingTop: '32px',
+      paddingBottom: '32px',
+      backdropFilter: 'blur(0px)'
+    },
     scrolled: {
       backgroundColor: 'rgba(250, 250, 250, 0.95)',
       backdropFilter: 'blur(24px)',
@@ -61,7 +68,7 @@ const Header = () => {
       animate={activeHeader ? "scrolled" : "initial"}
       variants={headerVariants}
       transition={{ duration: 0.4, ease: "easeInOut" }}
-      className={`fixed top-0 left-0 w-full z-[100] transition-colors ${!activeHeader ? 'py-8' : ''}`}
+      className="fixed top-0 left-0 w-full z-[100]"
     >
       <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
         {/* Left: Brand Logo */}
