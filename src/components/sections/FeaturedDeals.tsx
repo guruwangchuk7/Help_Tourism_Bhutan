@@ -48,7 +48,7 @@ const FeaturedDeals = () => {
                         <img
                             src={deal.image}
                             alt={deal.title}
-                            className="w-full h-full object-cover grayscale transition-all duration-1000 group-hover:grayscale-0 group-hover:scale-105"
+                            className="w-full h-full object-cover transition-all duration-1000 group-hover:scale-105"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-primary/95 via-primary/40 to-transparent p-10 flex flex-col justify-end">
                             <div className="flex space-x-2 mb-6 opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0 duration-500">

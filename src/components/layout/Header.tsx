@@ -1,13 +1,15 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, Compass, Globe, User } from 'lucide-react'
+import { Menu, X, Compass, Globe } from 'lucide-react'
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const location = useLocation()
-  const isHome = location.pathname === '/'
+  const isTransparentPage = ['/', '/contact', '/about', '/flights', '/hotels'].includes(location.pathname) ||
+    location.pathname.startsWith('/tours') ||
+    location.pathname.startsWith('/destinations')
 
   useEffect(() => {
     const handleScroll = () => {
@@ -60,7 +62,7 @@ const Header = () => {
     }
   }
 
-  const activeHeader = isScrolled || !isHome
+  const activeHeader = isScrolled || !isTransparentPage
 
   return (
     <motion.header
@@ -103,13 +105,6 @@ const Header = () => {
             <span className="text-[8px]">▼</span>
           </div>
           <Link
-            to="#"
-            className={`transition-colors ${activeHeader ? 'text-primary hover:text-accent' : 'text-white hover:text-white/80'}`}
-            title="Log In"
-          >
-            <User className="w-4.5 h-4.5" />
-          </Link>
-          <Link
             to="/plan"
             className={`btn-accent !px-6 !py-3 !rounded-full shadow-none ${activeHeader ? '' : 'bg-white text-primary hover:bg-white hover:text-primary'}`}
           >
@@ -148,7 +143,6 @@ const Header = () => {
               ))}
               <div className="pt-10 flex flex-col space-y-4">
                 <Link to="/plan" className="btn-accent w-full text-lg">Get Free Itinerary</Link>
-                <Link to="#" className="btn-outline w-full text-lg">Log In</Link>
               </div>
             </div>
           </motion.div>

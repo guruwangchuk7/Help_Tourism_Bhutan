@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion'
 import { Compass } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import PageTransition from '../components/common/PageTransition'
@@ -14,20 +15,38 @@ const Flights = () => {
 
   return (
     <PageTransition>
-      <div className="pt-24 bg-bg-light min-h-[100dvh]">
-        {/* Hero Section */}
-        <section className="relative h-[45dvh] flex items-center justify-center overflow-hidden">
-          <img
-            src="/dochula-pass.jpg"
-            className="absolute inset-0 w-full h-full object-cover brightness-[0.6]"
-            alt="Bhutan Aviation Routes"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-bg-light via-transparent to-black/25" />
+      <div className="bg-bg-light min-h-[100dvh] overflow-x-hidden">
+        {/* Full Image Hero Banner */}
+        <section className="relative min-h-[90dvh] flex flex-col items-center justify-center overflow-visible">
+          {/* Background Image with Overlay */}
+          <div className="absolute inset-0 z-0">
+            <img
+              src="/dochula-pass.jpg"
+              className="w-full h-full object-cover"
+              alt="Bhutan Aviation Routes"
+            />
+            <div className="absolute inset-0 bg-black/45 z-10" />
+          </div>
 
-          <div className="relative z-10 text-center px-6">
-            <h1 className="text-4xl sm:text-6xl md:text-7xl font-heading font-medium text-white tracking-tight">
-              Bhutan Flights
-            </h1>
+          {/* Hero Copy */}
+          <div className="relative z-20 max-w-5xl mx-auto px-6 text-center pt-32 pb-16">
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, ease: "easeOut" }}
+              className="text-white text-5xl md:text-7xl lg:text-8xl font-heading mb-6 leading-[1.1] font-medium"
+            >
+              Bhutan <span className="text-accent italic font-normal">Flights</span>
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
+              className="text-white/80 text-xs md:text-sm font-light max-w-2xl mx-auto leading-relaxed tracking-[0.15em] uppercase"
+            >
+              Fly into the Kingdom of Happiness with our comprehensive flight concierge protocols
+            </motion.p>
           </div>
         </section>
 
@@ -73,15 +92,14 @@ const Flights = () => {
           </div>
 
           {/* Inquiry Section */}
-          <div className="bg-primary text-white rounded-[2.5rem] p-10 md:p-16 text-center relative overflow-hidden shadow-premium">
-            <div className="absolute inset-0 bg-[url('/paro-taksang.jpg')] opacity-10 bg-cover bg-center grayscale mix-blend-overlay" />
+          <div className="bg-white text-primary border border-primary/5 rounded-[2.5rem] p-10 md:p-16 text-center relative overflow-hidden shadow-minimal">
             <div className="relative z-10 max-w-xl mx-auto flex flex-col items-center">
               <h3 className="text-2xl md:text-3xl font-heading font-medium mb-4">Flight Ticketing Concierge</h3>
-              <p className="text-white/70 text-sm mb-8 font-light leading-relaxed">
+              <p className="text-secondary text-sm mb-8 font-light leading-relaxed">
                 As a fully certified travel agency, we handle Bhutan flight reservations, visa issuance, and local ticketing directly through our Thimphu base. Let us organize the optimal flight path for you.
               </p>
               <button
-                onClick={() => navigate('/booking')}
+                onClick={() => navigate('/contact?type=flight')}
                 className="btn-accent !px-8 !py-3.5 text-sm font-semibold rounded-full shadow-lg hover:scale-105 transition-transform duration-300"
               >
                 Inquire Flight Tickets

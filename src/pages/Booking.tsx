@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { CheckCircle2, CreditCard, Gift, User, ArrowRight, ArrowLeft, ShieldCheck, Zap, Loader2 } from "lucide-react"
+import { CheckCircle2, CreditCard, Gift, User, ArrowRight, ArrowLeft, ShieldCheck, Zap, Loader2, Sparkles, Plane, Utensils } from "lucide-react"
 import { useNavigate, useLocation } from "react-router-dom"
 import PageTransition from "../components/common/PageTransition"
 import { loadStripe } from "@stripe/stripe-js"
@@ -181,36 +181,41 @@ const Booking = () => {
                                             <h2 className="text-3xl md:text-5xl lg:text-6xl font-heading font-medium text-primary mb-12 tracking-tight leading-none">Refine Your <br className="hidden md:block" /> <span className="text-accent italic font-normal">Experience</span></h2>
                                             <div className="space-y-6">
                                                 {[
-                                                    { title: 'Spiritual Concierge', price: '$150', desc: 'Private sessions with local Rinpoches.', icon: '🧘' },
-                                                    { title: 'Luxury Aviation', price: '$850', desc: 'Chartered helicopter flight over the peaks.', icon: '🚁' },
-                                                    { title: 'Gourmet Wilderness', price: '$120', desc: '5-course private dinner in a pine forest.', icon: '🍷' }
-                                                ].map(addon => (
-                                                    <div 
-                                                        key={addon.title} 
-                                                        onClick={() => toggleAddon(addon.title)}
-                                                        className={`group flex flex-col md:flex-row md:items-center justify-between p-6 sm:p-8 bg-bg-alt rounded-[2rem] border transition-all cursor-pointer shadow-none hover:shadow-premium gap-6 ${
-                                                            selectedAddons.includes(addon.title) ? 'border-accent bg-white shadow-premium' : 'border-primary/5'
-                                                        }`}
-                                                    >
-                                                        <div className="flex items-center space-x-6">
-                                                            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-3xl shadow-minimal group-hover:scale-110 transition-transform duration-500 border border-primary/5">{addon.icon}</div>
-                                                            <div>
-                                                                <h4 className="font-heading font-medium text-2xl text-primary tracking-wide mb-1">{addon.title}</h4>
-                                                                <p className="text-secondary font-light text-sm tracking-wide">{addon.desc}</p>
+                                                    { title: 'Spiritual Concierge', price: '$150', desc: 'Private sessions with local Rinpoches.', icon: Sparkles },
+                                                    { title: 'Luxury Aviation', price: '$850', desc: 'Chartered helicopter flight over the peaks.', icon: Plane },
+                                                    { title: 'Gourmet Wilderness', price: '$120', desc: '5-course private dinner in a pine forest.', icon: Utensils }
+                                                ].map(addon => {
+                                                    const IconComponent = addon.icon
+                                                    return (
+                                                        <div 
+                                                            key={addon.title} 
+                                                            onClick={() => toggleAddon(addon.title)}
+                                                            className={`group flex flex-col md:flex-row md:items-center justify-between p-6 sm:p-8 bg-bg-alt rounded-[2rem] border transition-all cursor-pointer shadow-none hover:shadow-premium gap-6 ${
+                                                                selectedAddons.includes(addon.title) ? 'border-accent bg-white shadow-premium' : 'border-primary/5'
+                                                            }`}
+                                                        >
+                                                            <div className="flex items-center space-x-6">
+                                                                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-accent shadow-minimal group-hover:scale-110 transition-transform duration-500 border border-primary/5">
+                                                                    <IconComponent className="w-6 h-6" />
+                                                                </div>
+                                                                <div>
+                                                                    <h4 className="font-heading font-medium text-2xl text-primary tracking-wide mb-1">{addon.title}</h4>
+                                                                    <p className="text-secondary font-light text-sm tracking-wide">{addon.desc}</p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex flex-row md:flex-col items-center justify-between md:items-end">
+                                                                <span className="font-heading font-semibold text-accent text-2xl">{addon.price}</span>
+                                                                <div className={`mt-0 md:mt-2 w-6 h-6 rounded-full border flex items-center justify-center transition-colors duration-300 ${
+                                                                    selectedAddons.includes(addon.title) ? 'border-accent bg-accent/10' : 'border-primary/20 group-hover:border-accent group-hover:bg-accent/10'
+                                                                }`}>
+                                                                    <div className={`w-3 h-3 rounded-full bg-accent transition-transform duration-300 ${
+                                                                        selectedAddons.includes(addon.title) ? 'scale-100' : 'scale-0 group-hover:scale-100'
+                                                                    }`} />
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                        <div className="flex flex-row md:flex-col items-center justify-between md:items-end">
-                                                            <span className="font-heading font-semibold text-accent text-2xl">{addon.price}</span>
-                                                            <div className={`mt-0 md:mt-2 w-6 h-6 rounded-full border flex items-center justify-center transition-colors duration-300 ${
-                                                                selectedAddons.includes(addon.title) ? 'border-accent bg-accent/10' : 'border-primary/20 group-hover:border-accent group-hover:bg-accent/10'
-                                                            }`}>
-                                                                <div className={`w-3 h-3 rounded-full bg-accent transition-transform duration-300 ${
-                                                                    selectedAddons.includes(addon.title) ? 'scale-100' : 'scale-0 group-hover:scale-100'
-                                                                }`} />
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                ))}
+                                                    )
+                                                })}
                                             </div>
                                         </motion.div>
                                     )}
@@ -380,7 +385,7 @@ const Booking = () => {
 
                                     <div className="flex flex-col gap-6 mb-10 pb-8 border-b border-primary/5">
                                         <div className="w-full h-40 rounded-[2rem] overflow-hidden shadow-glass shrink-0 border border-primary/5">
-                                            <img src="/punakha-dzong.jpg" className="w-full h-full object-cover grayscale opacity-80 hover:grayscale-0 hover:opacity-100 transition-all duration-700" alt="" />
+                                            <img src="/punakha-dzong.jpg" className="w-full h-full object-cover hover:scale-105 transition-all duration-700" alt="" />
                                         </div>
                                         <div>
                                             <h4 className="font-heading font-semibold text-xl text-primary leading-tight mb-2 tracking-wide">Punakha Sacred Grounds Tour</h4>

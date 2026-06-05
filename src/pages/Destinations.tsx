@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, SlidersHorizontal, FilterX, ArrowRight } from 'lucide-react'
+import { Search, SlidersHorizontal, FilterX } from 'lucide-react'
 import { destinations } from '../data/destinations'
 import DestinationCard from '../components/destinations/DestinationCard'
 import PageTransition from '../components/common/PageTransition'
@@ -20,105 +20,121 @@ const Destinations = () => {
 
   return (
     <PageTransition>
-      <div className="pt-24 bg-white min-h-[100dvh]">
-        {/* Cinematic Header - Minimalist */}
-        <section className="relative h-[50dvh] flex items-center justify-center overflow-hidden">
-          <motion.img
-            initial={{ scale: 1.1 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 1.5 }}
-            src="/paro-taksang.jpg"
-            className="absolute inset-0 w-full h-full object-cover brightness-[0.7]"
-            alt="Bhutan Archives"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-black/25" />
+      <div className="bg-bg-light min-h-[100dvh] overflow-x-hidden">
+        {/* Full Image Hero Banner */}
+        <section className="relative min-h-[90dvh] flex flex-col items-center justify-center overflow-visible">
+          {/* Background Image with Overlay */}
+          <div className="absolute inset-0 z-0">
+            <img
+              src="/paro-taksang.jpg"
+              className="w-full h-full object-cover"
+              alt="Bhutan Destinations Archives"
+            />
+            <div className="absolute inset-0 bg-black/45 z-10" />
+          </div>
 
-          <div className="relative z-10 text-center px-6">
+          {/* Hero Copy */}
+          <div className="relative z-20 max-w-5xl mx-auto px-6 text-center pt-32 pb-16">
             <motion.h1
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              className="text-6xl md:text-8xl font-heading font-bold text-white tracking-tighter mb-4"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, ease: "easeOut" }}
+              className="text-white text-5xl md:text-7xl lg:text-8xl font-heading mb-6 leading-[1.1] font-medium"
             >
-              The <span className="italic font-normal">Archives</span>
+              The <span className="text-accent italic font-normal">Archives</span>
             </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
+              className="text-white/80 text-xs md:text-sm font-light max-w-2xl mx-auto leading-relaxed tracking-[0.15em] uppercase"
+            >
+              Explore the legendary valleys and sacred pathways of the Himalayan kingdom
+            </motion.p>
           </div>
         </section>
 
-        {/* Interface Bar - Clean & Minimal */}
-        <div className="sticky top-20 z-50 bg-white/80 backdrop-blur-2xl border-b border-gray-100 py-6">
-          <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row gap-6 items-center">
-            <div className="flex-1 relative w-full">
-              <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-accent transition-colors w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Filter by valley or tradition..."
-                className="w-full bg-gray-50 border-none rounded-xl pl-16 pr-8 py-5 outline-none focus:ring-2 focus:ring-primary/10 transition-all font-medium text-lg"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-
-            <div className="flex items-center space-x-4 w-full md:w-auto">
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className={`flex items-center justify-center space-x-3 px-8 py-5 rounded-xl font-bold uppercase tracking-widest text-[10px] transition-all flex-1 md:flex-none ${showFilters ? 'bg-primary text-white shadow-lg' : 'bg-white text-primary border border-gray-100 hover:border-primary'
-                  }`}
-              >
-                <SlidersHorizontal className="w-4 h-4" />
-                <span>Filters</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Animated Filter Panel */}
-          <AnimatePresence>
-            {showFilters && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="overflow-hidden bg-gray-50/50"
-              >
-                <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-2 gap-12 mt-6">
-                  <div>
-                    <h4 className="font-bold text-primary uppercase tracking-widest text-[10px] mb-6">Experience Category</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {categories.map(cat => (
-                        <button
-                          key={cat}
-                          onClick={() => setFilterType(cat)}
-                          className={`px-6 py-2 rounded-lg font-bold text-xs border transition-all ${filterType === cat ? 'bg-primary border-primary text-white shadow-md' : 'bg-white border-gray-100 text-gray-400 hover:border-primary/20'
-                            }`}
-                        >
-                          {cat}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="flex items-end justify-end">
-                    <button
-                      onClick={() => { setFilterType('All'); setSearchQuery(''); }}
-                      className="flex items-center space-x-2 text-gray-400 hover:text-accent font-bold uppercase tracking-widest text-[10px]"
-                    >
-                      <FilterX className="w-4 h-4" />
-                      <span>Clear All Filters</span>
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
         {/* Results Main */}
-        <main className="max-w-7xl mx-auto px-6 py-24">
-          <div className="flex items-end justify-between mb-16 border-b border-gray-100 pb-8">
+        <main className="max-w-7xl mx-auto px-6 py-20">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 border-b border-primary/5 pb-8 gap-4">
             <div>
               <span className="text-accent font-bold uppercase tracking-[0.2em] text-[10px] mb-2 block">Catalog</span>
               <h2 className="text-4xl font-heading font-bold text-primary tracking-tight">Available Paths</h2>
             </div>
             <p className="text-gray-400 font-bold text-xs uppercase tracking-widest">{filteredDestinations.length} Results Found</p>
+          </div>
+
+          {/* Interface Bar - Clean, Compact & Minimal */}
+          <div className="mb-12">
+            <div className="flex flex-col sm:flex-row gap-4 items-center">
+              <div className="flex-1 relative w-full">
+                <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <input
+                  type="text"
+                  placeholder="Filter by valley or tradition..."
+                  className="w-full bg-white border border-gray-200 rounded-lg pl-12 pr-6 py-3 outline-none focus:ring-1 focus:ring-accent focus:border-accent transition-all text-sm text-primary"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+
+              <div className="flex items-center space-x-3 w-full sm:w-auto">
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={`flex items-center justify-center space-x-2 px-6 py-3 rounded-lg font-bold uppercase tracking-wider text-[10px] transition-all flex-1 sm:flex-none cursor-pointer border ${
+                    showFilters 
+                      ? 'bg-primary border-primary text-white shadow-sm' 
+                      : 'bg-white text-primary border-gray-200 hover:border-primary'
+                  }`}
+                >
+                  <SlidersHorizontal className="w-3.5 h-3.5" />
+                  <span>Filters</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Animated Filter Panel */}
+            <AnimatePresence>
+              {showFilters && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden bg-gray-50/50 rounded-lg border border-gray-100 mt-4"
+                >
+                  <div className="px-6 py-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                      <h4 className="font-bold text-primary uppercase tracking-widest text-[9px] mb-4">Experience Category</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {categories.map(cat => (
+                          <button
+                            key={cat}
+                            onClick={() => setFilterType(cat)}
+                            className={`px-4 py-1.5 rounded-md font-bold text-[10px] uppercase tracking-wider border transition-all cursor-pointer ${
+                              filterType === cat 
+                                ? 'bg-primary border-primary text-white shadow-sm' 
+                                : 'bg-white border-gray-200 text-gray-400 hover:border-primary/20'
+                            }`}
+                          >
+                            {cat}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex items-end justify-end">
+                      <button
+                        onClick={() => { setFilterType('All'); setSearchQuery(''); }}
+                        className="flex items-center space-x-2 text-gray-400 hover:text-accent font-bold uppercase tracking-widest text-[9px] cursor-pointer"
+                      >
+                        <FilterX className="w-3.5 h-3.5" />
+                        <span>Clear All Filters</span>
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           {filteredDestinations.length > 0 ? (
@@ -148,13 +164,7 @@ const Destinations = () => {
             </div>
           )}
 
-          {/* Minimalist Pagination */}
-          <div className="mt-32 flex justify-center">
-            <button className="flex items-center space-x-4 group text-primary font-bold uppercase tracking-widest text-xs border border-gray-100 px-10 py-5 rounded-full hover:bg-primary hover:text-white transition-all">
-              <span>Load More Journeys</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
-            </button>
-          </div>
+
         </main>
       </div>
     </PageTransition>

@@ -1,5 +1,5 @@
 import { motion } from "framer-motion"
-import { Compass, Zap, Shield, Heart, ArrowRight, CloudRain, Sun, Snowflake } from "lucide-react"
+import { Heart, ArrowRight, CloudRain, Sun, Snowflake } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import PageTransition from "../components/common/PageTransition"
 
@@ -8,33 +8,38 @@ const Tours = () => {
 
   return (
     <PageTransition>
-      <div className="pt-24 bg-bg-light min-h-[100dvh] border-t border-primary/5">
-        {/* Luxury Intro */}
-        <section className="py-24 px-6 md:py-40 relative flex flex-col items-center justify-center text-center overflow-hidden">
-          <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-accent/5 rounded-full blur-[150px] -z-10" />
-          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[100px] -z-10" />
+      <div className="bg-bg-light min-h-[100dvh] overflow-x-hidden">
+        {/* Full Image Hero Banner */}
+        <section className="relative min-h-[90dvh] flex flex-col items-center justify-center overflow-visible">
+          {/* Background Image with Overlay */}
+          <div className="absolute inset-0 z-0">
+            <img
+              src="/paro-taksang.jpg"
+              className="w-full h-full object-cover"
+              alt="Bhutan Signature Tours"
+            />
+            <div className="absolute inset-0 bg-black/45 z-10" />
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            className="flex flex-col items-center"
-          >
-            <div className="w-12 h-[2px] bg-accent mb-10" />
-            <h1 className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-heading font-medium text-primary leading-[1] tracking-tight mb-10">
-              Signature <br /> <span className="text-accent italic font-normal">Expeditions</span>
-            </h1>
-            <p className="max-w-xl text-secondary font-light text-xl mb-16 leading-relaxed tracking-wide">
-              Limited-entry tours designed around festivals, royal traditions, and seasonal peaks.
-            </p>
-          </motion.div>
+          {/* Hero Copy */}
+          <div className="relative z-20 max-w-5xl mx-auto px-6 text-center pt-32 pb-16">
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, ease: "easeOut" }}
+              className="text-white text-5xl md:text-7xl lg:text-8xl font-heading mb-6 leading-[1.1] font-medium"
+            >
+              Signature <span className="text-accent italic font-normal">Expeditions</span>
+            </motion.h1>
 
-          {/* Filter Chips Placeholder */}
-          <div className="flex flex-wrap justify-center gap-4 mb-10">
-            {['Cultural Festivals', 'Laya Gasa Trek', 'Royal Highland', 'Spirit of Bhutan'].map(tour => (
-              <button key={tour} className="px-8 py-3 rounded-full bg-white border border-primary/5 shadow-minimal font-medium text-[10px] uppercase tracking-[0.2em] text-primary hover:bg-primary hover:text-white hover:shadow-premium transition-all duration-300">
-                {tour}
-              </button>
-            ))}
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
+              className="text-white/80 text-xs md:text-sm font-light max-w-2xl mx-auto leading-relaxed tracking-[0.15em] uppercase"
+            >
+              Limited-entry tours designed around festivals, royal traditions, and seasonal peaks
+            </motion.p>
           </div>
         </section>
 
@@ -54,7 +59,7 @@ const Tours = () => {
                 className="bg-white rounded-[3rem] overflow-hidden shadow-minimal hover:shadow-premium group border border-primary/5 p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center transition-all duration-500 cursor-pointer"
               >
                 <div className="w-full md:w-56 h-56 rounded-[2rem] overflow-hidden shrink-0 shadow-glass border border-primary/5">
-                  <img src={tour.img} className="w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" alt="" />
+                  <img src={tour.img} className="w-full h-full object-cover group-hover:scale-105 transition-all duration-1000" alt="" />
                 </div>
                 <div className="flex-1 w-full">
                   <div className={`inline-flex items-center space-x-2 ${tour.color} ${tour.text} px-4 py-2 rounded-full mb-6`}>
@@ -81,34 +86,6 @@ const Tours = () => {
             ))}
           </div>
         </div>
-
-        {/* Inclusion Section */}
-        <section className="py-32 bg-primary px-6 rounded-t-[4rem] relative overflow-hidden">
-          <div className="absolute inset-0 bg-[url('/paro-taksang.jpg')] opacity-10 bg-cover bg-center grayscale mix-blend-overlay" />
-          <div className="max-w-7xl mx-auto relative z-10">
-            <div className="text-center mb-24">
-              <span className="text-accent font-semibold tracking-[0.3em] uppercase text-[10px] mb-6 block">Our Standards</span>
-              <h2 className="text-4xl sm:text-5xl md:text-7xl text-white font-heading font-medium tracking-tight leading-tight mb-8">What’s <span className="text-accent italic font-normal">Enveloped</span></h2>
-              <p className="text-white/60 font-light max-w-xl mx-auto tracking-wide text-lg">Every expedition we curate includes the following premium protocols.</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-              {[
-                { icon: Shield, title: "Visa & Entry", desc: "Full handling of Bhutanese visa permits and SDF government taxes." },
-                { icon: Compass, title: "Expert Guides", desc: "A personal heritage architect assigned to your journey from start to finish." },
-                { icon: Zap, title: "Local Flights", desc: "Domestic transfers within the kingdom, ensuring zero logistical stress." },
-              ].map((inc, i) => (
-                <div key={i} className="glass-panel !bg-white/5 !border-white/10 p-6 sm:p-10 md:p-12 rounded-[2rem] sm:rounded-[3rem] flex flex-col items-center text-center group hover:bg-white/10 transition-colors duration-500">
-                  <div className="w-20 h-20 bg-accent/20 border border-accent/20 rounded-full flex items-center justify-center text-accent mb-10 group-hover:bg-accent group-hover:text-primary transition-all duration-500">
-                    <inc.icon className="w-8 h-8 transition-colors" />
-                  </div>
-                  <h4 className="text-xl font-heading font-medium text-white mb-6 tracking-wide">{inc.title}</h4>
-                  <p className="text-white/60 font-light leading-relaxed tracking-wide text-sm">{inc.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
       </div>
     </PageTransition>
   )

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { useParams, useNavigate, Link } from "react-router-dom"
+import { motion } from "framer-motion"
 import { tours } from "../data/tours"
 import { ArrowLeft, Clock, ShieldCheck, ChevronDown, Check, X } from "lucide-react"
 import PageTransition from "../components/common/PageTransition"
@@ -37,14 +38,17 @@ const TourDetail = () => {
   return (
     <PageTransition>
       <div className="bg-bg-light min-h-[100dvh] pb-32">
-        {/* Hero Section */}
-        <section className="relative h-[60dvh] flex items-center justify-center overflow-hidden">
-          <img
-            src={tour.image}
-            className="absolute inset-0 w-full h-full object-cover brightness-[0.6]"
-            alt={tour.title}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-bg-light via-transparent to-black/20" />
+        {/* Full Image Hero Banner */}
+        <section className="relative min-h-[90dvh] flex flex-col items-center justify-center overflow-visible">
+          {/* Background Image with Overlay */}
+          <div className="absolute inset-0 z-0">
+            <img
+              src={tour.image}
+              className="w-full h-full object-cover"
+              alt={tour.title}
+            />
+            <div className="absolute inset-0 bg-black/45 z-10" />
+          </div>
 
           {/* Back button */}
           <button
@@ -55,16 +59,23 @@ const TourDetail = () => {
             <span className="text-xs font-semibold uppercase tracking-wider">All Tours</span>
           </button>
 
-          <div className="relative z-10 text-center px-6 max-w-4xl pt-16">
-            <span className="text-accent font-semibold tracking-[0.3em] uppercase text-[10px] mb-4 block">
-              {tour.category} • {tour.difficulty}
-            </span>
-            <h1 className="text-4xl sm:text-6xl md:text-7xl font-heading font-medium text-white tracking-tight leading-none mb-6">
-              {tour.title}
-            </h1>
-            <p className="text-white/80 text-sm md:text-base font-light tracking-wide max-w-2xl mx-auto leading-relaxed">
-              {tour.desc}
-            </p>
+          {/* Hero Copy */}
+          <div className="relative z-20 max-w-5xl mx-auto px-6 text-center pt-32 pb-16">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+            >
+              <span className="text-accent font-semibold tracking-[0.3em] uppercase text-[10px] sm:text-xs mb-4 block">
+                {tour.category} • {tour.difficulty}
+              </span>
+              <h1 className="text-5xl md:text-7xl lg:text-8xl font-heading mb-6 leading-[1.1] font-medium text-white">
+                {tour.title}
+              </h1>
+              <p className="text-white/85 text-xs md:text-sm font-light max-w-2xl mx-auto leading-relaxed uppercase tracking-[0.15em]">
+                {tour.desc}
+              </p>
+            </motion.div>
           </div>
         </section>
 

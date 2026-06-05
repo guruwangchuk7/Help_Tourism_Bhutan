@@ -47,20 +47,38 @@ const Hotels = () => {
 
   return (
     <PageTransition>
-      <div className="pt-24 bg-bg-light min-h-[100dvh]">
-        {/* Hero Section */}
-        <section className="relative h-[45dvh] flex items-center justify-center overflow-hidden">
-          <img
-            src="/paro-taksang.jpg"
-            className="absolute inset-0 w-full h-full object-cover brightness-[0.6]"
-            alt="Bhutan Luxury Hotels"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-bg-light via-transparent to-black/25" />
+      <div className="bg-bg-light min-h-[100dvh] overflow-x-hidden">
+        {/* Full Image Hero Banner */}
+        <section className="relative min-h-[90dvh] flex flex-col items-center justify-center overflow-visible">
+          {/* Background Image with Overlay */}
+          <div className="absolute inset-0 z-0">
+            <img
+              src="/paro-taksang.jpg"
+              className="w-full h-full object-cover"
+              alt="Bhutan Luxury Hotels"
+            />
+            <div className="absolute inset-0 bg-black/45 z-10" />
+          </div>
 
-          <div className="relative z-10 text-center px-6">
-            <h1 className="text-4xl sm:text-6xl md:text-7xl font-heading font-medium text-white tracking-tight">
-              Luxury Hotels
-            </h1>
+          {/* Hero Copy */}
+          <div className="relative z-20 max-w-5xl mx-auto px-6 text-center pt-32 pb-16">
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, ease: "easeOut" }}
+              className="text-white text-5xl md:text-7xl lg:text-8xl font-heading mb-6 leading-[1.1] font-medium"
+            >
+              Luxury <span className="text-accent italic font-normal">Hotels</span>
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
+              className="text-white/80 text-xs md:text-sm font-light max-w-2xl mx-auto leading-relaxed tracking-[0.15em] uppercase"
+            >
+              Experience the highest form of hospitality within the kingdom
+            </motion.p>
           </div>
         </section>
 

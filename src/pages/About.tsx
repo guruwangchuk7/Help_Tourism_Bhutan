@@ -5,14 +5,38 @@ import PageTransition from "../components/common/PageTransition"
 const About = () => {
   return (
     <PageTransition>
-      <div className="pt-24 bg-white min-h-[100dvh]">
-        {/* Hero */}
-        <section className="relative h-[60dvh] flex items-center justify-center overflow-hidden">
-          <img src="/monk.jpg" className="absolute inset-0 w-full h-full object-cover" alt="About Bhutan" />
-          <div className="absolute inset-0 bg-primary/60 mix-blend-multiply" />
-          <div className="relative z-10 text-center px-6">
-            <h1 className="text-6xl md:text-8xl lg:text-9xl font-heading font-medium text-white tracking-tight leading-none mb-6">Our <span className="text-accent italic">Legacy</span></h1>
-            <p className="text-white/80 text-lg md:text-xl font-light tracking-wide max-w-2xl mx-auto">Founded in the heart of Thimphu, we are the bridge between the world and the Kingdom of Happiness.</p>
+      <div className="bg-bg-light min-h-[100dvh]">
+        {/* Full Image Hero Banner */}
+        <section className="relative min-h-[90dvh] flex flex-col items-center justify-center overflow-visible">
+          {/* Background Image with Overlay */}
+          <div className="absolute inset-0 z-0">
+            <img
+              src="/monk.jpg"
+              className="w-full h-full object-cover"
+              alt="About Bhutan"
+            />
+            <div className="absolute inset-0 bg-black/45 z-10" />
+          </div>
+
+          {/* Hero Copy */}
+          <div className="relative z-20 max-w-5xl mx-auto px-6 text-center pt-32 pb-16">
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, ease: "easeOut" }}
+              className="text-white text-5xl md:text-7xl lg:text-8xl font-heading mb-6 leading-[1.1] font-medium"
+            >
+              Our <span className="text-accent italic font-normal">Legacy</span>
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
+              className="text-white/80 text-xs md:text-sm font-light max-w-2xl mx-auto leading-relaxed tracking-[0.15em] uppercase"
+            >
+              Founded in the heart of Thimphu, we are the bridge between the world and the Kingdom of Happiness.
+            </motion.p>
           </div>
         </section>
 

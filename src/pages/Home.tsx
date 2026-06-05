@@ -229,11 +229,10 @@ const Home = () => {
 
         {/* Section 7: Bottom Homepage CTA Section */}
         <section className="py-24 px-6 md:px-12 max-w-7xl mx-auto mb-16">
-          <div className="bg-primary text-white rounded-[3rem] p-12 md:p-20 text-center relative overflow-hidden shadow-premium">
-            <div className="absolute inset-0 bg-[url('/paro-taksang.jpg')] opacity-10 bg-cover bg-center grayscale mix-blend-overlay" />
+          <div className="bg-white text-primary border border-primary/5 rounded-[3rem] p-12 md:p-20 text-center relative overflow-hidden shadow-minimal">
             <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center">
               <h2 className="text-4xl md:text-6xl font-heading font-medium mb-6 leading-tight">Ready for Your Bhutan Adventure?</h2>
-              <p className="text-white/80 text-lg mb-10 font-light max-w-xl leading-relaxed">
+              <p className="text-secondary text-lg mb-10 font-light max-w-xl leading-relaxed">
                 Let our local experts create a personalized itinerary for you.
               </p>
               <Link to="/booking" className="btn-accent !px-10 !py-4 text-base font-semibold rounded-full shadow-lg hover:scale-105 transition-transform duration-300">

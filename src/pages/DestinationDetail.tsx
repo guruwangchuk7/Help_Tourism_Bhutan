@@ -57,32 +57,25 @@ const DestinationDetail = () => {
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-primary/90" />
 
-          {/* Navigation Overlays */}
-          <div className="absolute top-28 left-6 md:left-20 z-30">
-            <button
-              onClick={() => navigate(-1)}
-              className="flex items-center space-x-3 text-white/70 hover:text-white transition-colors duration-300 group"
-            >
-              <div className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center group-hover:bg-white/10 transition-colors duration-300 backdrop-blur-sm">
-                <ArrowLeft className="w-5 h-5" />
-              </div>
-              <span className="font-semibold text-[10px] uppercase tracking-[0.3em]">Return</span>
-            </button>
-          </div>
+          {/* Back button */}
+          <button
+            onClick={() => navigate(-1)}
+            className="absolute top-28 left-6 sm:left-12 z-20 flex items-center gap-2 text-white/80 hover:text-white bg-black/25 hover:bg-black/40 px-5 py-2.5 rounded-full backdrop-blur-md border border-white/10 transition-all cursor-pointer"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span className="text-xs font-semibold uppercase tracking-wider">Return</span>
+          </button>
 
           <div className="absolute bottom-12 md:bottom-20 left-6 md:left-20 right-6 md:right-20 z-30">
             <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-10">
               <div>
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="flex items-center space-x-4 text-gold mb-6"
+                <motion.span
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-accent font-semibold tracking-[0.3em] uppercase text-[10px] sm:text-xs mb-4 block"
                 >
-                  <div className="bg-white/10 backdrop-blur-md border border-white/20 text-white px-4 py-1.5 rounded-full text-[9px] font-semibold uppercase tracking-[0.3em] shadow-lg">Rare Experience</div>
-                  <div className="flex space-x-1">
-                    {[...Array(5)].map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-gold text-gold" />)}
-                  </div>
-                </motion.div>
+                  Rare Experience • {destination.location}
+                </motion.span>
                 <motion.h1
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -257,62 +250,62 @@ const DestinationDetail = () => {
           <div className="lg:col-span-4">
             <div className="sticky top-32 space-y-8">
               {/* Booking Widget */}
-              <div className="bg-primary rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-10 text-white shadow-premium relative overflow-hidden group">
-                <div className="absolute top-[-50px] right-[-50px] w-48 h-48 bg-white/5 rounded-full blur-2xl" />
+              <div className="bg-white rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-10 text-primary border border-primary/5 shadow-premium relative overflow-hidden group">
+                <div className="absolute top-[-50px] right-[-50px] w-48 h-48 bg-accent/5 rounded-full blur-2xl pointer-events-none" />
 
                 <div className="relative z-10">
-                  <div className="flex items-end justify-between mb-8 pb-6 border-b border-white/10">
+                  <div className="flex items-end justify-between mb-8 pb-6 border-b border-primary/5">
                     <div className="flex flex-col">
-                      <span className="text-white/40 text-[9px] font-semibold uppercase tracking-[0.2em] mb-2">Total Stay Cost</span>
-                      <span className="text-4xl font-heading font-semibold text-white leading-none tracking-tight">${totalPrice}</span>
+                      <span className="text-secondary/60 text-[9px] font-semibold uppercase tracking-[0.2em] mb-2">Total Stay Cost</span>
+                      <span className="text-4xl font-heading font-semibold text-primary leading-none tracking-tight">${totalPrice}</span>
                     </div>
                     <div className="text-right flex flex-col justify-end">
-                      <span className="block font-medium text-[10px] uppercase tracking-widest text-white/80">{nights} Night{nights > 1 ? 's' : ''} / {adults} Guest{adults > 1 ? 's' : ''}</span>
-                      <span className="text-white/40 text-[9px] italic mt-1 font-light">{destination.price} per night</span>
+                      <span className="block font-medium text-[10px] uppercase tracking-widest text-secondary">{nights} Night{nights > 1 ? 's' : ''} / {adults} Guest{adults > 1 ? 's' : ''}</span>
+                      <span className="text-secondary/60 text-[9px] italic mt-1 font-light">{destination.price} per night</span>
                     </div>
                   </div>
 
                   {/* Date Selectors */}
                   <div className="grid grid-cols-2 gap-3 mb-4">
                     <div className="flex flex-col gap-1">
-                      <label className="text-[8px] font-bold uppercase tracking-wider text-white/50 pl-1">Check In</label>
+                      <label className="text-[8px] font-bold uppercase tracking-wider text-secondary/60 pl-1">Check In</label>
                       <input 
                         type="date" 
                         value={startDate} 
                         onChange={(e) => setStartDate(e.target.value)} 
-                        className="w-full bg-white/10 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white outline-none focus:border-white/30 cursor-pointer"
+                        className="w-full bg-bg-alt border border-primary/5 rounded-xl px-3 py-2.5 text-xs text-primary outline-none focus:border-accent/40 cursor-pointer"
                       />
                     </div>
                     <div className="flex flex-col gap-1">
-                      <label className="text-[8px] font-bold uppercase tracking-wider text-white/50 pl-1">Check Out</label>
+                      <label className="text-[8px] font-bold uppercase tracking-wider text-secondary/60 pl-1">Check Out</label>
                       <input 
                         type="date" 
                         value={endDate} 
                         onChange={(e) => setEndDate(e.target.value)} 
-                        className="w-full bg-white/10 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white outline-none focus:border-white/30 cursor-pointer"
+                        className="w-full bg-bg-alt border border-primary/5 rounded-xl px-3 py-2.5 text-xs text-primary outline-none focus:border-accent/40 cursor-pointer"
                       />
                     </div>
                   </div>
 
                   {/* Travelers Selector */}
-                  <div className="flex items-center justify-between bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 mb-6">
+                  <div className="flex items-center justify-between bg-bg-alt border border-primary/5 rounded-xl px-4 py-2.5 mb-6 text-primary">
                     <div className="flex items-center gap-2">
                       <Users className="w-4 h-4 text-accent" />
-                      <span className="text-xs font-medium text-white">Travelers</span>
+                      <span className="text-xs font-medium text-primary">Travelers</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <button
                         type="button"
                         onClick={() => { if (adults > 1) setAdults(adults - 1); }}
-                        className="w-6 h-6 rounded-full border border-white/20 flex items-center justify-center text-white hover:bg-white/10 text-xs transition-colors"
+                        className="w-6 h-6 rounded-full border border-primary/10 flex items-center justify-center text-primary hover:bg-bg-light text-xs transition-colors cursor-pointer"
                       >
                         <Minus className="w-2.5 h-2.5" />
                       </button>
-                      <span className="font-semibold text-sm text-white min-w-[12px] text-center">{adults}</span>
+                      <span className="font-semibold text-sm text-primary min-w-[12px] text-center">{adults}</span>
                       <button
                         type="button"
                         onClick={() => setAdults(adults + 1)}
-                        className="w-6 h-6 rounded-full border border-white/20 flex items-center justify-center text-white hover:bg-white/10 text-xs transition-colors"
+                        className="w-6 h-6 rounded-full border border-primary/10 flex items-center justify-center text-primary hover:bg-bg-light text-xs transition-colors cursor-pointer"
                       >
                         <Plus className="w-2.5 h-2.5" />
                       </button>
@@ -321,13 +314,13 @@ const DestinationDetail = () => {
 
                   <button
                     onClick={() => navigate('/booking', { state: { adults, nights, startDate, endDate, destinationName: destination.name, totalPrice } })}
-                    className="w-full btn-accent py-5 text-sm shadow-glass"
+                    className="w-full btn-accent py-5 text-sm shadow-premium"
                   >
                     Secure Trip
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </button>
 
-                  <p className="mt-8 text-center text-[9px] font-medium text-white/30 uppercase tracking-[0.2em]">
+                  <p className="mt-8 text-center text-[9px] font-medium text-secondary/40 uppercase tracking-[0.2em]">
                     Instant Confirmation Required
                   </p>
                 </div>

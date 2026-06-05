@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { ArrowLeft, ArrowRight, Sparkles, Compass, Calendar, Home as HomeIcon, CheckCircle } from "lucide-react"
+import { ArrowLeft, ArrowRight, Sparkles, Compass, Calendar, Home as HomeIcon, CheckCircle, MapPin, Mountain, Sun, Gift, Star } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import PageTransition from "../components/common/PageTransition"
 
@@ -110,28 +110,33 @@ const TripBuilder = () => {
                   <h3 className="text-xl md:text-2xl font-heading font-medium text-primary mb-6">Select your travel style</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {[
-                      { name: "Culture & Dzongs", desc: "Monasteries, history, and royal valleys.", icon: "🕌" },
-                      { name: "Trekking & Wilderness", desc: "High mountain peaks, passes, and lakes.", icon: "🏔️" },
-                      { name: "Luxury & Wellness", desc: "5-star spa resorts and helicopter transfers.", icon: "💆" },
-                      { name: "Spiritual retreats", desc: "Private meditations with local Rinpoches.", icon: "🧘" },
-                      { name: "Festivals Edition", desc: "Colorful Paro & Thimphu Tshechus.", icon: "🎭" }
-                    ].map((item) => (
-                      <div
-                        key={item.name}
-                        onClick={() => setStyle(item.name)}
-                        className={`p-6 rounded-2xl border transition-all cursor-pointer flex gap-4 items-center ${
-                          style === item.name 
-                            ? "border-accent bg-accent/5 shadow-minimal" 
-                            : "border-primary/5 hover:border-primary/20 bg-bg-alt/50 hover:bg-white"
-                        }`}
-                      >
-                        <span className="text-3xl">{item.icon}</span>
-                        <div>
-                          <h4 className="font-heading font-semibold text-sm text-primary">{item.name}</h4>
-                          <p className="text-secondary text-[11px] font-light mt-0.5">{item.desc}</p>
+                      { name: "Culture & Dzongs", desc: "Monasteries, history, and royal valleys.", icon: Compass },
+                      { name: "Trekking & Wilderness", desc: "High mountain peaks, passes, and lakes.", icon: Mountain },
+                      { name: "Luxury & Wellness", desc: "5-star spa resorts and helicopter transfers.", icon: Sparkles },
+                      { name: "Spiritual retreats", desc: "Private meditations with local Rinpoches.", icon: Sun },
+                      { name: "Festivals Edition", desc: "Colorful Paro & Thimphu Tshechus.", icon: Gift }
+                    ].map((item) => {
+                      const IconComponent = item.icon
+                      return (
+                        <div
+                          key={item.name}
+                          onClick={() => setStyle(item.name)}
+                          className={`p-6 rounded-2xl border transition-all cursor-pointer flex gap-4 items-center ${
+                            style === item.name 
+                              ? "border-accent bg-accent/5 shadow-minimal" 
+                              : "border-primary/5 hover:border-primary/20 bg-bg-alt/50 hover:bg-white"
+                          }`}
+                        >
+                          <div className="w-12 h-12 rounded-xl bg-bg-alt flex items-center justify-center text-accent shrink-0">
+                            <IconComponent className="w-6 h-6" />
+                          </div>
+                          <div>
+                            <h4 className="font-heading font-semibold text-sm text-primary">{item.name}</h4>
+                            <p className="text-secondary text-[11px] font-light mt-0.5">{item.desc}</p>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 </motion.div>
               )}
@@ -222,31 +227,36 @@ const TripBuilder = () => {
                   <h3 className="text-xl md:text-2xl font-heading font-medium text-primary mb-6">Select accommodation comfort level</h3>
                   <div className="space-y-4">
                     {[
-                      { tier: "Standard (3-Star)", desc: "Heritage hotels and traditional cottages.", rate: "$350 / night (Inc. SDF & Visa)", icon: "🏨" },
-                      { tier: "Boutique (4-Star)", desc: "Tailored boutique lodges with private spa access.", rate: "$550 / night (Inc. SDF & Visa)", icon: "🏡" },
-                      { tier: "Ultra-Luxury (5-Star)", desc: "Five-star premium suites (Amankora, Six Senses, COMO).", rate: "$1,300 / night (Inc. SDF & Visa)", icon: "👑" }
-                    ].map((item) => (
-                      <div
-                        key={item.tier}
-                        onClick={() => setTier(item.tier)}
-                        className={`p-6 rounded-2xl border transition-all cursor-pointer flex justify-between items-center ${
-                          tier === item.tier 
-                            ? "border-accent bg-accent/5 shadow-minimal" 
-                            : "border-primary/5 hover:border-primary/20 bg-bg-alt/50 hover:bg-white"
-                        }`}
-                      >
-                        <div className="flex gap-4 items-center">
-                          <span className="text-3xl">{item.icon}</span>
-                          <div>
-                            <h4 className="font-heading font-semibold text-sm text-primary">{item.tier}</h4>
-                            <p className="text-secondary text-[11px] font-light mt-0.5">{item.desc}</p>
+                      { tier: "Standard (3-Star)", desc: "Heritage hotels and traditional cottages.", rate: "$350 / night (Inc. SDF & Visa)", icon: HomeIcon },
+                      { tier: "Boutique (4-Star)", desc: "Tailored boutique lodges with private spa access.", rate: "$550 / night (Inc. SDF & Visa)", icon: MapPin },
+                      { tier: "Ultra-Luxury (5-Star)", desc: "Five-star premium suites (Amankora, Six Senses, COMO).", rate: "$1,300 / night (Inc. SDF & Visa)", icon: Star }
+                    ].map((item) => {
+                      const IconComponent = item.icon
+                      return (
+                        <div
+                          key={item.tier}
+                          onClick={() => setTier(item.tier)}
+                          className={`p-6 rounded-2xl border transition-all cursor-pointer flex justify-between items-center ${
+                            tier === item.tier 
+                              ? "border-accent bg-accent/5 shadow-minimal" 
+                              : "border-primary/5 hover:border-primary/20 bg-bg-alt/50 hover:bg-white"
+                          }`}
+                        >
+                          <div className="flex gap-4 items-center">
+                            <div className="w-12 h-12 rounded-xl bg-bg-alt flex items-center justify-center text-accent shrink-0">
+                              <IconComponent className="w-6 h-6" />
+                            </div>
+                            <div>
+                              <h4 className="font-heading font-semibold text-sm text-primary">{item.tier}</h4>
+                              <p className="text-secondary text-[11px] font-light mt-0.5">{item.desc}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <span className="font-heading font-bold text-sm text-accent block">{item.rate}</span>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <span className="font-heading font-bold text-sm text-accent block">{item.rate}</span>
-                        </div>
-                      </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 </motion.div>
               )}
