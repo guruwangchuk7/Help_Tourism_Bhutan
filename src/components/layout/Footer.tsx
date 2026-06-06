@@ -136,16 +136,16 @@ const Footer = () => {
 
 
 
-        {/* Minimalist Bottom Bar */}
-        <div className="pt-12 flex flex-col md:flex-row justify-between items-center text-[10px] font-normal tracking-[0.2em] text-primary/40 gap-4">
-          <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4">
-            <p>© {new Date().getFullYear()} Help Tourism Bhutan. All rights reserved.</p>
-            <span className="hidden md:inline">|</span>
-            <p className="text-secondary/60">Developed by KodaDev</p>
-          </div>
-          <div className="flex space-x-10 mt-6 md:mt-0">
-            <Link to="/faq" className="hover:text-accent transition-colors">Travel FAQs</Link>
-            <Link to="/sdf" className="hover:text-accent transition-colors">Sustainability & SDF</Link>
+        {/* Bottom Bar */}
+        <div className="pt-8 mt-2 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-3">
+          <p className="text-[11px] tracking-widest text-primary/40 font-light text-center sm:text-left">
+            © {new Date().getFullYear()} Help Tourism Bhutan. All rights reserved.
+            <span className="mx-2 opacity-40">·</span>
+            <span className="text-primary/30">Developed by KodaDev</span>
+          </p>
+          <div className="flex items-center gap-6">
+            <Link to="/faq" className="text-[11px] tracking-widest text-primary/40 hover:text-accent transition-colors font-light">FAQs</Link>
+            <Link to="/sdf" className="text-[11px] tracking-widest text-primary/40 hover:text-accent transition-colors font-light">SDF</Link>
           </div>
         </div>
       </div>
