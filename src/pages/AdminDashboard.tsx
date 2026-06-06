@@ -93,6 +93,7 @@ const AdminDashboard = () => {
   const [touristForm, setTouristForm] = useState<any>({ name: "", nationality: "", passportNumber: "", email: "", phone: "", tourName: "", checkInDate: "", checkOutDate: "", sdfStatus: "Paid", specialRequests: "" })
   const [editTouristId, setEditTouristId] = useState<number | null>(null)
   const [showTouristModal, setShowTouristModal] = useState(false)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   const [adminKey, setAdminKey] = useState<string | null>(localStorage.getItem('ADMIN_API_KEY'))
 
@@ -705,18 +706,55 @@ const AdminDashboard = () => {
 
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-800 font-sans flex [&_h1]:font-sans [&_h2]:font-sans [&_h3]:font-sans [&_h4]:font-sans [&_h5]:font-sans [&_h6]:font-sans">
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-800 font-sans flex flex-col md:flex-row [&_h1]:font-sans [&_h2]:font-sans [&_h3]:font-sans [&_h4]:font-sans [&_h5]:font-sans [&_h6]:font-sans">
+      {/* Mobile Top Header */}
+      <div className="md:hidden sticky top-0 z-30 bg-white border-b border-slate-200 px-4 py-3.5 flex items-center justify-between shadow-sm shrink-0">
+        <button
+          onClick={() => setIsSidebarOpen(true)}
+          className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-700 active:scale-95 transition-all cursor-pointer"
+        >
+          <SlidersHorizontal className="w-5 h-5" />
+        </button>
+        <span className="font-bold text-sm tracking-tight text-slate-900">Bhutan CMS</span>
+        <Link to="/" className="text-xs font-semibold text-slate-600 hover:text-slate-900 border border-slate-200 px-2.5 py-1 rounded-md bg-white">
+          Back
+        </Link>
+      </div>
+
+      {/* Mobile Overlay */}
+      <AnimatePresence>
+        {isSidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsSidebarOpen(false)}
+            className="fixed inset-0 z-40 bg-slate-950/40 backdrop-blur-sm md:hidden"
+          />
+        )}
+      </AnimatePresence>
+
       {/* Left Sidebar Navigation */}
-      <aside className="w-72 bg-white border-r border-slate-200/80 flex flex-col justify-between shrink-0">
+      <aside className={`
+        fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-slate-200/80 flex flex-col justify-between shrink-0 transition-transform duration-300 ease-in-out
+        md:static md:translate-x-0
+        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+      `}>
         <div>
           {/* Sidebar Header */}
-          <div className="p-6 border-b border-slate-100">
-            <div className="flex items-center mb-2">
+          <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+            <div>
               <span className="font-bold text-lg tracking-tight text-slate-900">
                 Bhutan CMS
               </span>
+              <p className="text-xs text-slate-500 font-medium">Help Tourism Bhutan Admin</p>
             </div>
-            <p className="text-xs text-slate-500 font-medium">Help Tourism Bhutan Admin</p>
+            <button
+              onClick={() => setIsSidebarOpen(false)}
+              className="md:hidden p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-900 transition cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
 
           {/* Navigation Links */}
@@ -726,7 +764,7 @@ const AdminDashboard = () => {
             </div>
 
             <button
-              onClick={() => { setActiveTab('destinations'); setSearchQuery(''); }}
+              onClick={() => { setActiveTab('destinations'); setSearchQuery(''); setIsSidebarOpen(false); }}
               className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${activeTab === 'destinations'
                   ? 'bg-slate-100 text-slate-900 border-l-2 border-slate-900'
                   : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
@@ -743,7 +781,7 @@ const AdminDashboard = () => {
             </button>
 
             <button
-              onClick={() => { setActiveTab('tours'); setSearchQuery(''); }}
+              onClick={() => { setActiveTab('tours'); setSearchQuery(''); setIsSidebarOpen(false); }}
               className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${activeTab === 'tours'
                   ? 'bg-slate-100 text-slate-900 border-l-2 border-slate-900'
                   : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
@@ -760,7 +798,7 @@ const AdminDashboard = () => {
             </button>
 
             <button
-              onClick={() => { setActiveTab('hotels'); setSearchQuery(''); }}
+              onClick={() => { setActiveTab('hotels'); setSearchQuery(''); setIsSidebarOpen(false); }}
               className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${activeTab === 'hotels'
                   ? 'bg-slate-100 text-slate-900 border-l-2 border-slate-900'
                   : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
@@ -777,7 +815,7 @@ const AdminDashboard = () => {
             </button>
 
             <button
-              onClick={() => { setActiveTab('about'); setSearchQuery(''); }}
+              onClick={() => { setActiveTab('about'); setSearchQuery(''); setIsSidebarOpen(false); }}
               className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${activeTab === 'about'
                   ? 'bg-slate-100 text-slate-900 border-l-2 border-slate-900'
                   : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
@@ -790,7 +828,7 @@ const AdminDashboard = () => {
             </button>
 
             <button
-              onClick={() => { setActiveTab('contact'); setSearchQuery(''); }}
+              onClick={() => { setActiveTab('contact'); setSearchQuery(''); setIsSidebarOpen(false); }}
               className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${activeTab === 'contact'
                   ? 'bg-slate-100 text-slate-900 border-l-2 border-slate-900'
                   : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
@@ -803,7 +841,7 @@ const AdminDashboard = () => {
             </button>
 
             <button
-              onClick={() => { setActiveTab('testimonials'); setSearchQuery(''); }}
+              onClick={() => { setActiveTab('testimonials'); setSearchQuery(''); setIsSidebarOpen(false); }}
               className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${activeTab === 'testimonials'
                   ? 'bg-slate-100 text-slate-900 border-l-2 border-slate-900'
                   : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
@@ -816,7 +854,7 @@ const AdminDashboard = () => {
             </button>
 
             <button
-              onClick={() => { setActiveTab('tourists'); setSearchQuery(''); }}
+              onClick={() => { setActiveTab('tourists'); setSearchQuery(''); setIsSidebarOpen(false); }}
               className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${activeTab === 'tourists'
                   ? 'bg-slate-100 text-slate-900 border-l-2 border-slate-900'
                   : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
@@ -844,7 +882,7 @@ const AdminDashboard = () => {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto h-screen p-8">
+      <main className="flex-1 overflow-y-auto h-screen p-4 md:p-8">
         {/* Top Header Bar */}
         <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-6 mb-8 border-b border-slate-200 gap-4">
           <div>
@@ -1764,7 +1802,7 @@ const AdminDashboard = () => {
               <p className="text-xs text-slate-500 mt-1">Official logbook of tourists entering the Kingdom of Bhutan.</p>
             </div>
             
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto hidden md:block">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-slate-100 text-xs font-bold uppercase tracking-wider text-slate-400 bg-slate-50/70">
@@ -1844,6 +1882,81 @@ const AdminDashboard = () => {
                 </tbody>
               </table>
             </div>
+
+            {/* Mobile View for Tourists */}
+            <div className="md:hidden space-y-4 p-4">
+              {tourists.length > 0 ? (
+                tourists.map((t) => (
+                  <div key={t.id} className="p-4 space-y-3 bg-white hover:bg-slate-50/50 transition border border-slate-200 rounded-xl shadow-sm">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <div className="font-semibold text-slate-950">{t.name}</div>
+                        <div className="text-xs text-slate-500 mt-0.5">{t.nationality} • PP: {t.passportNumber}</div>
+                      </div>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                        t.sdfStatus === 'Paid' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-amber-50 text-amber-700 border border-amber-100'
+                      }`}>
+                        {t.sdfStatus}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 text-xs text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                      <div>
+                        <span className="font-semibold text-slate-400 block text-[9px] uppercase tracking-wider">Contact</span>
+                        <div className="truncate">{t.email}</div>
+                        <div>{t.phone}</div>
+                      </div>
+                      <div>
+                        <span className="font-semibold text-slate-400 block text-[9px] uppercase tracking-wider">Stay Dates</span>
+                        <div>In: {t.checkInDate}</div>
+                        <div>Out: {t.checkOutDate}</div>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center pt-1">
+                      <div className="text-xs">
+                        <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider">Tour Package</span>
+                        <span className="font-medium text-slate-800">{t.tourName}</span>
+                      </div>
+                      <div className="flex space-x-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setTouristForm(t)
+                            setEditTouristId(t.id)
+                            setShowTouristModal(true)
+                          }}
+                          className="p-2 bg-slate-50 hover:bg-slate-100 rounded-lg text-slate-600 hover:text-slate-900 border border-slate-200 cursor-pointer"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            if (window.confirm(`Are you sure you want to delete ${t.name} from the logbook?`)) {
+                              try {
+                                const res = await fetch(`${API_BASE}/api/tourists/${t.id}`, {
+                                  method: 'DELETE',
+                                  headers: getAuthHeader()
+                                })
+                                if (!res.ok) throw new Error("Failed to delete tourist")
+                                setTourists(prev => prev.filter(item => item.id !== t.id))
+                                showToast(`${t.name} deleted from logbook.`, 'success')
+                              } catch (e: any) {
+                                showToast(e.message || "Error deleting tourist", "error")
+                              }
+                            }
+                          }}
+                          className="p-2 bg-rose-50 hover:bg-rose-100 rounded-lg text-rose-500 hover:text-rose-700 border border-rose-100 cursor-pointer"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="p-8 text-center text-slate-400 font-light italic">No registered tourists in the database yet.</div>
+              )}
+            </div>
           </div>
         ) : (
           <div className="bg-white border-x border-b border-slate-200 rounded-b-xl overflow-hidden shadow-sm">
@@ -1857,171 +1970,300 @@ const AdminDashboard = () => {
               <>
                 {/* DESTINATIONS LIST */}
                 {activeTab === 'destinations' && (
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="bg-slate-50 border-b border-slate-200 text-slate-550 text-xs font-semibold uppercase tracking-wider">
-                        <th className="p-4 w-20 pl-6">ID</th>
-                        <th className="p-4">Name & Description</th>
-                        <th className="p-4">Location</th>
-                        <th className="p-4">Price</th>
-                        <th className="p-4">Rating</th>
-                        <th className="p-4 text-right pr-6">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
+                  <>
+                    <table className="hidden md:table w-full text-left border-collapse">
+                      <thead>
+                        <tr className="bg-slate-50 border-b border-slate-200 text-slate-550 text-xs font-semibold uppercase tracking-wider">
+                          <th className="p-4 w-20 pl-6">ID</th>
+                          <th className="p-4">Name & Description</th>
+                          <th className="p-4">Location</th>
+                          <th className="p-4">Price</th>
+                          <th className="p-4">Rating</th>
+                          <th className="p-4 text-right pr-6">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {(displayedItems as Destination[]).map(d => (
+                          <tr key={d.id} className="hover:bg-slate-50/70 transition-all duration-150">
+                            <td className="p-4 font-mono text-slate-400 pl-6 text-sm">{d.id}</td>
+                            <td className="p-4 flex items-center space-x-3">
+                              <img src={d.image} alt={d.name} className="w-12 h-10 object-cover rounded-lg border border-slate-200 bg-slate-100" />
+                              <div>
+                                <p className="font-semibold text-slate-900 text-sm">{d.name}</p>
+                                <p className="text-xs text-slate-500 line-clamp-1 max-w-md">{d.description}</p>
+                              </div>
+                            </td>
+                            <td className="p-4 text-slate-600 text-sm">{d.location}</td>
+                            <td className="p-4 text-emerald-600 font-bold text-sm">{d.price}</td>
+                            <td className="p-4 text-slate-705 text-sm">
+                              <div className="flex items-center space-x-1">
+                                <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
+                                <span className="font-semibold">{d.rating}</span>
+                              </div>
+                            </td>
+                            <td className="p-4 text-right pr-6">
+                              <div className="flex justify-end items-center space-x-1">
+                                <button
+                                  onClick={() => handleOpenEdit('destinations', d)}
+                                  className="p-2 hover:bg-slate-100 text-slate-700 hover:text-black rounded-lg transition cursor-pointer"
+                                  title="Edit"
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => handleDelete('destinations', d.id)}
+                                  className="p-2 hover:bg-slate-100 text-slate-500 hover:text-rose-600 rounded-lg transition cursor-pointer"
+                                  title="Delete"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+
+                    {/* DESTINATIONS MOBILE LIST */}
+                    <div className="md:hidden space-y-4 p-4">
                       {(displayedItems as Destination[]).map(d => (
-                        <tr key={d.id} className="hover:bg-slate-50/70 transition-all duration-150">
-                          <td className="p-4 font-mono text-slate-400 pl-6 text-sm">{d.id}</td>
-                          <td className="p-4 flex items-center space-x-3">
-                            <img src={d.image} alt={d.name} className="w-12 h-10 object-cover rounded-lg border border-slate-200 bg-slate-100" />
+                        <div key={d.id} className="p-4 space-y-3 bg-white hover:bg-slate-50/50 transition border border-slate-200 rounded-xl shadow-sm">
+                          <div className="flex items-center space-x-3">
+                            <img src={d.image} alt={d.name} className="w-16 h-12 object-cover rounded-lg border border-slate-200 bg-slate-100" />
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-bold text-slate-900 text-sm truncate">{d.name}</h4>
+                              <p className="text-xs text-slate-505 truncate">{d.location}</p>
+                            </div>
+                            <div className="flex items-center space-x-1 bg-slate-50 px-2 py-1 rounded-lg border border-slate-100">
+                              <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                              <span className="text-xs font-bold text-slate-700">{d.rating}</span>
+                            </div>
+                          </div>
+                          <p className="text-xs text-slate-600 line-clamp-2">{d.description}</p>
+                          <div className="flex items-center justify-between pt-2 border-t border-slate-100">
                             <div>
-                              <p className="font-semibold text-slate-900 text-sm">{d.name}</p>
-                              <p className="text-xs text-slate-500 line-clamp-1 max-w-md">{d.description}</p>
+                              <span className="text-[10px] text-slate-400 font-semibold block uppercase tracking-wider">Starting Price</span>
+                              <span className="text-sm font-bold text-emerald-600">{d.price}</span>
                             </div>
-                          </td>
-                          <td className="p-4 text-slate-600 text-sm">{d.location}</td>
-                          <td className="p-4 text-emerald-600 font-bold text-sm">{d.price}</td>
-                          <td className="p-4 text-slate-705 text-sm">
-                            <div className="flex items-center space-x-1">
-                              <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
-                              <span className="font-semibold">{d.rating}</span>
-                            </div>
-                          </td>
-                          <td className="p-4 text-right pr-6">
-                            <div className="flex justify-end items-center space-x-1">
+                            <div className="flex space-x-1">
                               <button
                                 onClick={() => handleOpenEdit('destinations', d)}
                                 className="p-2 hover:bg-slate-100 text-slate-700 hover:text-black rounded-lg transition cursor-pointer"
-                                title="Edit"
                               >
                                 <Edit className="w-4 h-4" />
                               </button>
                               <button
                                 onClick={() => handleDelete('destinations', d.id)}
                                 className="p-2 hover:bg-slate-100 text-slate-500 hover:text-rose-600 rounded-lg transition cursor-pointer"
-                                title="Delete"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
                             </div>
-                          </td>
-                        </tr>
+                          </div>
+                        </div>
                       ))}
-                    </tbody>
-                  </table>
+                    </div>
+                  </>
                 )}
 
                 {/* TOURS LIST */}
                 {activeTab === 'tours' && (
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="bg-slate-50 border-b border-slate-200 text-slate-550 text-xs font-semibold uppercase tracking-wider">
-                        <th className="p-4 w-28 pl-6">Tour Code</th>
-                        <th className="p-4">Title & Details</th>
-                        <th className="p-4">Duration</th>
-                        <th className="p-4">Price</th>
-                        <th className="p-4">Category</th>
-                        <th className="p-4">Difficulty</th>
-                        <th className="p-4 text-right pr-6">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
+                  <>
+                    <table className="hidden md:table w-full text-left border-collapse">
+                      <thead>
+                        <tr className="bg-slate-50 border-b border-slate-200 text-slate-550 text-xs font-semibold uppercase tracking-wider">
+                          <th className="p-4 w-28 pl-6">Tour Code</th>
+                          <th className="p-4">Title & Details</th>
+                          <th className="p-4">Duration</th>
+                          <th className="p-4">Price</th>
+                          <th className="p-4">Category</th>
+                          <th className="p-4">Difficulty</th>
+                          <th className="p-4 text-right pr-6">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {(displayedItems as Tour[]).map(t => (
+                          <tr key={t.id} className="hover:bg-slate-50/70 transition-all duration-150">
+                            <td className="p-4 font-mono text-slate-700 pl-6 text-sm">{t.id}</td>
+                            <td className="p-4 flex items-center space-x-3">
+                              <img src={t.image} alt={t.title} className="w-12 h-10 object-cover rounded-lg border border-slate-200 bg-slate-100" />
+                              <div>
+                                <p className="font-semibold text-slate-900 text-sm">{t.title}</p>
+                                <p className="text-xs text-slate-500 line-clamp-1 max-w-md">{t.desc}</p>
+                              </div>
+                            </td>
+                            <td className="p-4 text-slate-600 text-sm">{t.duration} ({t.nights} Nights)</td>
+                            <td className="p-4 text-emerald-600 font-bold text-sm">{t.price}</td>
+                            <td className="p-4 text-slate-600 text-sm">{t.category}</td>
+                            <td className="p-4">
+                              <span className="px-2 py-0.5 rounded text-xs font-semibold border bg-slate-100 text-slate-750 border-slate-200">
+                                {t.difficulty}
+                              </span>
+                            </td>
+                            <td className="p-4 text-right pr-6">
+                              <div className="flex justify-end items-center space-x-1">
+                                <button
+                                  onClick={() => handleOpenEdit('tours', t)}
+                                  className="p-2 hover:bg-slate-100 text-slate-700 hover:text-black rounded-lg transition cursor-pointer"
+                                  title="Edit"
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => handleDelete('tours', t.id)}
+                                  className="p-2 hover:bg-slate-100 text-slate-500 hover:text-rose-600 rounded-lg transition cursor-pointer"
+                                  title="Delete"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+
+                    {/* TOURS MOBILE LIST */}
+                    <div className="md:hidden space-y-4 p-4">
                       {(displayedItems as Tour[]).map(t => (
-                        <tr key={t.id} className="hover:bg-slate-50/70 transition-all duration-150">
-                          <td className="p-4 font-mono text-slate-700 pl-6 text-sm">{t.id}</td>
-                          <td className="p-4 flex items-center space-x-3">
-                            <img src={t.image} alt={t.title} className="w-12 h-10 object-cover rounded-lg border border-slate-200 bg-slate-100" />
-                            <div>
-                              <p className="font-semibold text-slate-900 text-sm">{t.title}</p>
-                              <p className="text-xs text-slate-500 line-clamp-1 max-w-md">{t.desc}</p>
+                        <div key={t.id} className="p-4 space-y-3 bg-white hover:bg-slate-50/50 transition border border-slate-200 rounded-xl shadow-sm">
+                          <div className="flex items-center space-x-3">
+                            <img src={t.image} alt={t.title} className="w-16 h-12 object-cover rounded-lg border border-slate-200 bg-slate-100" />
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-bold text-slate-900 text-sm truncate">{t.title}</h4>
+                              <p className="text-xs text-slate-500 truncate">{t.category} • {t.duration} ({t.nights} Nights)</p>
                             </div>
-                          </td>
-                          <td className="p-4 text-slate-600 text-sm">{t.duration} ({t.nights} Nights)</td>
-                          <td className="p-4 text-emerald-600 font-bold text-sm">{t.price}</td>
-                          <td className="p-4 text-slate-600 text-sm">{t.category}</td>
-                          <td className="p-4">
-                            <span className="px-2 py-0.5 rounded text-xs font-semibold border bg-slate-100 text-slate-750 border-slate-200">
+                            <span className="px-2 py-0.5 rounded text-xs font-semibold border bg-slate-100 text-slate-700 border-slate-200">
                               {t.difficulty}
                             </span>
-                          </td>
-                          <td className="p-4 text-right pr-6">
-                            <div className="flex justify-end items-center space-x-1">
+                          </div>
+                          <p className="text-xs text-slate-600 line-clamp-2">{t.desc}</p>
+                          <div className="flex justify-between items-center pt-2 border-t border-slate-100">
+                            <div>
+                              <span className="text-[10px] text-slate-400 font-semibold block uppercase tracking-wider">Tour Code</span>
+                              <span className="text-xs font-mono text-slate-700">{t.id}</span>
+                            </div>
+                            <div>
+                              <span className="text-[10px] text-slate-400 font-semibold block uppercase tracking-wider text-right">Price</span>
+                              <span className="text-sm font-bold text-emerald-600">{t.price}</span>
+                            </div>
+                            <div className="flex space-x-1">
                               <button
                                 onClick={() => handleOpenEdit('tours', t)}
                                 className="p-2 hover:bg-slate-100 text-slate-700 hover:text-black rounded-lg transition cursor-pointer"
-                                title="Edit"
                               >
                                 <Edit className="w-4 h-4" />
                               </button>
                               <button
                                 onClick={() => handleDelete('tours', t.id)}
                                 className="p-2 hover:bg-slate-100 text-slate-500 hover:text-rose-600 rounded-lg transition cursor-pointer"
-                                title="Delete"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
                             </div>
-                          </td>
-                        </tr>
+                          </div>
+                        </div>
                       ))}
-                    </tbody>
-                  </table>
+                    </div>
+                  </>
                 )}
 
                 {/* HOTELS LIST */}
                 {activeTab === 'hotels' && (
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="bg-slate-50 border-b border-slate-200 text-slate-550 text-xs font-semibold uppercase tracking-wider">
-                        <th className="p-4 w-20 pl-6">ID</th>
-                        <th className="p-4">Name & Description</th>
-                        <th className="p-4">Location</th>
-                        <th className="p-4">Starting Rate</th>
-                        <th className="p-4">Rating</th>
-                        <th className="p-4 text-right pr-6">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
+                  <>
+                    <table className="hidden md:table w-full text-left border-collapse">
+                      <thead>
+                        <tr className="bg-slate-50 border-b border-slate-200 text-slate-550 text-xs font-semibold uppercase tracking-wider">
+                          <th className="p-4 w-20 pl-6">ID</th>
+                          <th className="p-4">Name & Description</th>
+                          <th className="p-4">Location</th>
+                          <th className="p-4">Starting Rate</th>
+                          <th className="p-4">Rating</th>
+                          <th className="p-4 text-right pr-6">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {(displayedItems as LuxuryHotel[]).map(h => (
+                          <tr key={h.id} className="hover:bg-slate-50/70 transition-all duration-150">
+                            <td className="p-4 font-mono text-slate-400 pl-6 text-sm">{h.id}</td>
+                            <td className="p-4 flex items-center space-x-3">
+                              <img src={h.image} alt={h.name} className="w-12 h-10 object-cover rounded-lg border border-slate-200 bg-slate-100" />
+                              <div>
+                                <p className="font-semibold text-slate-900 text-sm">{h.name}</p>
+                                <p className="text-xs text-slate-500 line-clamp-1 max-w-md">{h.description}</p>
+                              </div>
+                            </td>
+                            <td className="p-4 text-slate-600 text-sm">{h.location}</td>
+                            <td className="p-4 text-emerald-600 font-bold text-sm">{h.price} <span className="text-xs text-slate-400 font-medium">/ Night</span></td>
+                            <td className="p-4 text-slate-705 text-sm">
+                              <div className="flex items-center space-x-1">
+                                <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
+                                <span className="font-semibold">{h.rating}</span>
+                              </div>
+                            </td>
+                            <td className="p-4 text-right pr-6">
+                              <div className="flex justify-end items-center space-x-1">
+                                <button
+                                  onClick={() => handleOpenEdit('hotels', h)}
+                                  className="p-2 hover:bg-slate-100 text-slate-700 hover:text-black rounded-lg transition cursor-pointer"
+                                  title="Edit"
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => handleDelete('hotels', h.id)}
+                                  className="p-2 hover:bg-slate-100 text-slate-500 hover:text-rose-600 rounded-lg transition cursor-pointer"
+                                  title="Delete"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+
+                    {/* HOTELS MOBILE LIST */}
+                    <div className="md:hidden space-y-4 p-4">
                       {(displayedItems as LuxuryHotel[]).map(h => (
-                        <tr key={h.id} className="hover:bg-slate-50/70 transition-all duration-150">
-                          <td className="p-4 font-mono text-slate-400 pl-6 text-sm">{h.id}</td>
-                          <td className="p-4 flex items-center space-x-3">
-                            <img src={h.image} alt={h.name} className="w-12 h-10 object-cover rounded-lg border border-slate-200 bg-slate-100" />
+                        <div key={h.id} className="p-4 space-y-3 bg-white hover:bg-slate-50/50 transition border border-slate-200 rounded-xl shadow-sm">
+                          <div className="flex items-center space-x-3">
+                            <img src={h.image} alt={h.name} className="w-16 h-12 object-cover rounded-lg border border-slate-200 bg-slate-100" />
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-bold text-slate-900 text-sm truncate">{h.name}</h4>
+                              <p className="text-xs text-slate-505 truncate">{h.location}</p>
+                            </div>
+                            <div className="flex items-center space-x-1 bg-slate-50 px-2 py-1 rounded-lg border border-slate-100">
+                              <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                              <span className="text-xs font-bold text-slate-700">{h.rating}</span>
+                            </div>
+                          </div>
+                          <p className="text-xs text-slate-600 line-clamp-2">{h.description}</p>
+                          <div className="flex justify-between items-center pt-2 border-t border-slate-100">
                             <div>
-                              <p className="font-semibold text-slate-900 text-sm">{h.name}</p>
-                              <p className="text-xs text-slate-500 line-clamp-1 max-w-md">{h.description}</p>
+                              <span className="text-[10px] text-slate-400 font-semibold block uppercase tracking-wider">Starting Rate</span>
+                              <span className="text-sm font-bold text-emerald-600">{h.price} <span className="text-[10px] text-slate-400 font-medium">/ Night</span></span>
                             </div>
-                          </td>
-                          <td className="p-4 text-slate-600 text-sm">{h.location}</td>
-                          <td className="p-4 text-emerald-600 font-bold text-sm">{h.price} <span className="text-xs text-slate-400 font-medium">/ Night</span></td>
-                          <td className="p-4 text-slate-705 text-sm">
-                            <div className="flex items-center space-x-1">
-                              <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
-                              <span className="font-semibold">{h.rating}</span>
-                            </div>
-                          </td>
-                          <td className="p-4 text-right pr-6">
-                            <div className="flex justify-end items-center space-x-1">
+                            <div className="flex space-x-1">
                               <button
                                 onClick={() => handleOpenEdit('hotels', h)}
                                 className="p-2 hover:bg-slate-100 text-slate-700 hover:text-black rounded-lg transition cursor-pointer"
-                                title="Edit"
                               >
                                 <Edit className="w-4 h-4" />
                               </button>
                               <button
                                 onClick={() => handleDelete('hotels', h.id)}
                                 className="p-2 hover:bg-slate-100 text-slate-500 hover:text-rose-600 rounded-lg transition cursor-pointer"
-                                title="Delete"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
                             </div>
-                          </td>
-                        </tr>
+                          </div>
+                        </div>
                       ))}
-                    </tbody>
-                  </table>
+                    </div>
+                  </>
                 )}
               </>
             )}
