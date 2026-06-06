@@ -76,7 +76,7 @@ const Home = () => {
 
         {/* Section 2: Popular Destinations */}
         <section className="section-padding px-6 max-w-[1440px] mx-auto mt-28 md:mt-32">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
@@ -99,7 +99,7 @@ const Home = () => {
             </Link>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
@@ -123,7 +123,7 @@ const Home = () => {
         {/* Section 3: Top Tours */}
         <section className="section-padding bg-bg-alt py-24 px-6">
           <div className="max-w-7xl mx-auto">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
@@ -167,7 +167,7 @@ const Home = () => {
                   <div className="flex flex-col flex-1 pt-6 px-2">
                     <h3 className="text-xl font-heading font-medium text-primary leading-tight mb-3 group-hover:text-accent transition-colors">{tour.title}</h3>
                     <p className="text-secondary font-light text-sm mb-6 leading-relaxed flex-1">{tour.desc}</p>
-                    
+
                     <div className="flex items-center justify-between pt-5 border-t border-primary/5">
                       <div className="flex flex-col">
                         <span className="text-[9px] font-semibold text-secondary/60 uppercase tracking-wider mb-0.5">Price starting</span>
@@ -190,7 +190,7 @@ const Home = () => {
         {/* Section 4: Why Choose Us */}
         <section className="section-padding py-24 px-6 bg-white">
           <div className="max-w-7xl mx-auto">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
@@ -212,7 +212,7 @@ const Home = () => {
                   whileInView={{ opacity: 1, scale: 1 }}
                   transition={{ delay: idx * 0.08, duration: 0.5, ease: "easeOut" }}
                   viewport={{ once: true }}
-                  className="flex flex-col items-center text-center p-8 bg-[#FAFAFA] rounded-[2rem] hover:shadow-premium hover:bg-white transition-all duration-300 border border-primary/5"
+                  className="why-card flex flex-col items-center text-center p-8 bg-[#FAFAFA] rounded-[2rem] hover:shadow-premium hover:bg-white transition-all duration-300 border border-primary/5"
                 >
                   <div className="w-16 h-16 bg-accent/10 text-accent rounded-2xl flex items-center justify-center mb-6">
                     <item.icon className="w-6 h-6" />
@@ -231,7 +231,7 @@ const Home = () => {
         {/* Section 6: Instagram Gallery */}
         <section className="section-padding bg-bg-alt py-24 px-6">
           <div className="max-w-7xl mx-auto">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
@@ -250,8 +250,8 @@ const Home = () => {
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               {instagramPhotos.map((photo, index) => (
-                <motion.div 
-                  key={index} 
+                <motion.div
+                  key={index}
                   initial={{ opacity: 0, scale: 0.9 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true, margin: "-150px" }}
@@ -270,7 +270,7 @@ const Home = () => {
 
         {/* Section 7: Bottom Homepage CTA Section */}
         <section className="py-24 px-6 md:px-12 max-w-7xl mx-auto mb-16">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}

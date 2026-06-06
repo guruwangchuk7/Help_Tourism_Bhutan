@@ -53,7 +53,7 @@ const Testimonials = () => {
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             transition={{ delay: idx * 0.1 }}
-                            className="flex flex-col h-full bg-[#FAFAFA] p-6 md:p-12 rounded-3xl group w-[85%] md:w-auto shrink-0 snap-center"
+                            className="flex flex-col h-full bg-[#FAFAFA] p-6 md:p-12 rounded-3xl group w-[280px] md:w-auto shrink-0 snap-center"
                         >
                             <div className="flex items-center gap-1 mb-6 md:mb-8">
                                 {[...Array(t.rating || 5)].map((_, i) => (
@@ -61,15 +61,15 @@ const Testimonials = () => {
                                 ))}
                             </div>
 
-                            <p className="text-secondary text-sm md:text-lg font-light tracking-wide leading-relaxed mb-6 md:mb-12 flex-1 italic">
+                            <span className="text-secondary text-xs md:text-lg font-light tracking-wide leading-relaxed mb-4 md:mb-12 flex-1 italic block">
                                 "{t.content}"
-                            </p>
+                            </span>
 
-                            <div className="mt-auto flex items-center space-x-4 pt-6 md:pt-8 border-t border-primary/5">
-                                <img src={t.avatar || "https://i.pravatar.cc/200"} alt={t.name} className="w-12 h-12 rounded-full object-cover shadow-minimal transition-transform duration-500 group-hover:scale-105" />
+                            <div className="mt-auto flex items-center space-x-3 pt-4 md:pt-8 border-t border-primary/5">
+                                <img src={t.avatar || "https://i.pravatar.cc/200"} alt={t.name} className="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover shadow-minimal transition-transform duration-500 group-hover:scale-105" />
                                 <div className="flex flex-col">
-                                    <h4 className="font-heading font-semibold text-primary text-sm md:text-base mb-1 tracking-wide">{t.name}</h4>
-                                    <span className="text-[9px] font-medium uppercase tracking-[0.2em] text-secondary/60">{t.role}</span>
+                                    <span className="font-heading font-semibold text-primary text-xs md:text-base mb-0.5 tracking-wide block">{t.name}</span>
+                                    <span className="text-[9px] md:text-[11px] font-light text-secondary/60 leading-tight block tracking-normal mt-0.5">{t.role}</span>
                                 </div>
                             </div>
                         </motion.div>
