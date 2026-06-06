@@ -4,6 +4,8 @@ import { motion } from "framer-motion"
 import { ArrowLeft, Clock, ShieldCheck, ChevronDown, Check, X } from "lucide-react"
 import PageTransition from "../components/common/PageTransition"
 
+import { DetailSkeleton } from "../components/common/Skeleton"
+
 type Tour = {
   id: string
   title: string
@@ -31,7 +33,7 @@ const TourDetail = () => {
 
   useEffect(() => {
     setLoading(true)
-    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tours/${id}`)
+    fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000'}/api/tours/${id}`)
       .then(res => res.json())
       .then(data => {
         setTour(data)
@@ -48,11 +50,7 @@ const TourDetail = () => {
   }, [id])
 
   if (loading) {
-    return (
-      <div className="p-40 text-center min-h-[100dvh] bg-bg-light text-2xl font-heading font-medium text-primary animate-pulse">
-        Loading Tour Itinerary Details...
-      </div>
-    )
+    return <DetailSkeleton />
   }
 
   if (!tour) {

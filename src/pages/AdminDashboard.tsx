@@ -6,6 +6,7 @@ import {
   HelpCircle, Upload, Phone
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { TableSkeleton } from '../components/common/Skeleton'
 
 type Destination = {
   id: number
@@ -55,7 +56,7 @@ type LuxuryHotel = {
   description: string
 }
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+const API_BASE = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000'
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState<'destinations' | 'tours' | 'hotels' | 'about' | 'contact' | 'testimonials'>('destinations')
@@ -814,12 +815,7 @@ const AdminDashboard = () => {
 
         {/* Content list block */}
         {loading ? (
-          <div className="bg-white border-x border-b border-slate-200 rounded-b-xl flex justify-center py-24 shadow-sm">
-            <div className="flex flex-col items-center space-y-4">
-              <div className="w-10 h-10 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin"></div>
-              <span className="text-xs text-slate-500 font-medium tracking-wide">Syncing data objects...</span>
-            </div>
-          </div>
+          <TableSkeleton rows={5} />
         ) : activeTab === 'about' ? (
           <form onSubmit={handleSaveAbout} className="bg-white border border-slate-200 rounded-xl p-8 shadow-sm space-y-8 max-w-4xl mx-auto">
             {/* About Tab Navigation */}

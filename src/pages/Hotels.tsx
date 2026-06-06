@@ -4,6 +4,8 @@ import { Star, MapPin, ArrowRight } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import PageTransition from '../components/common/PageTransition'
 
+import { CardSkeleton } from '../components/common/Skeleton'
+
 type Hotel = {
   id: number
   name: string
@@ -21,7 +23,7 @@ const Hotels = () => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/hotels`)
+    fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000'}/api/hotels`)
       .then(res => res.json())
       .then(data => {
         setLuxuryHotels(data)
@@ -73,8 +75,10 @@ const Hotels = () => {
         {/* Hotels Grid */}
         <main className="max-w-7xl mx-auto px-6 py-20">
           {loading ? (
-            <div className="py-40 text-center">
-              <p className="text-2xl font-heading italic text-gray-400 animate-pulse">Loading Luxury Partner Hotels...</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <CardSkeleton key={i} />
+              ))}
             </div>
           ) : (
             <motion.div 

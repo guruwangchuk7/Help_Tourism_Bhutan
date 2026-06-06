@@ -3,6 +3,8 @@ import { motion } from "framer-motion"
 import { Users, History, Award, Heart, ShieldCheck } from "lucide-react"
 import PageTransition from "../components/common/PageTransition"
 
+import { PageSkeleton } from "../components/common/Skeleton"
+
 type AboutData = {
   philosophyText: string
   stat1Label: string
@@ -28,7 +30,7 @@ const About = () => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/about`)
+    fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000'}/api/about`)
       .then(res => res.json())
       .then(d => {
         setData(d)
@@ -41,11 +43,7 @@ const About = () => {
   }, [])
 
   if (loading || !data) {
-    return (
-      <div className="p-40 text-center min-h-[100dvh] bg-bg-light text-2xl font-heading font-medium text-primary animate-pulse">
-        Loading About Details...
-      </div>
-    )
+    return <PageSkeleton cardCount={4} />
   }
 
   return (

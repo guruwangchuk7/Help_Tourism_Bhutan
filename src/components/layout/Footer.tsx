@@ -17,7 +17,7 @@ const Footer = () => {
   const [data, setData] = useState<FooterContactData | null>(null)
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/contact`)
+    fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000'}/api/contact`)
       .then(res => res.json())
       .then(d => {
         setData(d)

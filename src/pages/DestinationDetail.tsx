@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { ArrowLeft, Users, MessageSquare, Heart, Share2, Star, ArrowRight, Wifi, Mountain, Bath, Car, Utensils, Sparkles, Minus, Plus } from "lucide-react"
 import { useState, useEffect } from "react"
 import PageTransition from "../components/common/PageTransition"
+import { DetailSkeleton } from "../components/common/Skeleton"
 
 type Destination = {
   id: number
@@ -27,7 +28,7 @@ const DestinationDetail = () => {
 
   useEffect(() => {
     setLoading(true)
-    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/destinations/${id}`)
+    fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000'}/api/destinations/${id}`)
       .then(res => res.json())
       .then(data => {
         setDestination(data)
@@ -58,7 +59,7 @@ const DestinationDetail = () => {
     window.scrollTo(0, 0)
   }, [id])
 
-  if (loading) return <div className="p-40 text-center text-2xl font-heading font-medium text-primary animate-pulse">Loading Expedition Valley Details...</div>
+  if (loading) return <DetailSkeleton />
   if (!destination) return <div className="p-20 text-center text-2xl font-heading font-medium text-primary">Destination missed. Back to Home?</div>
 
   // Default values

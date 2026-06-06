@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Star } from "lucide-react"
+import { Skeleton } from "../common/Skeleton"
 
 type TestimonialItem = {
     id: number
@@ -16,7 +17,7 @@ const Testimonials = () => {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/testimonials`)
+        fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000'}/api/testimonials`)
             .then(res => res.json())
             .then(data => {
                 setList(data)
@@ -30,9 +31,32 @@ const Testimonials = () => {
 
     if (loading) {
         return (
-            <div className="py-24 text-center text-secondary font-light animate-pulse">
-                Loading Voice of the Valley...
-            </div>
+            <section className="section-padding bg-white overflow-hidden">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6">
+                    <div className="text-center mb-8 sm:mb-12">
+                        <Skeleton className="h-3 w-24 mx-auto mb-2" />
+                        <Skeleton className="h-10 w-48 mx-auto rounded-lg" />
+                    </div>
+                </div>
+                {/* 3 card skeletons */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto px-6">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                        <div key={i} className="flex flex-col bg-[#FAFAFA] p-8 rounded-3xl space-y-4">
+                            <Skeleton className="h-4 w-24" />
+                            <Skeleton className="h-4 w-full" />
+                            <Skeleton className="h-4 w-full" />
+                            <Skeleton className="h-4 w-2/3" />
+                            <div className="flex items-center gap-3 pt-5 border-t border-primary/5">
+                                <Skeleton className="w-10 h-10 rounded-full shrink-0" />
+                                <div className="space-y-2 w-full">
+                                    <Skeleton className="h-3.5 w-1/3" />
+                                    <Skeleton className="h-2.5 w-1/4" />
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </section>
         )
     }
 

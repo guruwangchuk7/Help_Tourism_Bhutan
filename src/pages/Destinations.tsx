@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Search, SlidersHorizontal, FilterX } from 'lucide-react'
 import DestinationCard from '../components/destinations/DestinationCard'
 import PageTransition from '../components/common/PageTransition'
+import { CardSkeleton } from '../components/common/Skeleton'
 
 type Destination = {
   id: number
@@ -23,7 +24,7 @@ const Destinations = () => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/destinations`)
+    fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000'}/api/destinations`)
       .then(res => res.json())
       .then(data => {
         setDestinations(data)
@@ -163,8 +164,10 @@ const Destinations = () => {
           </div>
 
           {loading ? (
-            <div className="py-40 text-center">
-              <p className="text-2xl font-heading italic text-gray-400 animate-pulse">Loading Valleys...</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <CardSkeleton key={i} />
+              ))}
             </div>
           ) : filteredDestinations.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">

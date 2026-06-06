@@ -4,6 +4,8 @@ import { Heart, ArrowRight, CloudRain, Sun, Snowflake } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import PageTransition from "../components/common/PageTransition"
 
+import { CardSkeleton } from "../components/common/Skeleton"
+
 const iconMap: { [key: string]: any } = {
   Sun,
   CloudRain,
@@ -27,7 +29,7 @@ const Tours = () => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tours/editions`)
+    fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000'}/api/tours/editions`)
       .then(res => res.json())
       .then(data => {
         setEditions(data)
@@ -79,8 +81,10 @@ const Tours = () => {
         {/* Seasonal Tours Grid */}
         <div className="max-w-7xl mx-auto px-6 py-20 pb-32">
           {loading ? (
-            <div className="py-40 text-center">
-              <p className="text-2xl font-heading italic text-gray-400 animate-pulse">Loading Seasonal Expeditions...</p>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <CardSkeleton key={i} />
+              ))}
             </div>
           ) : (
             <motion.div 

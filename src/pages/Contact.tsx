@@ -4,6 +4,8 @@ import { motion } from "framer-motion"
 import { Phone, Mail, MapPin, Send, Instagram, Twitter, Facebook, Globe } from "lucide-react"
 import PageTransition from "../components/common/PageTransition"
 
+import { Skeleton, FormSkeleton } from "../components/common/Skeleton"
+
 type ContactData = {
   heroTitle: string
   heroSubtitle: string
@@ -30,7 +32,7 @@ const Contact = () => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/contact`)
+    fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000'}/api/contact`)
       .then(res => res.json())
       .then(d => {
         setData(d)
@@ -44,8 +46,28 @@ const Contact = () => {
 
   if (loading || !data) {
     return (
-      <div className="p-40 text-center min-h-[100dvh] bg-bg-light text-2xl font-heading font-medium text-primary animate-pulse">
-        Loading Contact Details...
+      <div className="bg-bg-light min-h-[100dvh]">
+        {/* Banner Skeleton */}
+        <div className="relative min-h-[70dvh] bg-gray-200/50 flex flex-col items-center justify-center p-6 border-b border-primary/5">
+          <Skeleton className="h-16 w-1/3 mb-4 rounded-xl" />
+          <Skeleton className="h-4 w-1/4" />
+        </div>
+        {/* Content Layout Skeleton */}
+        <div className="max-w-6xl mx-auto px-6 py-20 grid grid-cols-1 lg:grid-cols-12 gap-20 items-start">
+          <div className="lg:col-span-5 space-y-6">
+            <Skeleton className="h-4 w-1/4" />
+            <Skeleton className="h-8 w-3/4 rounded-lg" />
+            <Skeleton className="h-16 w-full rounded-xl" />
+            <div className="space-y-4 pt-4">
+              <Skeleton className="h-24 w-full rounded-2xl" />
+              <Skeleton className="h-24 w-full rounded-2xl" />
+              <Skeleton className="h-24 w-full rounded-2xl" />
+            </div>
+          </div>
+          <div className="lg:col-span-7">
+            <FormSkeleton />
+          </div>
+        </div>
       </div>
     )
   }
