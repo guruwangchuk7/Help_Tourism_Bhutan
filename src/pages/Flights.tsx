@@ -52,15 +52,27 @@ const Flights = () => {
 
         {/* Flights Content */}
         <main className="max-w-5xl mx-auto px-6 py-20">
-          <div className="text-center mb-16 max-w-2xl mx-auto">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8 }}
+            className="text-center mb-16 max-w-2xl mx-auto"
+          >
             <h2 className="text-3xl font-heading font-medium text-primary mb-4">Airlines Entering the Kingdom</h2>
             <p className="text-secondary font-light leading-relaxed">
               Flying into Bhutan is a scenic adventure itself. Due to the unique valley terrain of Paro International Airport (PBH), only two airlines operate commercial flights into the country: **Drukair** (Royal Bhutan Airlines) and **Bhutan Airlines**.
             </p>
-          </div>
+          </motion.div>
 
           {/* Route Table */}
-          <div className="bg-white rounded-3xl p-8 border border-primary/5 shadow-minimal mb-16">
+          <motion.div 
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8 }}
+            className="bg-white rounded-3xl p-8 border border-primary/5 shadow-minimal mb-16"
+          >
             <h3 className="text-xl font-heading font-medium text-primary mb-6 flex items-center gap-2">
               <Compass className="w-5 h-5 text-accent" />
               Popular Direct Entry Sectors
@@ -89,10 +101,16 @@ const Flights = () => {
                 </tbody>
               </table>
             </div>
-          </div>
+          </motion.div>
 
           {/* Inquiry Section */}
-          <div className="bg-white text-primary border border-primary/5 rounded-[2.5rem] p-10 md:p-16 text-center relative overflow-hidden shadow-minimal">
+          <motion.div 
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8 }}
+            className="bg-white text-primary border border-primary/5 rounded-[2.5rem] p-10 md:p-16 text-center relative overflow-hidden shadow-minimal"
+          >
             <div className="relative z-10 max-w-xl mx-auto flex flex-col items-center">
               <h3 className="text-2xl md:text-3xl font-heading font-medium mb-4">Flight Ticketing Concierge</h3>
               <p className="text-secondary text-sm mb-8 font-light leading-relaxed">
@@ -105,7 +123,7 @@ const Flights = () => {
                 Inquire Flight Tickets
               </button>
             </div>
-          </div>
+          </motion.div>
         </main>
       </div>
     </PageTransition>

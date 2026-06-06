@@ -77,7 +77,13 @@ const Hotels = () => {
               <p className="text-2xl font-heading italic text-gray-400 animate-pulse">Loading Luxury Partner Hotels...</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <motion.div 
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.8 }}
+              className="grid grid-cols-1 md:grid-cols-2 gap-12"
+            >
               {luxuryHotels.map((hotel) => (
                 <motion.div
                   key={hotel.id}
@@ -128,7 +134,7 @@ const Hotels = () => {
                   </div>
                 </motion.div>
               ))}
-            </div>
+            </motion.div>
           )}
         </main>
       </div>

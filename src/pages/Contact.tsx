@@ -91,7 +91,13 @@ const Contact = () => {
         <div className="max-w-6xl mx-auto px-6 py-28 pb-32">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-20 items-start">
             {/* Contact Info (5 cols) */}
-            <div className="lg:col-span-5 space-y-8">
+            <motion.div 
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.8 }}
+              className="lg:col-span-5 space-y-8"
+            >
               <div>
                 <span className="text-accent font-semibold uppercase tracking-[0.2em] text-[10px] mb-2 block">{data.channelTitle}</span>
                 <h2 className="text-2xl md:text-3xl font-heading font-medium text-primary tracking-tight mb-3">{data.channelSubtitle}</h2>
@@ -151,10 +157,16 @@ const Contact = () => {
                   </button>
                 ))}
               </div>
-            </div>
+            </motion.div>
 
             {/* Contact Form (7 cols) */}
-            <div className="lg:col-span-7">
+            <motion.div 
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.8 }}
+              className="lg:col-span-7"
+            >
               <div className="bg-white rounded-[2rem] p-6 sm:p-8 md:p-10 shadow-minimal border border-primary/5 relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-24 h-24 bg-accent/5 rounded-full blur-2xl group-hover:bg-accent/10 transition-colors duration-700 pointer-events-none" />
                 <h3 className="text-2xl sm:text-3xl font-heading font-medium text-primary mb-2 tracking-tight">Initiate <span className="text-accent italic font-normal">Inquiry</span></h3>
@@ -205,7 +217,7 @@ const Contact = () => {
                   </button>
                 </form>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
 

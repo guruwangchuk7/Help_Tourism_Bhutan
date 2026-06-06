@@ -76,7 +76,13 @@ const Home = () => {
 
         {/* Section 2: Popular Destinations */}
         <section className="section-padding px-6 max-w-[1440px] mx-auto mt-28 md:mt-32">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 px-2 gap-6">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8 }}
+            className="flex flex-col md:flex-row md:items-end justify-between mb-16 px-2 gap-6"
+          >
             <div className="max-w-2xl">
               <span className="text-accent font-semibold tracking-[0.3em] uppercase text-[10px] mb-4 block">Where to Explore</span>
               <h2 className="text-3xl md:text-5xl lg:text-6xl font-heading text-primary tracking-tight font-medium">Popular Destinations</h2>
@@ -91,9 +97,15 @@ const Home = () => {
               <span>Explore All</span>
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </Link>
-          </div>
+          </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+          <motion.div 
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6"
+          >
             {popularDestinations.map((dest) => (
               <DestinationCard
                 key={dest.id}
@@ -105,13 +117,19 @@ const Home = () => {
                 location={dest.location}
               />
             ))}
-          </div>
+          </motion.div>
         </section>
 
         {/* Section 3: Top Tours */}
         <section className="section-padding bg-bg-alt py-24 px-6">
           <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.8 }}
+              className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6"
+            >
               <div className="max-w-2xl">
                 <span className="text-accent font-semibold tracking-[0.3em] uppercase text-[10px] mb-4 block">Signature Itineraries</span>
                 <h2 className="text-3xl md:text-5xl lg:text-6xl font-heading text-primary tracking-tight font-medium">Top Tours</h2>
@@ -126,12 +144,16 @@ const Home = () => {
                 <span>View All Tours</span>
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </Link>
-            </div>
+            </motion.div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {topTours.map((tour, idx) => (
                 <motion.div
                   key={idx}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-100px" }}
+                  transition={{ duration: 0.8, delay: idx * 0.1 }}
                   whileHover={{ y: -6 }}
                   onClick={() => navigate(`/tours/${tour.id}`)}
                   className="bg-white rounded-[2.5rem] overflow-hidden shadow-minimal hover:shadow-premium group border border-primary/5 p-5 flex flex-col transition-all duration-300 cursor-pointer"
@@ -168,13 +190,19 @@ const Home = () => {
         {/* Section 4: Why Choose Us */}
         <section className="section-padding py-24 px-6 bg-white">
           <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-20">
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.8 }}
+              className="text-center mb-20"
+            >
               <span className="text-accent font-semibold tracking-[0.3em] uppercase text-[10px] mb-4 block">The Help Tourism Bhutan Way</span>
               <h2 className="text-3xl md:text-5xl text-primary font-heading font-medium leading-tight">Why Choose Us</h2>
               <p className="text-secondary max-w-2xl mx-auto mt-4 font-light text-base md:text-lg tracking-wide leading-relaxed">
                 We craft moments, not just schedules. Discover how our localized experience changes your journey.
               </p>
-            </div>
+            </motion.div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
               {whyChooseUs.map((item, idx) => (
@@ -203,7 +231,13 @@ const Home = () => {
         {/* Section 6: Instagram Gallery */}
         <section className="section-padding bg-bg-alt py-24 px-6">
           <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-16">
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.8 }}
+              className="text-center mb-16"
+            >
               <div className="inline-flex items-center gap-2 text-accent font-semibold tracking-[0.3em] uppercase text-[10px] mb-4">
                 <Instagram className="w-3.5 h-3.5" />
                 <span>Our Live Feed</span>
@@ -212,16 +246,23 @@ const Home = () => {
               <p className="text-secondary max-w-2xl mx-auto mt-4 font-light text-base md:text-lg tracking-wide leading-relaxed">
                 Photos shared by our guests while journeying through the valleys of Bhutan.
               </p>
-            </div>
+            </motion.div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               {instagramPhotos.map((photo, index) => (
-                <div key={index} className="relative aspect-square rounded-2xl overflow-hidden group shadow-minimal border border-primary/5">
+                <motion.div 
+                  key={index} 
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true, margin: "-150px" }}
+                  transition={{ duration: 0.6, delay: index * 0.05 }}
+                  className="relative aspect-square rounded-2xl overflow-hidden group shadow-minimal border border-primary/5"
+                >
                   <img src={photo} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={`Instagram Guest Photo ${index + 1}`} />
                   <div className="absolute inset-0 bg-primary/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                     <Instagram className="w-6 h-6 text-white" />
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
@@ -229,7 +270,13 @@ const Home = () => {
 
         {/* Section 7: Bottom Homepage CTA Section */}
         <section className="py-24 px-6 md:px-12 max-w-7xl mx-auto mb-16">
-          <div className="bg-white text-primary border border-primary/5 rounded-[3rem] p-12 md:p-20 text-center relative overflow-hidden shadow-minimal">
+          <motion.div 
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8 }}
+            className="bg-white text-primary border border-primary/5 rounded-[3rem] p-12 md:p-20 text-center relative overflow-hidden shadow-minimal"
+          >
             <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center">
               <h2 className="text-4xl md:text-6xl font-heading font-medium mb-6 leading-tight">Ready for Your Bhutan Adventure?</h2>
               <p className="text-secondary text-lg mb-10 font-light max-w-xl leading-relaxed">
@@ -239,7 +286,7 @@ const Home = () => {
                 Start Planning
               </Link>
             </div>
-          </div>
+          </motion.div>
         </section>
       </div>
     </PageTransition>

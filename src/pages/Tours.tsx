@@ -83,7 +83,13 @@ const Tours = () => {
               <p className="text-2xl font-heading italic text-gray-400 animate-pulse">Loading Seasonal Expeditions...</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+            <motion.div 
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.8 }}
+              className="grid grid-cols-1 lg:grid-cols-2 gap-16"
+            >
               {editions.map((tour, idx) => {
                 const IconComponent = iconMap[tour.icon] || Sun;
                 return (
@@ -120,7 +126,7 @@ const Tours = () => {
               </motion.div>
             )
           })}
-          </div>
+          </motion.div>
           )}
         </div>
       </div>

@@ -87,7 +87,13 @@ const About = () => {
 
         {/* Philosophy */}
         <section className="py-32 px-6 max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+          <motion.div 
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8 }}
+            className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center"
+          >
             <div>
               <span className="text-accent font-semibold uppercase tracking-[0.3em] text-[10px] mb-6 block">Our Philosophy</span>
               <h2 className="text-5xl md:text-7xl font-heading font-medium text-primary tracking-tight leading-none mb-10">Travel as a <br /> <span className="text-accent italic font-normal">Spiritual Act.</span></h2>
@@ -116,16 +122,22 @@ const About = () => {
                 <History className="w-20 h-20" />
               </div>
             </div>
-          </div>
+          </motion.div>
         </section>
 
         {/* Values */}
         <section className="py-32 bg-bg-light px-6 border-t border-primary/5">
-          <div className="max-w-7xl mx-auto text-center mb-24">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8 }}
+            className="max-w-7xl mx-auto text-center mb-24"
+          >
             <span className="text-accent font-semibold tracking-[0.3em] uppercase text-[10px] mb-6 block">Our Standards</span>
             <h2 className="text-5xl font-heading font-medium text-primary tracking-tight mb-6">Built on <span className="italic font-normal text-accent">Integrity</span></h2>
             <p className="text-secondary font-light tracking-wide max-w-xl mx-auto">Four pillars that define every Help Tourism Bhutan experience.</p>
-          </div>
+          </motion.div>
 
           <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
             {[
@@ -136,6 +148,10 @@ const About = () => {
             ].map((value, idx) => (
               <motion.div
                 key={idx}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.8, delay: idx * 0.1 }}
                 whileHover={{ y: -10 }}
                 className="bg-white p-12 rounded-[2rem] shadow-minimal hover:shadow-premium transition-all duration-500 border border-primary/5 flex flex-col items-center text-center group"
               >
