@@ -37,7 +37,7 @@ const Footer = () => {
   const tiktok = data?.footerTiktok || 'TikTok'
 
   return (
-    <footer className="bg-white border-t border-gray-100 pt-24 pb-12">
+    <footer className="bg-white border-t border-gray-100 pt-24 pb-[calc(3rem+env(safe-area-inset-bottom))]">
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 pb-20 border-b border-gray-100">
           {/* Logo & Bio */}

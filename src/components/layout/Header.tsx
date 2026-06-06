@@ -45,7 +45,7 @@ const Header = () => {
   // Animation variants for smooth sticky transition
   const headerVariants = {
     initial: { 
-      backgroundColor: 'rgba(255, 255, 255, 0)', 
+      background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 100%)', 
       boxShadow: 'none', 
       borderBottom: '1px solid transparent',
       paddingTop: '32px',
@@ -53,7 +53,7 @@ const Header = () => {
       backdropFilter: 'blur(0px)'
     },
     scrolled: {
-      backgroundColor: 'rgba(250, 250, 250, 0.95)',
+      background: 'rgba(250, 250, 250, 0.95)',
       backdropFilter: 'blur(24px)',
       boxShadow: '0 4px 30px rgba(0, 0, 0, 0.03)',
       borderBottom: '1px solid rgba(26, 26, 29, 0.05)',
@@ -75,8 +75,8 @@ const Header = () => {
       <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
         {/* Left: Brand Logo */}
         <Link to="/" className="flex items-center space-x-2 sm:space-x-3 group relative z-[130] -top-[4px]">
-          <Compass className={`w-6 h-6 sm:w-7 sm:h-7 transition-all duration-300 group-hover:rotate-45 ${activeHeader || mobileMenuOpen ? 'text-accent' : 'text-white'}`} />
-          <span className={`text-base sm:text-xl md:text-2xl font-heading font-semibold tracking-wide ${activeHeader || mobileMenuOpen ? 'text-primary' : 'text-white'}`}>
+          <Compass className={`w-6 h-6 sm:w-7 sm:h-7 transition-all duration-300 group-hover:rotate-45 ${activeHeader || mobileMenuOpen ? 'text-accent' : 'text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)]'}`} />
+          <span className={`text-base sm:text-xl md:text-2xl font-heading font-semibold tracking-wide ${activeHeader || mobileMenuOpen ? 'text-primary' : 'text-white [text-shadow:0_1px_4px_rgba(0,0,0,0.3)]'}`}>
             Help Tourism Bhutan
           </span>
         </Link>
@@ -89,7 +89,7 @@ const Header = () => {
               to={link.path}
               className={`text-[11px] font-semibold uppercase tracking-[0.2em] transition-colors duration-300 relative lg:after:content-[''] lg:after:absolute lg:after:-bottom-2 lg:after:left-1/2 lg:after:-translate-x-1/2 lg:after:w-1 lg:after:h-1 lg:after:bg-accent lg:after:rounded-full lg:after:opacity-0 lg:hover:after:opacity-100 lg:after:transition-opacity ${activeHeader
                 ? 'text-primary/70 hover:text-primary'
-                : 'text-white/80 hover:text-white'
+                : 'text-white/80 hover:text-white [text-shadow:0_1px_4px_rgba(0,0,0,0.3)]'
                 } ${location.pathname === link.path ? '!text-accent lg:after:opacity-100 lg:after:bg-accent' : ''}`}
             >
               {link.name}
@@ -99,7 +99,7 @@ const Header = () => {
 
         {/* Right: Actions */}
         <div className="hidden lg:flex items-center space-x-6">
-          <div className={`flex items-center space-x-1 cursor-pointer transition-colors ${activeHeader ? 'text-primary hover:text-accent' : 'text-white hover:text-white/80'}`}>
+          <div className={`flex items-center space-x-1 cursor-pointer transition-colors ${activeHeader ? 'text-primary hover:text-accent' : 'text-white hover:text-white/80 [text-shadow:0_1px_4px_rgba(0,0,0,0.3)]'}`}>
             <Globe className="w-4 h-4" />
             <span className="text-[10px] font-bold uppercase tracking-widest">EN</span>
             <span className="text-[8px]">▼</span>
@@ -129,7 +129,7 @@ const Header = () => {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-0 bg-[#FAFAFA] z-[120] lg:hidden flex flex-col p-6 pt-24 h-screen w-screen overflow-y-auto"
+            className="fixed inset-0 bg-[#FAFAFA] z-[120] lg:hidden flex flex-col p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-[calc(6rem+env(safe-area-inset-top))] h-[100dvh] w-screen overflow-y-auto"
           >
             <div className="flex flex-col space-y-2">
               {navLinks.map((link) => (

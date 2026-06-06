@@ -3,8 +3,6 @@ import { motion, AnimatePresence } from "framer-motion"
 import { User, ArrowRight, ArrowLeft, ShieldCheck, Zap, Mail, Check } from "lucide-react"
 import { useNavigate, useLocation } from "react-router-dom"
 import PageTransition from "../components/common/PageTransition"
-import { destinations } from "../data/destinations"
-import { tours } from "../data/tours"
 
 const Booking = () => {
     const navigate = useNavigate()
@@ -28,9 +26,26 @@ const Booking = () => {
     const [firstName, setFirstName] = useState("")
     const [lastName, setLastName] = useState("")
     const [email, setEmail] = useState("")
+    const [errors, setErrors] = useState({ firstName: "", lastName: "", email: "" })
 
-    const matchedDestination = destinations.find(d => d.name === locationState?.destinationName)
-    const matchedTour = tours.find(t => t.title === locationState?.destinationName)
+    const [dbDestinations, setDbDestinations] = useState<any[]>([])
+    const [dbTours, setDbTours] = useState<any[]>([])
+
+    useEffect(() => {
+        const url = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000'
+        fetch(`${url}/api/destinations`)
+            .then(res => res.json())
+            .then(data => setDbDestinations(data))
+            .catch(err => console.error("Error fetching destinations for booking:", err))
+            
+        fetch(`${url}/api/tours`)
+            .then(res => res.json())
+            .then(data => setDbTours(data))
+            .catch(err => console.error("Error fetching tours for booking:", err))
+    }, [])
+
+    const matchedDestination = dbDestinations.find(d => d.name === locationState?.destinationName)
+    const matchedTour = dbTours.find(t => t.title === locationState?.destinationName)
     const displayImage = locationState?.image || matchedDestination?.image || matchedTour?.image || "/punakha-dzong.jpg"
     const displayTitle = locationState?.destinationName || "Punakha Sacred Grounds Tour"
 
@@ -68,7 +83,7 @@ Please contact me to finalize the booking and coordinate payment.
 
 Thank you!`
 
-        return `https://mail.google.com/mail/?view=cm&fs=1&to=explore@helptourismbhutan.bt&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(baseText)}`
+        return `mailto:explore@helptourismbhutan.bt?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(baseText)}`
     }
 
 
@@ -82,6 +97,35 @@ Thank you!`
     ]
 
     const handleNext = () => {
+        if (step === 1) {
+            const newErrors = { firstName: "", lastName: "", email: "" }
+            let hasError = false
+            
+            if (!firstName.trim()) {
+                newErrors.firstName = "First name is required"
+                hasError = true
+            }
+            if (!lastName.trim()) {
+                newErrors.lastName = "Last name is required"
+                hasError = true
+            }
+            if (!email.trim()) {
+                newErrors.email = "Email address is required"
+                hasError = true
+            } else if (!/\S+@\S+\.\S+/.test(email)) {
+                newErrors.email = "Please enter a valid email address"
+                hasError = true
+            }
+            
+            if (hasError) {
+                setErrors(newErrors)
+                alert("Please fill in all required traveler details correctly before continuing.")
+                return
+            } else {
+                setErrors({ firstName: "", lastName: "", email: "" })
+            }
+        }
+
         if (step < 2) setStep(step + 1)
         else {
             if (paymentMethod === 'email') {
@@ -176,12 +220,16 @@ Thank you!`
                                                         <input 
                                                             type="text" 
                                                             value={firstName}
-                                                            onChange={(e) => setFirstName(e.target.value)}
+                                                            onChange={(e) => {
+                                                                setFirstName(e.target.value)
+                                                                if (errors.firstName) setErrors(prev => ({ ...prev, firstName: "" }))
+                                                            }}
                                                             className="w-full bg-bg-alt border border-primary/5 rounded-2xl pl-14 pr-6 py-5 outline-none focus:bg-white focus:ring-2 focus:ring-accent/20 transition-all font-light text-primary text-base placeholder-secondary/30" 
                                                             placeholder="e.g. Tenzin" 
                                                             required
                                                         />
                                                     </div>
+                                                    {errors.firstName && <span className="text-[11px] text-rose-500 pl-4 mt-1 block">{errors.firstName}</span>}
                                                 </div>
                                                 <div className="flex flex-col space-y-3 relative">
                                                     <label className="text-[10px] font-bold text-secondary uppercase tracking-[0.2em] pl-4">Last Name</label>
@@ -190,12 +238,16 @@ Thank you!`
                                                         <input 
                                                             type="text" 
                                                             value={lastName}
-                                                            onChange={(e) => setLastName(e.target.value)}
+                                                            onChange={(e) => {
+                                                                setLastName(e.target.value)
+                                                                if (errors.lastName) setErrors(prev => ({ ...prev, lastName: "" }))
+                                                            }}
                                                             className="w-full bg-bg-alt border border-primary/5 rounded-2xl pl-14 pr-6 py-5 outline-none focus:bg-white focus:ring-2 focus:ring-accent/20 transition-all font-light text-primary text-base placeholder-secondary/30" 
                                                             placeholder="e.g. Dorji" 
                                                             required
                                                         />
                                                     </div>
+                                                    {errors.lastName && <span className="text-[11px] text-rose-500 pl-4 mt-1 block">{errors.lastName}</span>}
                                                 </div>
                                                 <div className="flex flex-col space-y-3 md:col-span-2 mt-4 relative">
                                                     <label className="text-[10px] font-bold text-secondary uppercase tracking-[0.2em] pl-4">Email Address</label>
@@ -204,12 +256,16 @@ Thank you!`
                                                         <input 
                                                             type="email" 
                                                             value={email}
-                                                            onChange={(e) => setEmail(e.target.value)}
+                                                            onChange={(e) => {
+                                                                setEmail(e.target.value)
+                                                                if (errors.email) setErrors(prev => ({ ...prev, email: "" }))
+                                                            }}
                                                             className="w-full bg-bg-alt border border-primary/5 rounded-2xl pl-14 pr-6 py-5 outline-none focus:bg-white focus:ring-2 focus:ring-accent/20 transition-all font-light text-primary text-base placeholder-secondary/30" 
                                                             placeholder="tenzin@bhutan.com" 
                                                             required
                                                         />
                                                     </div>
+                                                    {errors.email && <span className="text-[11px] text-rose-500 pl-4 mt-1 block">{errors.email}</span>}
                                                 </div>
                                             </div>
                                         </motion.div>
@@ -384,7 +440,7 @@ Thank you!`
                                                         <span className="text-secondary font-light text-sm tracking-wide group-hover:text-primary transition-colors">
                                                             Government SDF Tax
                                                         </span>
-                                                        <span className="font-heading font-semibold text-rose-500 tracking-wide">
+                                                        <span className="font-heading font-semibold text-accent tracking-wide">
                                                             Excluded
                                                         </span>
                                                     </div>

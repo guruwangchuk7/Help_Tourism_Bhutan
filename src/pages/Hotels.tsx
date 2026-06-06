@@ -65,7 +65,7 @@ const Hotels = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
-              className="text-white/80 text-xs md:text-sm font-light max-w-2xl mx-auto leading-relaxed tracking-[0.15em] uppercase"
+              className="text-white/80 text-[10px] md:text-sm font-light max-w-2xl mx-auto leading-relaxed tracking-[0.15em] uppercase"
             >
               Experience the highest form of hospitality within the kingdom
             </motion.p>
@@ -115,7 +115,7 @@ const Hotels = () => {
 
                     <div className="flex items-center justify-between pt-4 border-t border-primary/5">
                       <div className="flex flex-col">
-                        <span className="text-[9px] font-semibold text-rose-500 uppercase tracking-wider mb-0.5">Excludes $100/night government SDF</span>
+                        <span className="text-[9px] font-semibold text-accent uppercase tracking-wider mb-0.5">Excludes $100/night government SDF</span>
                         <span className="text-xl font-heading font-semibold text-primary">{hotel.price} <span className="text-xs font-normal text-secondary">/ night</span></span>
                       </div>
                       <button

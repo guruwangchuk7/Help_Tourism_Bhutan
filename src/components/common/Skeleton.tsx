@@ -4,7 +4,7 @@ import React from "react"
 export const Skeleton: React.FC<{ className?: string }> = ({ className = "" }) => {
   return (
     <div
-      className={`animate-pulse bg-gray-200/80 dark:bg-gray-700/50 rounded-lg ${className}`}
+      className={`animate-pulse bg-gray-200/40 rounded-lg ${className}`}
     />
   )
 }

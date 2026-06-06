@@ -9,11 +9,97 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
-app.use(express.json());
+// Security Hardening: Ensure strict CORS policy and deny wildcards in production
+const allowedOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173'];
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Blocked by CORS policy'));
+    }
+  },
+  credentials: true
+}));
 
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://sahdrcajbflinfhlwgmb.supabase.co';
-const SUPABASE_KEY = process.env.SUPABASE_KEY || 'sb_publishable_RVaEhvDjI2TE6ctNgtiK2A_2g9slg0N';
+app.use(express.json({ limit: '10mb' }));
+
+// Custom middleware for security headers
+app.use((req, res, next) => {
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  next();
+});
+
+// Lightweight in-memory Rate Limiting to prevent DoS/brute-force
+const rateLimitWindow = 15 * 60 * 1000; // 15 mins
+const requestCounts = new Map<string, { count: number; resetTime: number }>();
+app.use((req, res, next) => {
+  const ip = req.ip || req.socket.remoteAddress || 'unknown';
+  const now = Date.now();
+  const record = requestCounts.get(ip);
+  if (!record || now > record.resetTime) {
+    requestCounts.set(ip, { count: 1, resetTime: now + rateLimitWindow });
+    return next();
+  }
+  record.count += 1;
+  if (record.count > 250) { // Limit to 250 requests per 15 mins
+    return res.status(429).json({ error: 'Too many requests. Please try again later.' });
+  }
+  next();
+});
+
+// Securely check for required database parameters
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_KEY;
+const ADMIN_API_KEY = process.env.ADMIN_API_KEY;
+
+if (!SUPABASE_URL || !SUPABASE_KEY) {
+  console.error("FATAL ERROR: SUPABASE_URL and SUPABASE_KEY environment variables must be defined!");
+  process.exit(1);
+}
+
+if (!ADMIN_API_KEY) {
+  console.warn("WARNING: ADMIN_API_KEY is not defined. CMS operations will be locked.");
+}
+
+// Authentication Middleware to protect Admin endpoints
+const authenticateAdmin = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || typeof authHeader !== 'string' || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Unauthorized: Missing token' });
+  }
+  const token = authHeader.split(' ')[1];
+  if (!ADMIN_API_KEY || token !== ADMIN_API_KEY) {
+    return res.status(403).json({ error: 'Forbidden: Invalid API key' });
+  }
+  next();
+};
+
+// Caching Store & Helpers for high scalability
+const apiCache = new Map<string, { data: any; expiry: number }>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes TTL
+
+function getCache(key: string): any | null {
+  const cached = apiCache.get(key);
+  if (cached && cached.expiry > Date.now()) {
+    return cached.data;
+  }
+  return null;
+}
+
+function setCache(key: string, data: any) {
+  apiCache.set(key, { data, expiry: Date.now() + CACHE_TTL });
+}
+
+function clearCache(prefix: string) {
+  for (const key of apiCache.keys()) {
+    if (key.startsWith(prefix)) {
+      apiCache.delete(key);
+    }
+  }
+}
 
 // Helper to fetch from Supabase REST API
 async function supabaseFetch(path: string, options: any = {}): Promise<any> {
@@ -293,6 +379,10 @@ checkDb();
 
 // Routes
 app.get('/api/destinations', async (req, res) => {
+  const cacheKey = 'destinations:list';
+  const cached = getCache(cacheKey);
+  if (cached) return res.json(cached);
+
   if (dbConnected) {
     try {
       const data = await supabaseFetch('/destinations?select=*&order=id.asc');
@@ -300,6 +390,7 @@ app.get('/api/destinations', async (req, res) => {
         ...d,
         rating: parseFloat(d.rating) || d.rating
       }));
+      setCache(cacheKey, formatted);
       return res.json(formatted);
     } catch (err: any) {
       console.error("Supabase fetch error for destinations:", err.message);
@@ -309,7 +400,12 @@ app.get('/api/destinations', async (req, res) => {
 });
 
 app.get('/api/destinations/:id', async (req, res) => {
-  const id = parseInt(req.params.id);
+  const idStr = req.params.id;
+  const id = parseInt(idStr as string);
+  const cacheKey = `destinations:${id}`;
+  const cached = getCache(cacheKey);
+  if (cached) return res.json(cached);
+
   if (dbConnected) {
     try {
       const destList = await supabaseFetch(`/destinations?id=eq.${id}&select=*`);
@@ -317,10 +413,12 @@ app.get('/api/destinations/:id', async (req, res) => {
         const dest = destList[0];
         dest.rating = parseFloat(dest.rating) || dest.rating;
         const attractions = await supabaseFetch(`/attractions?destination_id=eq.${id}&select=name`);
-        return res.json({
+        const result = {
           ...dest,
           attractions: attractions.map((a: any) => a.name)
-        });
+        };
+        setCache(cacheKey, result);
+        return res.json(result);
       }
     } catch (err: any) {
       console.error(`Supabase fetch error for destination ${id}:`, err.message);
@@ -330,12 +428,17 @@ app.get('/api/destinations/:id', async (req, res) => {
   const dest = mockDestinations.find(d => d.id === id);
   if (dest) {
     const attractions = mockAttractions.filter(a => a.destination_id === id).map(a => a.name);
-    return res.json({ ...dest, attractions });
+    const result = { ...dest, attractions };
+    return res.json(result);
   }
   res.status(404).json({ error: "Destination not found" });
 });
 
 app.get('/api/tours', async (req, res) => {
+  const cacheKey = 'tours:list';
+  const cached = getCache(cacheKey);
+  if (cached) return res.json(cached);
+
   if (dbConnected) {
     try {
       const data = await supabaseFetch('/tours?select=*');
@@ -345,6 +448,7 @@ app.get('/api/tours', async (req, res) => {
         priceVal: t.price_val,
         desc: t.description
       }));
+      setCache(cacheKey, formatted);
       return res.json(formatted);
     } catch (err: any) {
       console.error("Supabase fetch error for tours:", err.message);
@@ -354,9 +458,14 @@ app.get('/api/tours', async (req, res) => {
 });
 
 app.get('/api/tours/editions', async (req, res) => {
+  const cacheKey = 'tours:editions';
+  const cached = getCache(cacheKey);
+  if (cached) return res.json(cached);
+
   if (dbConnected) {
     try {
       const data = await supabaseFetch('/tour_editions?select=*&order=id.asc');
+      setCache(cacheKey, data);
       return res.json(data);
     } catch (err: any) {
       console.error("Supabase fetch error for tour editions:", err.message);
@@ -367,16 +476,22 @@ app.get('/api/tours/editions', async (req, res) => {
 
 app.get('/api/tours/:id', async (req, res) => {
   const id = req.params.id;
+  const cacheKey = `tours:${id}`;
+  const cached = getCache(cacheKey);
+  if (cached) return res.json(cached);
+
   if (dbConnected) {
     try {
       const tourList = await supabaseFetch(`/tours?id=eq.${id}&select=*`);
       if (tourList && tourList.length > 0) {
         const tour = tourList[0];
-        return res.json({
+        const result = {
           ...tour,
           priceVal: tour.price_val,
           desc: tour.description
-        });
+        };
+        setCache(cacheKey, result);
+        return res.json(result);
       }
     } catch (err: any) {
       console.error(`Supabase fetch error for tour ${id}:`, err.message);
@@ -388,6 +503,10 @@ app.get('/api/tours/:id', async (req, res) => {
 });
 
 app.get('/api/hotels', async (req, res) => {
+  const cacheKey = 'hotels:list';
+  const cached = getCache(cacheKey);
+  if (cached) return res.json(cached);
+
   if (dbConnected) {
     try {
       const data = await supabaseFetch('/hotels?select=*&order=id.asc');
@@ -395,6 +514,7 @@ app.get('/api/hotels', async (req, res) => {
         ...h,
         rating: parseFloat(h.rating) || h.rating
       }));
+      setCache(cacheKey, formatted);
       return res.json(formatted);
     } catch (err: any) {
       console.error("Supabase fetch error for hotels:", err.message);
@@ -404,7 +524,7 @@ app.get('/api/hotels', async (req, res) => {
 });
 
 // CREATE Destination
-app.post('/api/destinations', async (req, res) => {
+app.post('/api/destinations', authenticateAdmin, async (req, res) => {
   try {
     let { id, name, image, description, price, rating, location, altitude, ideal_stay, peak_period, language } = req.body;
     if (!id) {
@@ -416,6 +536,7 @@ app.post('/api/destinations', async (req, res) => {
       method: 'POST',
       body: JSON.stringify(payload)
     });
+    clearCache('destinations');
     res.status(201).json(payload);
   } catch (err: any) {
     console.error("Create destination failed:", err.message);
@@ -424,8 +545,8 @@ app.post('/api/destinations', async (req, res) => {
 });
 
 // UPDATE Destination
-app.put('/api/destinations/:id', async (req, res) => {
-  const id = parseInt(req.params.id);
+app.put('/api/destinations/:id', authenticateAdmin, async (req, res) => {
+  const id = parseInt(req.params.id as string);
   try {
     const { name, image, description, price, rating, location, altitude, ideal_stay, peak_period, language } = req.body;
     const payload = { name, image, description, price, rating: parseFloat(rating) || 4.8, location, altitude, ideal_stay, peak_period, language };
@@ -433,6 +554,7 @@ app.put('/api/destinations/:id', async (req, res) => {
       method: 'PATCH',
       body: JSON.stringify(payload)
     });
+    clearCache('destinations');
     res.json({ id, ...payload });
   } catch (err: any) {
     console.error(`Update destination ${id} failed:`, err.message);
@@ -441,12 +563,13 @@ app.put('/api/destinations/:id', async (req, res) => {
 });
 
 // DELETE Destination
-app.delete('/api/destinations/:id', async (req, res) => {
-  const id = parseInt(req.params.id);
+app.delete('/api/destinations/:id', authenticateAdmin, async (req, res) => {
+  const id = parseInt(req.params.id as string);
   try {
     await supabaseFetch(`/destinations?id=eq.${id}`, {
       method: 'DELETE'
     });
+    clearCache('destinations');
     res.json({ message: "Destination deleted successfully", id });
   } catch (err: any) {
     console.error(`Delete destination ${id} failed:`, err.message);
@@ -455,7 +578,7 @@ app.delete('/api/destinations/:id', async (req, res) => {
 });
 
 // CREATE Tour
-app.post('/api/tours', async (req, res) => {
+app.post('/api/tours', authenticateAdmin, async (req, res) => {
   try {
     let { id, title, duration, nights, price, priceVal, image, desc, category, difficulty, inclusions, exclusions, itinerary } = req.body;
     if (!id && title) {
@@ -480,6 +603,7 @@ app.post('/api/tours', async (req, res) => {
       method: 'POST',
       body: JSON.stringify(payload)
     });
+    clearCache('tours');
     res.status(201).json({ ...payload, priceVal: payload.price_val, desc: payload.description });
   } catch (err: any) {
     console.error("Create tour failed:", err.message);
@@ -488,7 +612,7 @@ app.post('/api/tours', async (req, res) => {
 });
 
 // UPDATE Tour
-app.put('/api/tours/:id', async (req, res) => {
+app.put('/api/tours/:id', authenticateAdmin, async (req, res) => {
   const id = req.params.id;
   try {
     const { title, duration, nights, price, priceVal, image, desc, category, difficulty, inclusions, exclusions, itinerary } = req.body;
@@ -510,6 +634,7 @@ app.put('/api/tours/:id', async (req, res) => {
       method: 'PATCH',
       body: JSON.stringify(payload)
     });
+    clearCache('tours');
     res.json({ id, ...payload, priceVal: payload.price_val, desc: payload.description });
   } catch (err: any) {
     console.error(`Update tour ${id} failed:`, err.message);
@@ -518,12 +643,13 @@ app.put('/api/tours/:id', async (req, res) => {
 });
 
 // DELETE Tour
-app.delete('/api/tours/:id', async (req, res) => {
+app.delete('/api/tours/:id', authenticateAdmin, async (req, res) => {
   const id = req.params.id;
   try {
     await supabaseFetch(`/tours?id=eq.${id}`, {
       method: 'DELETE'
     });
+    clearCache('tours');
     res.json({ message: "Tour deleted successfully", id });
   } catch (err: any) {
     console.error(`Delete tour ${id} failed:`, err.message);
@@ -532,7 +658,7 @@ app.delete('/api/tours/:id', async (req, res) => {
 });
 
 // CREATE Hotel
-app.post('/api/hotels', async (req, res) => {
+app.post('/api/hotels', authenticateAdmin, async (req, res) => {
   try {
     let { id, name, location, image, rating, price, description } = req.body;
     if (!id) {
@@ -544,6 +670,7 @@ app.post('/api/hotels', async (req, res) => {
       method: 'POST',
       body: JSON.stringify(payload)
     });
+    clearCache('hotels');
     res.status(201).json(payload);
   } catch (err: any) {
     console.error("Create hotel failed:", err.message);
@@ -552,8 +679,8 @@ app.post('/api/hotels', async (req, res) => {
 });
 
 // UPDATE Hotel
-app.put('/api/hotels/:id', async (req, res) => {
-  const id = parseInt(req.params.id);
+app.put('/api/hotels/:id', authenticateAdmin, async (req, res) => {
+  const id = parseInt(req.params.id as string);
   try {
     const { name, location, image, rating, price, description } = req.body;
     const payload = { name, location, image, rating: parseFloat(rating) || 5.0, price, description };
@@ -561,6 +688,7 @@ app.put('/api/hotels/:id', async (req, res) => {
       method: 'PATCH',
       body: JSON.stringify(payload)
     });
+    clearCache('hotels');
     res.json({ id, ...payload });
   } catch (err: any) {
     console.error(`Update hotel ${id} failed:`, err.message);
@@ -569,12 +697,13 @@ app.put('/api/hotels/:id', async (req, res) => {
 });
 
 // DELETE Hotel
-app.delete('/api/hotels/:id', async (req, res) => {
-  const id = parseInt(req.params.id);
+app.delete('/api/hotels/:id', authenticateAdmin, async (req, res) => {
+  const id = parseInt(req.params.id as string);
   try {
     await supabaseFetch(`/hotels?id=eq.${id}`, {
       method: 'DELETE'
     });
+    clearCache('hotels');
     res.json({ message: "Hotel deleted successfully", id });
   } catch (err: any) {
     console.error(`Delete hotel ${id} failed:`, err.message);
@@ -582,19 +711,36 @@ app.delete('/api/hotels/:id', async (req, res) => {
   }
 });
 
-// File upload endpoint (writes to frontend public/uploads directory)
-app.post('/api/upload', (req, res) => {
+// File upload endpoint with authentication and strict file typing/sizing verification
+app.post('/api/upload', authenticateAdmin, (req, res) => {
   try {
     const { name, data } = req.body;
     if (!name || !data) {
       return res.status(400).json({ error: "Name and data are required" });
     }
 
+    // Strict extension check
+    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.svg'];
+    const ext = path.extname(name).toLowerCase();
+    if (!allowedExtensions.includes(ext)) {
+      return res.status(400).json({ error: "Invalid file extension. Only images are allowed." });
+    }
+
     // Extract base64 content
+    const match = data.match(/^data:image\/(\w+);base64,/);
+    if (!match) {
+      return res.status(400).json({ error: "Invalid file format. Only base64-encoded images are allowed." });
+    }
+
     const base64Data = data.replace(/^data:image\/\w+;base64,/, "");
     const buffer = Buffer.from(base64Data, 'base64');
 
-    // Create public/uploads directory
+    // Strict file size check (5MB limit)
+    if (buffer.length > 5 * 1024 * 1024) {
+      return res.status(400).json({ error: "File exceeds maximum size limit of 5MB." });
+    }
+
+    // Create public/uploads directory safely
     let uploadDir = path.resolve(process.cwd(), '../public/uploads');
     const rootPublic = path.resolve(process.cwd(), '../public');
     if (!fs.existsSync(rootPublic)) {
@@ -605,8 +751,15 @@ app.post('/api/upload', (req, res) => {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
 
-    const filename = `${Date.now()}-${name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+    // Sanitize filename to prevent Path Traversal
+    const safeName = path.basename(name).replace(/[^a-zA-Z0-9.-]/g, '_');
+    const filename = `${Date.now()}-${safeName}`;
     const filePath = path.join(uploadDir, filename);
+
+    // Final security check: Ensure filePath is inside uploadDir
+    if (!filePath.startsWith(uploadDir)) {
+      return res.status(400).json({ error: "Invalid path traversal attempt." });
+    }
 
     fs.writeFileSync(filePath, buffer);
 
@@ -640,10 +793,16 @@ const defaultAboutData = {
 };
 
 app.get('/api/about', (req, res) => {
+  const cacheKey = 'about:data';
+  const cached = getCache(cacheKey);
+  if (cached) return res.json(cached);
+
   try {
     if (fs.existsSync(ABOUT_FILE)) {
       const data = fs.readFileSync(ABOUT_FILE, 'utf8');
-      return res.json(JSON.parse(data));
+      const parsed = JSON.parse(data);
+      setCache(cacheKey, parsed);
+      return res.json(parsed);
     }
   } catch (e) {
     console.error("Failed to read about.json:", e);
@@ -651,9 +810,10 @@ app.get('/api/about', (req, res) => {
   res.json(defaultAboutData);
 });
 
-app.put('/api/about', (req, res) => {
+app.put('/api/about', authenticateAdmin, (req, res) => {
   try {
     fs.writeFileSync(ABOUT_FILE, JSON.stringify(req.body, null, 2), 'utf8');
+    clearCache('about:');
     res.json(req.body);
   } catch (err: any) {
     console.error("Failed to save about.json:", err.message);
@@ -689,10 +849,16 @@ const defaultContactData = {
 
 
 app.get('/api/contact', (req, res) => {
+  const cacheKey = 'contact:data';
+  const cached = getCache(cacheKey);
+  if (cached) return res.json(cached);
+
   try {
     if (fs.existsSync(CONTACT_FILE)) {
       const data = fs.readFileSync(CONTACT_FILE, 'utf8');
-      return res.json(JSON.parse(data));
+      const parsed = JSON.parse(data);
+      setCache(cacheKey, parsed);
+      return res.json(parsed);
     }
   } catch (e) {
     console.error("Failed to read contact.json:", e);
@@ -700,9 +866,10 @@ app.get('/api/contact', (req, res) => {
   res.json(defaultContactData);
 });
 
-app.put('/api/contact', (req, res) => {
+app.put('/api/contact', authenticateAdmin, (req, res) => {
   try {
     fs.writeFileSync(CONTACT_FILE, JSON.stringify(req.body, null, 2), 'utf8');
+    clearCache('contact:');
     res.json(req.body);
   } catch (err: any) {
     console.error("Failed to save contact.json:", err.message);
@@ -739,10 +906,16 @@ const defaultTestimonials = [
 ];
 
 app.get('/api/testimonials', (req, res) => {
+  const cacheKey = 'testimonials:list';
+  const cached = getCache(cacheKey);
+  if (cached) return res.json(cached);
+
   try {
     if (fs.existsSync(TESTIMONIALS_FILE)) {
       const data = fs.readFileSync(TESTIMONIALS_FILE, 'utf8');
-      return res.json(JSON.parse(data));
+      const parsed = JSON.parse(data);
+      setCache(cacheKey, parsed);
+      return res.json(parsed);
     }
   } catch (e) {
     console.error("Failed to read testimonials.json:", e);
@@ -750,9 +923,10 @@ app.get('/api/testimonials', (req, res) => {
   res.json(defaultTestimonials);
 });
 
-app.put('/api/testimonials', (req, res) => {
+app.put('/api/testimonials', authenticateAdmin, (req, res) => {
   try {
     fs.writeFileSync(TESTIMONIALS_FILE, JSON.stringify(req.body, null, 2), 'utf8');
+    clearCache('testimonials:');
     res.json(req.body);
   } catch (err: any) {
     console.error("Failed to save testimonials.json:", err.message);

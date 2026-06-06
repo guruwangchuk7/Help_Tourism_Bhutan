@@ -27,20 +27,28 @@ const TourDetail = () => {
   const navigate = useNavigate()
   const [tour, setTour] = useState<Tour | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
 
   const [activeTab, setActiveTab] = useState<"itinerary" | "inclusions" | "essential">("itinerary")
   const [expandedDay, setExpandedDay] = useState<number | null>(1)
 
   useEffect(() => {
     setLoading(true)
+    setError(false)
     fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000'}/api/tours/${id}`)
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) {
+          throw new Error("Failed to fetch")
+        }
+        return res.json()
+      })
       .then(data => {
         setTour(data)
         setLoading(false)
       })
       .catch(err => {
         console.error(err)
+        setError(true)
         setLoading(false)
       })
   }, [id])
@@ -53,15 +61,20 @@ const TourDetail = () => {
     return <DetailSkeleton />
   }
 
-  if (!tour) {
+  if (error || !tour) {
     return (
       <PageTransition>
-        <div className="pt-40 pb-40 text-center min-h-[100dvh] bg-bg-light">
-          <h2 className="text-3xl font-heading text-primary mb-4">Tour Not Found</h2>
-          <p className="text-secondary mb-8">We couldn't find the expedition you were looking for.</p>
-          <Link to="/tours" className="btn-accent px-8 py-3 rounded-full">
-            Back to Tours
-          </Link>
+        <div className="min-h-[100dvh] bg-bg-light flex flex-col items-center justify-center pt-32 pb-20 px-6 text-center">
+          <div className="max-w-md bg-white border border-primary/5 rounded-[2.5rem] p-8 sm:p-12 shadow-premium space-y-6">
+            <span className="text-accent font-semibold tracking-[0.3em] uppercase text-[10px] block">Error 404</span>
+            <h1 className="text-3xl font-heading font-medium text-primary">Tour Not Found</h1>
+            <p className="text-secondary font-light text-sm leading-relaxed">
+              We couldn't retrieve the details for this tour. It may have been modified or is currently unavailable.
+            </p>
+            <Link to="/tours" className="btn-accent px-8 py-3 rounded-full mt-4 inline-block">
+              Browse Tours
+            </Link>
+          </div>
         </div>
       </PageTransition>
     )
@@ -147,7 +160,7 @@ const TourDetail = () => {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as any)}
-                    className={`pb-4 text-[10px] font-bold uppercase tracking-[0.2em] border-b-2 transition-all shrink-0 cursor-pointer ${
+                    className={`pb-4 text-[10px] font-bold uppercase tracking-[0.2em] border-b-2 transition-all shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-4 rounded ${
                       activeTab === tab.id
                         ? "border-accent text-primary font-bold"
                         : "border-transparent text-secondary/60 hover:text-primary"
@@ -293,7 +306,8 @@ const TourDetail = () => {
                           destinationName: tour.title,
                           nights: tour.nights,
                           adults: 2,
-                          totalPrice: tour.priceVal * 2 // standard 2 travelers
+                          totalPrice: tour.priceVal * 2, // standard 2 travelers
+                          image: tour.image
                         }
                       })
                     }

@@ -43,7 +43,7 @@ const Flights = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
-              className="text-white/80 text-xs md:text-sm font-light max-w-2xl mx-auto leading-relaxed tracking-[0.15em] uppercase"
+              className="text-white/80 text-[10px] md:text-sm font-light max-w-2xl mx-auto leading-relaxed tracking-[0.15em] uppercase"
             >
               Fly into the Kingdom of Happiness with our comprehensive flight concierge protocols
             </motion.p>
@@ -52,7 +52,7 @@ const Flights = () => {
 
         {/* Flights Content */}
         <main className="max-w-5xl mx-auto px-6 py-20">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
@@ -66,7 +66,7 @@ const Flights = () => {
           </motion.div>
 
           {/* Route Table */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
@@ -77,7 +77,8 @@ const Flights = () => {
               <Compass className="w-5 h-5 text-accent" />
               Popular Direct Entry Sectors
             </h3>
-            <div className="overflow-x-auto">
+            {/* Desktop Table (hidden on mobile) */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-primary/5 text-[10px] font-bold uppercase tracking-wider text-secondary">
@@ -101,10 +102,37 @@ const Flights = () => {
                 </tbody>
               </table>
             </div>
+
+            {/* Mobile Stacked List (hidden on desktop) */}
+            <div className="md:hidden space-y-6 divide-y divide-primary/5">
+              {flightHubs.map((route, i) => (
+                <div key={i} className={`${i > 0 ? 'pt-6' : ''} space-y-2.5`}>
+                  <div className="flex justify-between items-center text-xs font-semibold uppercase tracking-wider text-secondary">
+                    <span>Route</span>
+                    <span className="text-[10px] bg-bg-alt text-primary px-2 py-0.5 rounded-md font-bold">{route.frequency}</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm text-primary">
+                    <span className="font-semibold">{route.from}</span>
+                    <span className="text-secondary/50">→</span>
+                    <span className="font-semibold">{route.to}</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 text-xs font-light text-secondary pt-1">
+                    <div>
+                      <span className="block text-[9px] font-bold uppercase text-secondary/40 tracking-wider mb-0.5">Duration</span>
+                      <span className="text-primary">{route.duration}</span>
+                    </div>
+                    <div>
+                      <span className="block text-[9px] font-bold uppercase text-secondary/40 tracking-wider mb-0.5">Carrier</span>
+                      <span className="text-accent font-medium">{route.carrier}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </motion.div>
 
           {/* Inquiry Section */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}

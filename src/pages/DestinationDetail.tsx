@@ -4,6 +4,16 @@ import { ArrowLeft, Users, MessageSquare, Heart, Share2, Star, ArrowRight, Wifi,
 import { useState, useEffect } from "react"
 import PageTransition from "../components/common/PageTransition"
 import { DetailSkeleton } from "../components/common/Skeleton"
+import avatarElena from "../assets/avatar-elena.png"
+import avatarMarcus from "../assets/avatar-marcus.png"
+import avatarUser from "../assets/avatar-user.png"
+
+const getLocalAvatar = (avatarUrl: string, name: string) => {
+  const url = avatarUrl || "";
+  if (url.includes("elena") || name.toLowerCase().includes("elena")) return avatarElena;
+  if (url.includes("marcus") || name.toLowerCase().includes("marcus")) return avatarMarcus;
+  return avatarUser;
+}
 
 type Destination = {
   id: number
@@ -21,21 +31,40 @@ const DestinationDetail = () => {
   const navigate = useNavigate()
   const [destination, setDestination] = useState<Destination | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
   const [activeTab, setActiveTab] = useState('overview')
-  const [startDate, setStartDate] = useState("")
-  const [endDate, setEndDate] = useState("")
+  const getTodayString = () => {
+    const today = new Date()
+    return today.toISOString().split('T')[0]
+  }
+
+  const getTomorrowString = () => {
+    const tomorrow = new Date()
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    return tomorrow.toISOString().split('T')[0]
+  }
+
+  const [startDate, setStartDate] = useState(getTodayString())
+  const [endDate, setEndDate] = useState(getTomorrowString())
   const [adults, setAdults] = useState(2)
 
   useEffect(() => {
     setLoading(true)
+    setError(false)
     fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000'}/api/destinations/${id}`)
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) {
+          throw new Error("Failed to fetch")
+        }
+        return res.json()
+      })
       .then(data => {
         setDestination(data)
         setLoading(false)
       })
       .catch(err => {
         console.error(err)
+        setError(true)
         setLoading(false)
       })
   }, [id])
@@ -60,7 +89,27 @@ const DestinationDetail = () => {
   }, [id])
 
   if (loading) return <DetailSkeleton />
-  if (!destination) return <div className="p-20 text-center text-2xl font-heading font-medium text-primary">Destination missed. Back to Home?</div>
+  if (error || !destination) {
+    return (
+      <PageTransition>
+        <div className="min-h-[100dvh] bg-bg-light flex flex-col items-center justify-center pt-32 pb-20 px-6 text-center">
+          <div className="max-w-md bg-white border border-primary/5 rounded-[2.5rem] p-8 sm:p-12 shadow-premium space-y-6">
+            <span className="text-accent font-semibold tracking-[0.3em] uppercase text-[10px] block">Error 404</span>
+            <h1 className="text-3xl font-heading font-medium text-primary">Destination Not Found</h1>
+            <p className="text-secondary font-light text-sm leading-relaxed">
+              We couldn't retrieve the details for this destination. It may have been relocated or is currently unavailable.
+            </p>
+            <button
+              onClick={() => navigate('/destinations')}
+              className="btn-accent px-8 py-3 rounded-full mt-4"
+            >
+              Browse Destinations
+            </button>
+          </div>
+        </div>
+      </PageTransition>
+    )
+  }
 
   // Default values
   let displayDescription = destination.description;
@@ -172,17 +221,19 @@ const DestinationDetail = () => {
           {/* Main Content Area (8 cols) */}
           <div className="lg:col-span-8">
             {/* Custom Tabs */}
-            <div className="flex space-x-6 md:space-x-12 border-b border-primary/5 mb-10 md:mb-16 overflow-x-auto scrollbar-hide pb-2">
+            <div className="flex space-x-6 md:space-x-12 border-b border-primary/5 mb-10 md:mb-16 overflow-x-auto scrollbar-hide pb-2 relative">
               {['overview', 'itinerary', 'amenities', 'reviews'].map(tab => (
                 <button
                   key={tab}
-                  className={`pb-4 relative font-medium text-[10px] uppercase tracking-[0.2em] transition-colors whitespace-nowrap ${activeTab === tab ? 'text-primary' : 'text-secondary/50 hover:text-primary'
+                  className={`pb-4 relative font-medium text-[10px] uppercase tracking-[0.2em] transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-4 rounded ${activeTab === tab ? 'text-primary' : 'text-secondary/50 hover:text-primary'
                     }`}
                   onClick={() => setActiveTab(tab)}
                 >
                   {tab}
                   {activeTab === tab && (
-                    <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 w-full h-[2px] bg-accent" />
+                    <div className="absolute bottom-0 left-0 right-0 h-[2px] pointer-events-none overflow-hidden">
+                      <motion.div layoutId="tab-underline" className="w-full h-full bg-accent" />
+                    </div>
                   )}
                 </button>
               ))}
@@ -270,7 +321,7 @@ const DestinationDetail = () => {
                       <div key={idx} className="p-8 bg-white rounded-[2rem] shadow-minimal border border-primary/5 space-y-6">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-4">
-                            <img src={review.avatar} alt={review.name} className="w-12 h-12 rounded-full object-cover grayscale" />
+                            <img src={getLocalAvatar(review.avatar, review.name)} alt={review.name} className="w-12 h-12 rounded-full object-cover grayscale" />
                             <div>
                               <h5 className="font-heading font-semibold text-primary text-base">{review.name}</h5>
                               <span className="text-[10px] uppercase text-secondary/60 tracking-wider">{review.date}</span>
@@ -293,7 +344,7 @@ const DestinationDetail = () => {
 
           {/* Dynamic Sidebar (4 cols) */}
           <div className="lg:col-span-4">
-            <div className="sticky top-32 space-y-8">
+            <div className="lg:sticky lg:top-32 space-y-8">
               {/* Booking Widget */}
               <div className="bg-white rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-10 text-primary border border-primary/5 shadow-premium relative overflow-hidden group">
                 <div className="absolute top-[-50px] right-[-50px] w-48 h-48 bg-accent/5 rounded-full blur-2xl pointer-events-none" />
@@ -318,7 +369,7 @@ const DestinationDetail = () => {
                         type="date" 
                         value={startDate} 
                         onChange={(e) => setStartDate(e.target.value)} 
-                        className="w-full bg-bg-alt border border-primary/5 rounded-xl px-3 py-2.5 text-xs text-primary outline-none focus:border-accent/40 cursor-pointer"
+                        className="w-full bg-bg-alt border border-primary/5 rounded-xl px-3 py-2.5 text-xs text-primary outline-none focus:border-accent/40 cursor-pointer min-h-[42px] appearance-none"
                       />
                     </div>
                     <div className="flex flex-col gap-1">
@@ -327,7 +378,7 @@ const DestinationDetail = () => {
                         type="date" 
                         value={endDate} 
                         onChange={(e) => setEndDate(e.target.value)} 
-                        className="w-full bg-bg-alt border border-primary/5 rounded-xl px-3 py-2.5 text-xs text-primary outline-none focus:border-accent/40 cursor-pointer"
+                        className="w-full bg-bg-alt border border-primary/5 rounded-xl px-3 py-2.5 text-xs text-primary outline-none focus:border-accent/40 cursor-pointer min-h-[42px] appearance-none"
                       />
                     </div>
                   </div>
@@ -358,7 +409,7 @@ const DestinationDetail = () => {
                   </div>
 
                   <button
-                    onClick={() => navigate('/booking', { state: { adults, nights, startDate, endDate, destinationName: destination.name, totalPrice } })}
+                    onClick={() => navigate('/booking', { state: { adults, nights, startDate, endDate, destinationName: destination.name, totalPrice, image: destination.image } })}
                     className="w-full btn-accent py-5 text-sm shadow-premium"
                   >
                     Secure Trip

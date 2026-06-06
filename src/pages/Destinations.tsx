@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, SlidersHorizontal, FilterX } from 'lucide-react'
 import DestinationCard from '../components/destinations/DestinationCard'
@@ -38,11 +38,13 @@ const Destinations = () => {
 
   const categories = ['All', 'Adventure', 'Cultural', 'Luxury', 'Trekking', 'Spiritual']
 
-  const filteredDestinations = destinations.filter(dest => {
-    const matchesSearch = dest.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      dest.description.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchesSearch
-  })
+  const filteredDestinations = useMemo(() => {
+    return destinations.filter(dest => {
+      const matchesSearch = dest.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        dest.description.toLowerCase().includes(searchQuery.toLowerCase())
+      return matchesSearch
+    })
+  }, [destinations, searchQuery])
 
   return (
     <PageTransition>
@@ -74,7 +76,7 @@ const Destinations = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
-              className="text-white/80 text-xs md:text-sm font-light max-w-2xl mx-auto leading-relaxed tracking-[0.15em] uppercase"
+              className="text-white/80 text-[10px] md:text-sm font-light max-w-2xl mx-auto leading-relaxed tracking-[0.15em] uppercase"
             >
               Explore the legendary valleys and sacred pathways of the Himalayan kingdom
             </motion.p>
@@ -132,7 +134,7 @@ const Destinations = () => {
                   <div className="px-6 py-8 grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div>
                       <h4 className="font-bold text-primary uppercase tracking-widest text-[9px] mb-4">Experience Category</h4>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-3 sm:gap-2">
                         {categories.map(cat => (
                           <button
                             key={cat}
@@ -170,26 +172,31 @@ const Destinations = () => {
               ))}
             </div>
           ) : filteredDestinations.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-              {filteredDestinations.map((dest, idx) => (
-                <motion.div
-                  key={dest.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.05 }}
-                  viewport={{ once: true }}
-                >
-                  <DestinationCard
-                    id={dest.id}
-                    name={dest.name}
-                    image={dest.image}
-                    price={dest.price}
-                    rating={dest.rating}
-                    location={dest.location}
-                  />
-                </motion.div>
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+                {filteredDestinations.map((dest, idx) => (
+                  <motion.div
+                    key={dest.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.05 }}
+                    viewport={{ once: true }}
+                  >
+                    <DestinationCard
+                      id={dest.id}
+                      name={dest.name}
+                      image={dest.image}
+                      price={dest.price}
+                      rating={dest.rating}
+                      location={dest.location}
+                    />
+                  </motion.div>
+                ))}
+              </div>
+              <div className="mt-16 text-center text-[10px] uppercase tracking-[0.15em] text-secondary/60 max-w-3xl mx-auto border-t border-primary/5 pt-8">
+                * Note: Lodging rates shown do not include the government Sustainable Development Fee (SDF) of $100 per night or visa processing fees.
+              </div>
+            </>
           ) : (
             <div className="py-40 text-center">
               <p className="text-2xl font-heading italic text-gray-300">No results found for your query.</p>

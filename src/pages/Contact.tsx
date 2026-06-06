@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { motion } from "framer-motion"
-import { Phone, Mail, MapPin, Send, Instagram, Twitter, Facebook, Globe } from "lucide-react"
+import { Phone, Mail, MapPin, Instagram, Twitter, Facebook, Globe, ChevronDown, Check } from "lucide-react"
 import PageTransition from "../components/common/PageTransition"
 
 import { Skeleton, FormSkeleton } from "../components/common/Skeleton"
@@ -30,6 +30,56 @@ const Contact = () => {
 
   const [data, setData] = useState<ContactData | null>(null)
   const [loading, setLoading] = useState(true)
+
+  const [fullName, setFullName] = useState("")
+  const [email, setEmail] = useState("")
+  const [message, setMessage] = useState("")
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+
+  const handleGmailSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!fullName.trim() || !email.trim() || !message.trim()) {
+      alert("Please fill in all fields before sending.")
+      return
+    }
+    const subject = `Inquiry: ${inquiryType}`
+    const body = `Kuzu zangpo la!
+
+I would like to make an inquiry.
+
+📋 Details:
+- Name: ${fullName}
+- Email: ${email}
+- Type: ${inquiryType}
+
+Message:
+${message}
+
+Thank you!`
+    const mailtoUrl = `mailto:explore@helptourismbhutan.bt?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    window.open(mailtoUrl, '_blank')
+    alert('Opening Gmail composer with your inquiry...')
+  }
+
+  const handleWhatsAppSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!fullName.trim() || !email.trim() || !message.trim()) {
+      alert("Please fill in all fields before sending.")
+      return
+    }
+    const body = `Kuzu zangpo la!
+
+📋 *New Inquiry:*
+- *Name:* ${fullName}
+- *Email:* ${email}
+- *Type:* ${inquiryType}
+
+*Message:*
+${message}`
+    const waUrl = `https://wa.me/97517517119?text=${encodeURIComponent(body)}`
+    window.open(waUrl, '_blank')
+    alert('Opening WhatsApp support with your inquiry...')
+  }
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000'}/api/contact`)
@@ -102,7 +152,7 @@ const Contact = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
-              className="text-white/80 text-xs md:text-sm font-light max-w-2xl mx-auto leading-relaxed tracking-[0.15em] uppercase"
+              className="text-white/80 text-[10px] md:text-sm font-light max-w-2xl mx-auto leading-relaxed tracking-[0.15em] uppercase"
             >
               {data.heroSubtitle}
             </motion.p>
@@ -196,47 +246,104 @@ const Contact = () => {
                   Fill in your details below and a travel architect will respond within 12 hours.
                 </p>
 
-                <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); alert('Message sent to Thimphu.') }}>
+                <form className="space-y-5">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="flex flex-col space-y-1.5">
                       <label className="text-[9px] font-medium text-secondary uppercase tracking-[0.2em] pl-1">Full Name</label>
-                      <input type="text" placeholder="e.g. Tenzin Dorji" className="w-full bg-bg-light border border-primary/5 rounded-xl px-4 py-3 outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/10 transition-all font-light text-primary placeholder-secondary/40 text-xs sm:text-sm" required />
+                      <input 
+                        type="text" 
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        placeholder="e.g. Tenzin Dorji" 
+                        className="w-full bg-bg-light border border-primary/5 rounded-xl px-4 py-3 outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/10 transition-all font-light text-primary placeholder-secondary/40 text-xs sm:text-sm" 
+                        required 
+                      />
                     </div>
                     <div className="flex flex-col space-y-1.5">
                       <label className="text-[9px] font-medium text-secondary uppercase tracking-[0.2em] pl-1">Email Address</label>
-                      <input type="email" placeholder="e.g. tenzin@domain.com" className="w-full bg-bg-light border border-primary/5 rounded-xl px-4 py-3 outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/10 transition-all font-light text-primary placeholder-secondary/40 text-xs sm:text-sm" required />
+                      <input 
+                        type="email" 
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="e.g. tenzin@domain.com" 
+                        className="w-full bg-bg-light border border-primary/5 rounded-xl px-4 py-3 outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/10 transition-all font-light text-primary placeholder-secondary/40 text-xs sm:text-sm" 
+                        required 
+                      />
                     </div>
                   </div>
 
-                  <div className="flex flex-col space-y-1.5">
+                  <div className="flex flex-col space-y-1.5 relative">
                     <label className="text-[9px] font-medium text-secondary uppercase tracking-[0.2em] pl-1">Inquiry Type</label>
-                    <div className="relative">
-                      <select 
-                        value={inquiryType}
-                        onChange={(e) => setInquiryType(e.target.value)}
-                        className="w-full bg-bg-light border border-primary/5 rounded-xl px-4 py-3 outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/10 transition-all font-light text-primary text-xs sm:text-sm appearance-none cursor-pointer"
-                      >
-                        <option>General Inquiry</option>
-                        <option>Flight Booking Inquiry</option>
-                        <option>Luxury Booking Request</option>
-                        <option>Partnership Protocol</option>
-                        <option>Cultural Sponsorship</option>
-                      </select>
-                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-secondary/60">
-                        <svg className="fill-current h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-                      </div>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setDropdownOpen(!dropdownOpen)}
+                      className="w-full bg-bg-light border border-primary/5 rounded-xl px-4 py-3 outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/10 transition-all font-light text-primary text-xs sm:text-sm flex items-center justify-between cursor-pointer text-left"
+                    >
+                      <span>{inquiryType}</span>
+                      <ChevronDown className={`w-3.5 h-3.5 text-secondary/60 transition-transform duration-300 ${dropdownOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                    {dropdownOpen && (
+                      <>
+                        <div className="fixed inset-0 z-40" onClick={() => setDropdownOpen(false)} />
+                        <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-primary/5 rounded-xl shadow-premium z-50 overflow-hidden text-xs sm:text-sm text-primary">
+                          {[
+                            "General Inquiry",
+                            "Flight Booking Inquiry",
+                            "Luxury Booking Request",
+                            "Partnership Protocol",
+                            "Cultural Sponsorship"
+                          ].map((option) => (
+                            <div
+                              key={option}
+                              onClick={() => {
+                                setInquiryType(option)
+                                setDropdownOpen(false)
+                              }}
+                              className={`px-4 py-3 cursor-pointer transition-colors duration-200 hover:bg-bg-alt flex items-center justify-between ${
+                                inquiryType === option ? 'bg-accent/5 text-accent font-medium' : 'text-primary font-light'
+                              }`}
+                            >
+                              <span>{option}</span>
+                              {inquiryType === option && <Check className="w-3.5 h-3.5 text-accent" />}
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    )}
                   </div>
 
                   <div className="flex flex-col space-y-1.5">
                     <label className="text-[9px] font-medium text-secondary uppercase tracking-[0.2em] pl-1">Your Message</label>
-                    <textarea placeholder="Describe your travel dreams, details, or questions..." rows={4} className="w-full bg-bg-light border border-primary/5 rounded-xl px-4 py-3 outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/10 transition-all font-light text-primary placeholder-secondary/40 text-xs sm:text-sm resize-none" required></textarea>
+                    <textarea 
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      placeholder="Describe your travel dreams, details, or questions..." 
+                      rows={4} 
+                      className="w-full bg-bg-light border border-primary/5 rounded-xl px-4 py-3 outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/10 transition-all font-light text-primary placeholder-secondary/40 text-xs sm:text-sm resize-none" 
+                      required
+                    />
                   </div>
 
-                  <button className="btn-accent w-full py-3.5 text-[10px] font-bold tracking-widest rounded-xl shadow-premium mt-3">
-                    Send Inquiry
-                    <Send className="w-3.5 h-3.5 ml-2" />
-                  </button>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
+                    <button 
+                      type="button"
+                      onClick={handleGmailSubmit}
+                      className="btn-accent w-full py-3.5 text-[10px] font-bold tracking-widest rounded-xl shadow-premium flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <span>Send via Gmail</span>
+                      <Mail className="w-3.5 h-3.5" />
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={handleWhatsAppSubmit}
+                      className="w-full py-3.5 bg-[#25D366] hover:bg-[#20ba5a] text-white text-[10px] font-bold tracking-widest rounded-xl shadow-premium flex items-center justify-center gap-2 transition-colors duration-300 cursor-pointer"
+                    >
+                      <span>Send via WhatsApp</span>
+                      <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.73-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.968C16.592 1.97 14.121.948 11.5.948c-5.442 0-9.867 4.372-9.87 9.802 0 1.698.48 3.35 1.387 4.814l-.993 3.627 3.733-.979zm11.391-7.228c-.286-.143-1.692-.825-1.953-.919-.26-.094-.45-.141-.639.143-.19.283-.733.919-.899 1.109-.166.19-.332.213-.618.071-.286-.143-1.206-.438-2.298-1.396-.85-.749-1.424-1.673-1.591-1.958-.167-.285-.018-.439.124-.581.128-.127.286-.33.429-.496.143-.165.19-.283.286-.472.095-.19.047-.354-.024-.496-.071-.142-.639-1.518-.876-2.085-.23-.553-.465-.478-.639-.487-.165-.008-.355-.01-.545-.01-.19 0-.5.07-.762.354-.262.283-1 .953-1 2.325 0 1.372 1.011 2.697 1.153 2.886.142.188 1.99 2.997 4.819 4.195.673.286 1.2.457 1.609.585.677.211 1.293.181 1.779.11.542-.08 1.692-.682 1.93-.941.237-.26.237-.482.166-.624-.071-.142-.285-.226-.571-.368z"/>
+                      </svg>
+                    </button>
+                  </div>
                 </form>
               </div>
             </motion.div>

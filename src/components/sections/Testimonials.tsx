@@ -2,6 +2,9 @@ import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Star } from "lucide-react"
 import { Skeleton } from "../common/Skeleton"
+import avatarElena from "../../assets/avatar-elena.png"
+import avatarMarcus from "../../assets/avatar-marcus.png"
+import avatarUser from "../../assets/avatar-user.png"
 
 type TestimonialItem = {
     id: number
@@ -10,6 +13,13 @@ type TestimonialItem = {
     content: string
     avatar: string
     rating: number
+}
+
+const getLocalAvatar = (avatarUrl: string, name: string) => {
+    const url = avatarUrl || "";
+    if (url.includes("elena") || name.toLowerCase().includes("elena")) return avatarElena;
+    if (url.includes("marcus") || name.toLowerCase().includes("marcus")) return avatarMarcus;
+    return avatarUser;
 }
 
 const Testimonials = () => {
@@ -89,7 +99,7 @@ const Testimonials = () => {
                         </p>
                         <div className="flex items-center gap-2 pt-3 border-t border-primary/5">
                             <img
-                                src={t.avatar || "https://i.pravatar.cc/200"}
+                                src={getLocalAvatar(t.avatar, t.name)}
                                 alt={t.name}
                                 className="w-7 h-7 rounded-full object-cover shrink-0"
                             />
@@ -123,7 +133,7 @@ const Testimonials = () => {
                         </p>
                         <div className="flex items-center gap-3 pt-5 border-t border-primary/5">
                             <img
-                                src={t.avatar || "https://i.pravatar.cc/200"}
+                                src={getLocalAvatar(t.avatar, t.name)}
                                 alt={t.name}
                                 className="w-10 h-10 rounded-full object-cover shrink-0"
                             />

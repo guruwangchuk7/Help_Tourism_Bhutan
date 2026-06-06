@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { ArrowLeft, ArrowRight, Sparkles, Compass, Calendar, Home as HomeIcon, CheckCircle, MapPin, Mountain, Sun, Gift, Star } from "lucide-react"
 import { useNavigate } from "react-router-dom"
@@ -9,27 +9,29 @@ const TripBuilder = () => {
   const [step, setStep] = useState(1)
 
   // Form states
-  const [style, setStyle] = useState<string>("Culture")
-  const [duration, setDuration] = useState<number>(7)
-  const [month, setMonth] = useState<string>("October")
-  const [groupSize, setGroupSize] = useState<number>(2)
-  const [tier, setTier] = useState<string>("Boutique (4-Star)")
-  const [name, setName] = useState<string>("")
-  const [email, setEmail] = useState<string>("")
-  const [notes, setNotes] = useState<string>("")
+  const [formData, setFormData] = useState({
+    style: "Culture & Dzongs",
+    duration: 7,
+    month: "Fall (Sep-Nov)",
+    groupSize: 2,
+    tier: "Boutique (4-Star)",
+    name: "",
+    email: "",
+    notes: ""
+  })
 
-  // Estimated budget calculator
-  const calculateEstimate = () => {
+  // Estimated budget calculation
+  const estimatedBudget = useMemo(() => {
     let rate = 250 // standard 3-star
-    if (tier.includes("4-Star")) rate = 450
-    if (tier.includes("5-Star")) rate = 1200
+    if (formData.tier.includes("4-Star")) rate = 450
+    if (formData.tier.includes("5-Star")) rate = 1200
 
     const sdf = 100
     const visa = 40
     
-    const costPerPerson = duration * (rate + sdf) + visa
-    return costPerPerson * groupSize
-  }
+    const costPerPerson = formData.duration * (rate + sdf) + visa
+    return costPerPerson * formData.groupSize
+  }, [formData.tier, formData.duration, formData.groupSize])
 
   const handleNext = () => {
     if (step < 4) setStep(step + 1)
@@ -120,9 +122,9 @@ const TripBuilder = () => {
                       return (
                         <div
                           key={item.name}
-                          onClick={() => setStyle(item.name)}
+                          onClick={() => setFormData(prev => ({ ...prev, style: item.name }))}
                           className={`p-6 rounded-2xl border transition-all cursor-pointer flex gap-4 items-center ${
-                            style === item.name 
+                            formData.style === item.name 
                               ? "border-accent bg-accent/5 shadow-minimal" 
                               : "border-primary/5 hover:border-primary/20 bg-bg-alt/50 hover:bg-white"
                           }`}
@@ -155,14 +157,14 @@ const TripBuilder = () => {
                   <div className="space-y-2">
                     <div className="flex justify-between items-center text-xs font-semibold uppercase tracking-wider text-secondary">
                       <span>Duration of Stay</span>
-                      <span className="text-primary text-sm font-bold">{duration} Nights</span>
+                      <span className="text-primary text-sm font-bold">{formData.duration} Nights</span>
                     </div>
                     <input
                       type="range"
                       min="3"
                       max="30"
-                      value={duration}
-                      onChange={(e) => setDuration(Number(e.target.value))}
+                      value={formData.duration}
+                      onChange={(e) => setFormData(prev => ({ ...prev, duration: Number(e.target.value) }))}
                       className="w-full h-1.5 bg-bg-alt rounded-lg appearance-none cursor-pointer accent-accent"
                     />
                   </div>
@@ -176,16 +178,16 @@ const TripBuilder = () => {
                     <div className="flex items-center gap-3">
                       <button
                         type="button"
-                        disabled={groupSize <= 1}
-                        onClick={() => setGroupSize(groupSize - 1)}
+                        disabled={formData.groupSize <= 1}
+                        onClick={() => setFormData(prev => ({ ...prev, groupSize: prev.groupSize - 1 }))}
                         className="w-8 h-8 rounded-full border border-primary/10 flex items-center justify-center hover:bg-bg-alt disabled:opacity-30 text-primary cursor-pointer"
                       >
                         -
                       </button>
-                      <span className="font-heading font-semibold text-lg text-primary min-w-[20px] text-center">{groupSize}</span>
+                      <span className="font-heading font-semibold text-lg text-primary min-w-[20px] text-center">{formData.groupSize}</span>
                       <button
                         type="button"
-                        onClick={() => setGroupSize(groupSize + 1)}
+                        onClick={() => setFormData(prev => ({ ...prev, groupSize: prev.groupSize + 1 }))}
                         className="w-8 h-8 rounded-full border border-primary/10 flex items-center justify-center hover:bg-bg-alt text-primary cursor-pointer"
                       >
                         +
@@ -201,9 +203,9 @@ const TripBuilder = () => {
                         <button
                           key={m}
                           type="button"
-                          onClick={() => setMonth(m)}
+                          onClick={() => setFormData(prev => ({ ...prev, month: m }))}
                           className={`py-2 px-1 rounded-xl text-[9px] font-bold uppercase tracking-wider border transition-all cursor-pointer ${
-                            month === m
+                            formData.month === m
                               ? "bg-primary border-primary text-white"
                               : "bg-bg-alt border-primary/5 text-primary hover:bg-white"
                           }`}
@@ -235,9 +237,9 @@ const TripBuilder = () => {
                       return (
                         <div
                           key={item.tier}
-                          onClick={() => setTier(item.tier)}
+                          onClick={() => setFormData(prev => ({ ...prev, tier: item.tier }))}
                           className={`p-6 rounded-2xl border transition-all cursor-pointer flex justify-between items-center ${
-                            tier === item.tier 
+                            formData.tier === item.tier 
                               ? "border-accent bg-accent/5 shadow-minimal" 
                               : "border-primary/5 hover:border-primary/20 bg-bg-alt/50 hover:bg-white"
                           }`}
@@ -275,8 +277,8 @@ const TripBuilder = () => {
                       <label className="text-[10px] font-bold text-secondary uppercase tracking-wider pl-4">Full Name</label>
                       <input
                         type="text"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
+                        value={formData.name}
+                        onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                         className="w-full bg-bg-alt border border-primary/5 rounded-xl px-6 py-4 outline-none focus:ring-2 focus:ring-accent/20 transition-all text-primary placeholder-secondary/40 font-light"
                         placeholder="e.g. Jigme Dorji"
                         required
@@ -286,8 +288,8 @@ const TripBuilder = () => {
                       <label className="text-[10px] font-bold text-secondary uppercase tracking-wider pl-4">Email Address</label>
                       <input
                         type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        value={formData.email}
+                        onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                         className="w-full bg-bg-alt border border-primary/5 rounded-xl px-6 py-4 outline-none focus:ring-2 focus:ring-accent/20 transition-all text-primary placeholder-secondary/40 font-light"
                         placeholder="e.g. jigme@bhutan.bt"
                         required
@@ -296,8 +298,8 @@ const TripBuilder = () => {
                     <div className="flex flex-col space-y-2 md:col-span-2">
                       <label className="text-[10px] font-bold text-secondary uppercase tracking-wider pl-4">Special Requests / Preferences</label>
                       <textarea
-                        value={notes}
-                        onChange={(e) => setNotes(e.target.value)}
+                        value={formData.notes}
+                        onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
                         rows={3}
                         className="w-full bg-bg-alt border border-primary/5 rounded-xl px-6 py-4 outline-none focus:ring-2 focus:ring-accent/20 transition-all text-primary placeholder-secondary/40 font-light resize-none"
                         placeholder="Describe special festivals, food restrictions, treks, or details you wish to include..."
@@ -310,7 +312,7 @@ const TripBuilder = () => {
                     <div>
                       <span className="text-[9px] font-bold text-secondary/60 uppercase tracking-widest block mb-0.5">Estimated Expenditure</span>
                       <span className="text-2xl font-heading font-semibold text-primary">
-                        ${calculateEstimate().toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                        ${estimatedBudget.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                       </span>
                     </div>
                     <div className="text-left sm:text-right text-[10px] text-secondary font-light max-w-xs sm:max-w-[180px] leading-relaxed">
@@ -332,13 +334,13 @@ const TripBuilder = () => {
                   </div>
                   <h3 className="text-2xl md:text-3xl font-heading font-medium text-primary">Travel Manifest Received</h3>
                   <p className="text-secondary font-light text-sm max-w-md mx-auto leading-relaxed">
-                    Thank you, <strong>{name}</strong>. An expert Bhutan travel architect has been assigned to your request and will format a custom itinerary proposal for your review within 24 hours.
+                    Thank you, <strong>{formData.name}</strong>. An expert Bhutan travel architect has been assigned to your request and will format a custom itinerary proposal for your review within 24 hours.
                   </p>
                   <div className="bg-bg-alt border border-primary/5 p-6 rounded-2xl max-w-sm mx-auto text-left space-y-2 text-xs font-light text-secondary">
-                    <p>• <strong>Selected Style:</strong> {style}</p>
-                    <p>• <strong>Duration:</strong> {duration} Nights ({month})</p>
-                    <p>• <strong>Group Size:</strong> {groupSize} Travelers</p>
-                    <p>• <strong>Hotel comfort class:</strong> {tier}</p>
+                    <p>• <strong>Selected Style:</strong> {formData.style}</p>
+                    <p>• <strong>Duration:</strong> {formData.duration} Nights ({formData.month})</p>
+                    <p>• <strong>Group Size:</strong> {formData.groupSize} Travelers</p>
+                    <p>• <strong>Hotel comfort class:</strong> {formData.tier}</p>
                   </div>
                   <button
                     onClick={() => navigate("/")}

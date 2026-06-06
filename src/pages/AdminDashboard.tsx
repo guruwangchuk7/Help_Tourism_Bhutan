@@ -90,6 +90,8 @@ const AdminDashboard = () => {
   const [contactForm, setContactForm] = useState<any>({})
   const [testimonialsForm, setTestimonialsForm] = useState<any[]>([])
 
+  const [adminKey, setAdminKey] = useState<string | null>(localStorage.getItem('ADMIN_API_KEY'))
+
   // Fetch all data
   const fetchData = async () => {
     setLoading(true)
@@ -124,9 +126,24 @@ const AdminDashboard = () => {
     }
   }
 
+  const getAuthHeader = () => {
+    const key = adminKey || localStorage.getItem('ADMIN_API_KEY') || '';
+    return { 'Authorization': `Bearer ${key}` };
+  }
+
   useEffect(() => {
+    let key = localStorage.getItem('ADMIN_API_KEY')
+    if (!key) {
+      key = window.prompt('Please enter the Admin API Key to access the dashboard:')
+      if (key) {
+        localStorage.setItem('ADMIN_API_KEY', key)
+        setAdminKey(key)
+      } else {
+        showToast('Access Denied: Admin API Key is required.', 'error')
+      }
+    }
     fetchData()
-  }, [])
+  }, [adminKey])
 
   const showToast = (text: string, type: 'success' | 'error') => {
     setMessage({ text, type })
@@ -139,9 +156,18 @@ const AdminDashboard = () => {
 
     try {
       const res = await fetch(`${API_BASE}/api/${type}/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          ...getAuthHeader()
+        }
       })
-      if (!res.ok) throw new Error('Delete failed')
+      if (!res.ok) {
+        if (res.status === 401 || res.status === 403) {
+          localStorage.removeItem('ADMIN_API_KEY')
+          setAdminKey(null)
+        }
+        throw new Error('Delete failed')
+      }
 
       showToast('Item deleted successfully!', 'success')
       fetchData()
@@ -317,11 +343,18 @@ const AdminDashboard = () => {
     try {
       const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeader()
+        },
         body: JSON.stringify(bodyData)
       })
 
       if (!res.ok) {
+        if (res.status === 401 || res.status === 403) {
+          localStorage.removeItem('ADMIN_API_KEY')
+          setAdminKey(null)
+        }
         const errData = await res.json()
         throw new Error(errData.error || 'Failed to save item')
       }
@@ -345,10 +378,19 @@ const AdminDashboard = () => {
         const base64 = reader.result as string
         const res = await fetch(`${API_BASE}/api/upload`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            ...getAuthHeader()
+          },
           body: JSON.stringify({ name: file.name, data: base64 })
         })
-        if (!res.ok) throw new Error('Upload failed')
+        if (!res.ok) {
+          if (res.status === 401 || res.status === 403) {
+            localStorage.removeItem('ADMIN_API_KEY')
+            setAdminKey(null)
+          }
+          throw new Error('Upload failed')
+        }
         const data = await res.json()
 
         if (type === 'destinations') {
@@ -381,10 +423,19 @@ const AdminDashboard = () => {
     try {
       const res = await fetch(`${API_BASE}/api/testimonials`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...getAuthHeader()
+        },
         body: JSON.stringify(testimonialsForm)
       })
-      if (!res.ok) throw new Error('Failed to save testimonials')
+      if (!res.ok) {
+        if (res.status === 401 || res.status === 403) {
+          localStorage.removeItem('ADMIN_API_KEY')
+          setAdminKey(null)
+        }
+        throw new Error('Failed to save testimonials')
+      }
       showToast('Customer reviews updated successfully!', 'success')
       fetchData()
     } catch (err: any) {
@@ -400,10 +451,19 @@ const AdminDashboard = () => {
     try {
       const res = await fetch(`${API_BASE}/api/about`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...getAuthHeader()
+        },
         body: JSON.stringify(aboutForm)
       })
-      if (!res.ok) throw new Error('Failed to save about details')
+      if (!res.ok) {
+        if (res.status === 401 || res.status === 403) {
+          localStorage.removeItem('ADMIN_API_KEY')
+          setAdminKey(null)
+        }
+        throw new Error('Failed to save about details')
+      }
       showToast('About content updated successfully!', 'success')
       fetchData()
     } catch (err: any) {
@@ -419,10 +479,19 @@ const AdminDashboard = () => {
     try {
       const res = await fetch(`${API_BASE}/api/contact`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...getAuthHeader()
+        },
         body: JSON.stringify(contactForm)
       })
-      if (!res.ok) throw new Error('Failed to save contact details')
+      if (!res.ok) {
+        if (res.status === 401 || res.status === 403) {
+          localStorage.removeItem('ADMIN_API_KEY')
+          setAdminKey(null)
+        }
+        throw new Error('Failed to save contact details')
+      }
       showToast('Contact content updated successfully!', 'success')
       fetchData()
     } catch (err: any) {

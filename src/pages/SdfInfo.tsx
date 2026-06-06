@@ -319,7 +319,8 @@ const SdfInfo = () => {
                         adults: adults,
                         nights: nights,
                         totalPrice: grandTotal,
-                        destinationName: "Bhutan Custom Itinerary (with SDF)"
+                        destinationName: "Bhutan Custom Itinerary (with SDF)",
+                        image: "/dochula-pass.jpg"
                       }
                     })}
                     className="btn-accent w-full py-4 text-xs font-bold uppercase tracking-wider rounded-xl mt-6 flex items-center justify-center gap-2 shadow-premium cursor-pointer"
