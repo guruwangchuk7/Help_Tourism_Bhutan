@@ -1,7 +1,41 @@
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Instagram, Facebook, Youtube, Video, ArrowUpRight, Compass, Phone, Mail, MessageCircle, MapPin } from 'lucide-react'
 
+type FooterContactData = {
+  footerPhone: string
+  footerEmail: string
+  footerWhatsapp: string
+  footerLocation: string
+  footerInstagram: string
+  footerFacebook: string
+  footerYoutube: string
+  footerTiktok: string
+}
+
 const Footer = () => {
+  const [data, setData] = useState<FooterContactData | null>(null)
+
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/contact`)
+      .then(res => res.json())
+      .then(d => {
+        setData(d)
+      })
+      .catch(err => {
+        console.error("Failed to load footer contact content:", err)
+      })
+  }, [])
+
+  const phone = data?.footerPhone || '+975 2 334567'
+  const email = data?.footerEmail || 'explore@helptourismbhutan.bt'
+  const whatsapp = data?.footerWhatsapp || '+975 17 609800 (WhatsApp)'
+  const location = data?.footerLocation || 'Thimphu, Bhutan'
+  const instagram = data?.footerInstagram || 'Instagram'
+  const facebook = data?.footerFacebook || 'Facebook'
+  const youtube = data?.footerYoutube || 'YouTube'
+  const tiktok = data?.footerTiktok || 'TikTok'
+
   return (
     <footer className="bg-white border-t border-gray-100 pt-24 pb-12">
       <div className="max-w-7xl mx-auto px-6">
@@ -59,19 +93,19 @@ const Footer = () => {
             <ul className="space-y-3 text-sm font-light text-secondary">
               <li className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-accent shrink-0" />
-                <span>+975 2 334567</span>
+                <span>{phone}</span>
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-accent shrink-0" />
-                <a href="mailto:explore@helptourismbhutan.bt" className="hover:text-accent transition-colors truncate">explore@helptourismbhutan.bt</a>
+                <a href={`mailto:${email}`} className="hover:text-accent transition-colors truncate">{email}</a>
               </li>
               <li className="flex items-center gap-2">
                 <MessageCircle className="w-4 h-4 text-accent shrink-0" />
-                <span>+975 17 609800 (WhatsApp)</span>
+                <span>{whatsapp}</span>
               </li>
               <li className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 text-accent shrink-0 mt-0.5" />
-                <span>Thimphu, Bhutan</span>
+                <span>{location}</span>
               </li>
             </ul>
           </div>
@@ -81,10 +115,10 @@ const Footer = () => {
             <h4 className="text-xs font-bold uppercase tracking-widest text-primary mb-6">Social Media</h4>
             <div className="flex flex-col gap-3">
               {[
-                { name: 'Instagram', icon: Instagram },
-                { name: 'Facebook', icon: Facebook },
-                { name: 'YouTube', icon: Youtube },
-                { name: 'TikTok', icon: Video }
+                { name: instagram, icon: Instagram },
+                { name: facebook, icon: Facebook },
+                { name: youtube, icon: Youtube },
+                { name: tiktok, icon: Video }
               ].map(social => (
                 <Link
                   key={social.name}
@@ -98,6 +132,8 @@ const Footer = () => {
             </div>
           </div>
         </div>
+        
+
 
 
         {/* Minimalist Bottom Bar */}

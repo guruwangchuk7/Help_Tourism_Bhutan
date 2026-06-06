@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import fs from 'fs';
+import path from 'path';
 
 dotenv.config();
 
@@ -576,6 +578,134 @@ app.delete('/api/hotels/:id', async (req, res) => {
     res.json({ message: "Hotel deleted successfully", id });
   } catch (err: any) {
     console.error(`Delete hotel ${id} failed:`, err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// File upload endpoint (writes to frontend public/uploads directory)
+app.post('/api/upload', (req, res) => {
+  try {
+    const { name, data } = req.body;
+    if (!name || !data) {
+      return res.status(400).json({ error: "Name and data are required" });
+    }
+
+    // Extract base64 content
+    const base64Data = data.replace(/^data:image\/\w+;base64,/, "");
+    const buffer = Buffer.from(base64Data, 'base64');
+
+    // Create public/uploads directory
+    let uploadDir = path.resolve(process.cwd(), '../public/uploads');
+    const rootPublic = path.resolve(process.cwd(), '../public');
+    if (!fs.existsSync(rootPublic)) {
+      uploadDir = path.resolve(__dirname, '../../public/uploads');
+    }
+
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
+    const filename = `${Date.now()}-${name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+    const filePath = path.join(uploadDir, filename);
+
+    fs.writeFileSync(filePath, buffer);
+
+    console.log("Successfully uploaded file:", filename, "to", filePath);
+    res.json({ url: `/uploads/${filename}` });
+  } catch (err: any) {
+    console.error("Upload error:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+const ABOUT_FILE = path.join(__dirname, '../about.json');
+const defaultAboutData = {
+  philosophyText: "At Help Tourism Bhutan, we believe travel shouldn't just change your location—it should change your perspective. We focus on \"Deep Travel\"—engaging with local communities, respecting sacred traditions, and ensuring every journey contributes to Bhutan's sustainable growth.",
+  stat1Label: "Founded",
+  stat1Val: "2010",
+  stat2Label: "Guides",
+  stat2Val: "50+ Local",
+  stat3Label: "Regions",
+  stat3Val: "All 20 Dzongkhags",
+  stat4Label: "Happiness",
+  stat4Val: "100% GNH",
+  pillar1Title: "Community First",
+  pillar1Desc: "We ensure tourism dollars reach the remote families we visit.",
+  pillar2Title: "Unmatched Expertise",
+  pillar2Desc: "Our guides are certified historians and cultural experts.",
+  pillar3Title: "Deep Vetting",
+  pillar3Desc: "Every hotel and lodge is personally tested for soul and quality.",
+  pillar4Title: "Ethical Impact",
+  pillar4Desc: "We are carbon-negative and plastic-free on all our treks."
+};
+
+app.get('/api/about', (req, res) => {
+  try {
+    if (fs.existsSync(ABOUT_FILE)) {
+      const data = fs.readFileSync(ABOUT_FILE, 'utf8');
+      return res.json(JSON.parse(data));
+    }
+  } catch (e) {
+    console.error("Failed to read about.json:", e);
+  }
+  res.json(defaultAboutData);
+});
+
+app.put('/api/about', (req, res) => {
+  try {
+    fs.writeFileSync(ABOUT_FILE, JSON.stringify(req.body, null, 2), 'utf8');
+    res.json(req.body);
+  } catch (err: any) {
+    console.error("Failed to save about.json:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+const CONTACT_FILE = path.join(__dirname, '../contact.json');
+const defaultContactData = {
+  heroTitle: "Contact Thimphu",
+  heroSubtitle: "Our local travel architects are stationed directly in the capital, ready to craft your bespoke Bhutanese journey.",
+  channelTitle: "Direct Channels",
+  channelSubtitle: "How to Reach Us",
+  channelDesc: "Whether you prefer a traditional wire transfer, a digital dialogue, or a direct call to our Himalayan base, we are here to assist.",
+  baseTitle: "The Base",
+  baseLine1: "Changlam Square, 2nd Floor",
+  baseLine2: "Thimphu, Kingdom of Bhutan",
+  callTitle: "Digital Call",
+  callLine1: "+975 2 334567",
+  callLine2: "+975 17 609800 (WhatsApp)",
+  emailTitle: "Electronic Mail",
+  emailLine1: "explore@helptourismbhutan.bt",
+  emailLine2: "concierge@helptourismbhutan.bt",
+  footerPhone: "+975 2 334567",
+  footerEmail: "explore@helptourismbhutan.bt",
+  footerWhatsapp: "+975 17 609800 (WhatsApp)",
+  footerLocation: "Thimphu, Bhutan",
+  footerInstagram: "Instagram",
+  footerFacebook: "Facebook",
+  footerYoutube: "YouTube",
+  footerTiktok: "TikTok"
+};
+
+
+app.get('/api/contact', (req, res) => {
+  try {
+    if (fs.existsSync(CONTACT_FILE)) {
+      const data = fs.readFileSync(CONTACT_FILE, 'utf8');
+      return res.json(JSON.parse(data));
+    }
+  } catch (e) {
+    console.error("Failed to read contact.json:", e);
+  }
+  res.json(defaultContactData);
+});
+
+app.put('/api/contact', (req, res) => {
+  try {
+    fs.writeFileSync(CONTACT_FILE, JSON.stringify(req.body, null, 2), 'utf8');
+    res.json(req.body);
+  } catch (err: any) {
+    console.error("Failed to save contact.json:", err.message);
     res.status(500).json({ error: err.message });
   }
 });

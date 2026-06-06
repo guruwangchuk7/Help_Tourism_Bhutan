@@ -15,6 +15,8 @@ const Booking = () => {
         endDate?: string
         destinationName?: string
         totalPrice?: number
+        type?: string
+        image?: string
     } | null
 
     const [step, setStep] = useState(1)
@@ -29,7 +31,7 @@ const Booking = () => {
 
     const matchedDestination = destinations.find(d => d.name === locationState?.destinationName)
     const matchedTour = tours.find(t => t.title === locationState?.destinationName)
-    const displayImage = matchedDestination?.image || matchedTour?.image || "/punakha-dzong.jpg"
+    const displayImage = locationState?.image || matchedDestination?.image || matchedTour?.image || "/punakha-dzong.jpg"
     const displayTitle = locationState?.destinationName || "Punakha Sacred Grounds Tour"
 
     const getWhatsAppUrl = () => {
@@ -368,7 +370,7 @@ Thank you!`
                                                         </span>
                                                     </div>
                                                 </>
-                                            ) : matchedDestination ? (
+                                            ) : (matchedDestination || locationState?.type === 'hotel') ? (
                                                 <>
                                                     <div className="flex justify-between items-center group">
                                                         <span className="text-secondary font-light text-sm tracking-wide group-hover:text-primary transition-colors">

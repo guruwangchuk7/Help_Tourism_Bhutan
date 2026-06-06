@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { 
   MapPin, Compass, Hotel, Plus, Edit, Trash2, Save, X, 
   ArrowLeft, Star, Search, SlidersHorizontal, ChevronRight, 
-  HelpCircle
+  HelpCircle, Upload, Phone
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
@@ -39,6 +39,10 @@ type Tour = {
   inclusions: string[]
   exclusions: string[]
   itinerary: { day: number; title: string; desc: string }[]
+  descText?: string
+  visaAdvice?: string
+  altitudeAdvice?: string
+  currencyAdvice?: string
 }
 
 type LuxuryHotel = {
@@ -54,7 +58,7 @@ type LuxuryHotel = {
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState<'destinations' | 'tours' | 'hotels'>('destinations')
+  const [activeTab, setActiveTab] = useState<'destinations' | 'tours' | 'hotels' | 'about' | 'contact'>('destinations')
   
   // Data States
   const [destinations, setDestinations] = useState<Destination[]>([])
@@ -72,30 +76,40 @@ const AdminDashboard = () => {
   const [showModal, setShowModal] = useState(false)
   const [editType, setEditType] = useState<'destinations' | 'tours' | 'hotels'>('destinations')
   const [editId, setEditId] = useState<string | number | null>(null) // null = create new
-  const [modalTab, setModalTab] = useState<'overview' | 'itinerary' | 'amenities' | 'reviews'>('overview')
+  const [modalTab, setModalTab] = useState<'overview' | 'itinerary' | 'amenities' | 'reviews' | 'advice'>('overview')
+  const [contactTab, setContactTab] = useState<'banner' | 'channels' | 'footer'>('banner')
+  const [aboutTab, setAboutTab] = useState<'philosophy' | 'stats' | 'pillars'>('philosophy')
   
   // Form values
   const [destForm, setDestForm] = useState<Partial<Destination>>({})
   const [tourForm, setTourForm] = useState<Partial<Tour>>({})
   const [hotelForm, setHotelForm] = useState<Partial<LuxuryHotel>>({})
+  const [aboutForm, setAboutForm] = useState<any>({})
+  const [contactForm, setContactForm] = useState<any>({})
 
   // Fetch all data
   const fetchData = async () => {
     setLoading(true)
     try {
-      const [destRes, toursRes, hotelsRes] = await Promise.all([
+      const [destRes, toursRes, hotelsRes, aboutRes, contactRes] = await Promise.all([
         fetch(`${API_BASE}/api/destinations`),
         fetch(`${API_BASE}/api/tours`),
-        fetch(`${API_BASE}/api/hotels`)
+        fetch(`${API_BASE}/api/hotels`),
+        fetch(`${API_BASE}/api/about`),
+        fetch(`${API_BASE}/api/contact`)
       ])
       
       const destData = await destRes.json()
       const toursData = await toursRes.json()
       const hotelsData = await hotelsRes.json()
+      const aboutData = await aboutRes.json()
+      const contactData = await contactRes.json()
       
       setDestinations(destData)
       setTours(toursData)
       setHotels(hotelsData)
+      setAboutForm(aboutData)
+      setContactForm(contactData)
     } catch (err: any) {
       console.error(err)
       showToast('Error loading data from server.', 'error')
@@ -176,7 +190,27 @@ const AdminDashboard = () => {
           reviews
         })
       } else if (type === 'tours') {
-        setTourForm(item)
+        let text = item.desc || ''
+        let visaAdvice = ''
+        let altitudeAdvice = ''
+        let currencyAdvice = ''
+        try {
+          if (item.desc && item.desc.trim().startsWith('{')) {
+            const parsed = JSON.parse(item.desc)
+            if (parsed.text) text = parsed.text
+            if (parsed.visaAdvice) visaAdvice = parsed.visaAdvice
+            if (parsed.altitudeAdvice) altitudeAdvice = parsed.altitudeAdvice
+            if (parsed.currencyAdvice) currencyAdvice = parsed.currencyAdvice
+          }
+        } catch (e) {}
+
+        setTourForm({
+          ...item,
+          descText: text,
+          visaAdvice,
+          altitudeAdvice,
+          currencyAdvice
+        })
       } else if (type === 'hotels') {
         setHotelForm(item)
       }
@@ -207,7 +241,16 @@ const AdminDashboard = () => {
       } else if (type === 'tours') {
         setTourForm({
           id: '', title: '', duration: '', nights: 3, price: '', priceVal: 999, image: '',
-          desc: '', category: 'Cultural', difficulty: 'Easy', inclusions: [], exclusions: [], itinerary: []
+          desc: '', category: 'Cultural', difficulty: 'Easy', inclusions: [], exclusions: [],
+          itinerary: [
+            { day: 1, title: 'Arrival', desc: 'Transfer and check into hotel.' },
+            { day: 2, title: 'Sightseeing', desc: 'Exploring local sights.' },
+            { day: 3, title: 'Departure', desc: 'Transfer to airport.' }
+          ],
+          descText: '',
+          visaAdvice: '',
+          altitudeAdvice: '',
+          currencyAdvice: ''
         })
       } else if (type === 'hotels') {
         setHotelForm({
@@ -242,7 +285,20 @@ const AdminDashboard = () => {
       delete bodyData.amenities
       delete bodyData.reviews
     } else if (editType === 'tours') {
-      bodyData = tourForm
+      const compiledDescription = JSON.stringify({
+        text: tourForm.descText || tourForm.desc || '',
+        visaAdvice: tourForm.visaAdvice || '',
+        altitudeAdvice: tourForm.altitudeAdvice || '',
+        currencyAdvice: tourForm.currencyAdvice || ''
+      })
+      bodyData = {
+        ...tourForm,
+        desc: compiledDescription
+      }
+      delete bodyData.descText
+      delete bodyData.visaAdvice
+      delete bodyData.altitudeAdvice
+      delete bodyData.currencyAdvice
     } else if (editType === 'hotels') {
       bodyData = hotelForm
     }
@@ -270,6 +326,170 @@ const AdminDashboard = () => {
     } catch (err: any) {
       showToast(err.message || 'Error saving details.', 'error')
     }
+  }
+
+  const [uploading, setUploading] = useState(false)
+
+  const handleFileUpload = async (file: File, type: 'destinations' | 'tours' | 'hotels') => {
+    setUploading(true)
+    try {
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+      reader.onload = async () => {
+        const base64 = reader.result as string
+        const res = await fetch(`${API_BASE}/api/upload`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: file.name, data: base64 })
+        })
+        if (!res.ok) throw new Error('Upload failed')
+        const data = await res.json()
+        
+        if (type === 'destinations') {
+          setDestForm(prev => ({ ...prev, image: data.url }))
+        } else if (type === 'tours') {
+          setTourForm(prev => ({ ...prev, image: data.url }))
+        } else if (type === 'hotels') {
+          setHotelForm(prev => ({ ...prev, image: data.url }))
+        }
+        
+        showToast('Image uploaded successfully!', 'success')
+      }
+    } catch (err: any) {
+      console.error(err)
+      showToast('Error uploading image.', 'error')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const handleSaveAbout = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    try {
+      const res = await fetch(`${API_BASE}/api/about`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(aboutForm)
+      })
+      if (!res.ok) throw new Error('Failed to save about details')
+      showToast('About content updated successfully!', 'success')
+      fetchData()
+    } catch (err: any) {
+      console.error(err)
+      showToast(err.message || 'Error saving details.', 'error')
+      setLoading(false)
+    }
+  }
+
+  const handleSaveContact = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    try {
+      const res = await fetch(`${API_BASE}/api/contact`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(contactForm)
+      })
+      if (!res.ok) throw new Error('Failed to save contact details')
+      showToast('Contact content updated successfully!', 'success')
+      fetchData()
+    } catch (err: any) {
+      console.error(err)
+      showToast(err.message || 'Error saving details.', 'error')
+      setLoading(false)
+    }
+  }
+
+  const ImageUploadField = ({ value, onChange, onUpload, label }: { value: string; onChange: (val: string) => void; onUpload: (file: File) => void; label: string }) => {
+    const [dragActive, setDragActive] = useState(false)
+
+    const handleDrag = (e: React.DragEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      if (e.type === "dragenter" || e.type === "dragover") {
+        setDragActive(true)
+      } else if (e.type === "dragleave") {
+        setDragActive(false)
+      }
+    }
+
+    const handleDrop = (e: React.DragEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      setDragActive(false)
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        onUpload(e.dataTransfer.files[0])
+      }
+    }
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      e.preventDefault()
+      if (e.target.files && e.target.files[0]) {
+        onUpload(e.target.files[0])
+      }
+    }
+
+    return (
+      <div className="col-span-1 md:col-span-2 space-y-2">
+        <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">{label}</label>
+        
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+          <div 
+            className={`md:col-span-7 border-2 border-dashed rounded-xl p-5 text-center flex flex-col items-center justify-center transition-all ${
+              dragActive ? "border-slate-900 bg-slate-50" : "border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-slate-400"
+            }`}
+            onDragEnter={handleDrag}
+            onDragOver={handleDrag}
+            onDragLeave={handleDrag}
+            onDrop={handleDrop}
+          >
+            <input 
+              type="file" 
+              id={`file-upload-${label.replace(/\s+/g, '-')}`}
+              className="hidden" 
+              accept="image/*"
+              onChange={handleChange} 
+            />
+            <label 
+              htmlFor={`file-upload-${label.replace(/\s+/g, '-')}`}
+              className="cursor-pointer flex flex-col items-center space-y-2 w-full"
+            >
+              <div className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center border border-slate-100">
+                <Upload className="w-4 h-4 text-slate-500" />
+              </div>
+              <div>
+                <span className="text-xs font-semibold text-slate-900 block">
+                  {uploading ? "Uploading..." : "Click to upload or drag & drop"}
+                </span>
+                <span className="text-[10px] text-slate-400 block mt-0.5">PNG, JPG, WEBP up to 5MB</span>
+              </div>
+            </label>
+          </div>
+
+          <div className="md:col-span-5 flex flex-col justify-between space-y-3">
+            <div className="relative">
+              <input 
+                type="text" 
+                placeholder="Or paste external image URL..." 
+                value={value}
+                onChange={e => onChange(e.target.value)}
+                className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 font-mono focus:outline-none focus:border-slate-900"
+              />
+            </div>
+            {value && (
+              <div className="flex items-center space-x-3 bg-slate-50 p-2 rounded-xl border border-slate-100">
+                <img src={value.startsWith('/') ? `${API_BASE}${value}` : value} alt="Preview" className="w-12 h-10 object-cover rounded-lg border border-slate-200 bg-white" />
+                <div className="overflow-hidden flex-1">
+                  <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider block">Image Preview</span>
+                  <span className="text-[10px] text-slate-600 font-mono truncate block">{value}</span>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    )
   }
 
   // Helper sorting and filtering functions
@@ -343,7 +563,7 @@ const AdminDashboard = () => {
 
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-800 font-sans flex">
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-800 font-sans flex [&_h1]:font-sans [&_h2]:font-sans [&_h3]:font-sans [&_h4]:font-sans [&_h5]:font-sans [&_h6]:font-sans">
       {/* Left Sidebar Navigation */}
       <aside className="w-72 bg-white border-r border-slate-200/80 flex flex-col justify-between shrink-0">
         <div>
@@ -419,6 +639,35 @@ const AdminDashboard = () => {
                 {totalHotelsCount}
               </span>
             </button>
+
+            <button
+              onClick={() => { setActiveTab('about'); setSearchQuery(''); }}
+              className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${
+                activeTab === 'about'
+                  ? 'bg-slate-100 text-slate-900 border-l-2 border-slate-900'
+                  : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+              }`}
+            >
+              <div className="flex items-center space-x-3">
+                <HelpCircle className={`w-4 h-4 ${activeTab === 'about' ? 'text-slate-900' : 'text-slate-400'}`} />
+                <span>About Content</span>
+              </div>
+            </button>
+
+            <button
+              onClick={() => { setActiveTab('contact'); setSearchQuery(''); }}
+              className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${
+                activeTab === 'contact'
+                  ? 'bg-slate-100 text-slate-900 border-l-2 border-slate-900'
+                  : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+              }`}
+            >
+              <div className="flex items-center space-x-3">
+                <Phone className={`w-4 h-4 ${activeTab === 'contact' ? 'text-slate-900' : 'text-slate-400'}`} />
+                <span>Contact Content</span>
+              </div>
+            </button>
+
           </nav>
         </div>
 
@@ -440,21 +689,40 @@ const AdminDashboard = () => {
         <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-6 mb-8 border-b border-slate-200 gap-4">
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 flex items-center space-x-2">
-              <span>{activeTab === 'destinations' ? 'Destinations' : activeTab === 'tours' ? 'Tours' : 'Hotels'}</span>
+              <span>
+                {activeTab === 'destinations' 
+                  ? 'Destinations' 
+                  : activeTab === 'tours' 
+                  ? 'Tours' 
+                  : activeTab === 'hotels' 
+                  ? 'Hotels' 
+                  : activeTab === 'about' 
+                  ? 'About Us' 
+                  : 'Contact Us'}
+              </span>
               <ChevronRight className="w-5 h-5 text-slate-400" />
               <span className="text-slate-500 text-lg font-medium">Dashboard</span>
             </h1>
-            <p className="text-xs text-slate-500 mt-1">Manage database objects, details, ratings, and media galleries.</p>
+            <p className="text-xs text-slate-500 mt-1">
+              {activeTab === 'about' 
+                ? 'Manage legacy stats, philosophy copy, and the four standards of integrity.' 
+                : activeTab === 'contact'
+                ? 'Manage office locations, phone channels, and support email addresses.'
+                : 'Manage database objects, details, ratings, and media galleries.'}
+            </p>
           </div>
 
-          <button
-            onClick={() => handleOpenEdit(activeTab)}
-            className="flex items-center justify-center space-x-2 bg-slate-900 hover:bg-black text-white font-bold px-5 py-2.5 rounded-lg transition-all duration-200 shadow-sm active:scale-[0.98] cursor-pointer"
-          >
-            <Plus className="w-5 h-5" />
-            <span>Add New {activeTab === 'destinations' ? 'Destination' : activeTab === 'tours' ? 'Tour' : 'Hotel'}</span>
-          </button>
+          {activeTab !== 'about' && activeTab !== 'contact' && (
+            <button
+              onClick={() => handleOpenEdit(activeTab as any)}
+              className="flex items-center justify-center space-x-2 bg-slate-900 hover:bg-black text-white font-bold px-5 py-2.5 rounded-lg transition-all duration-200 shadow-sm active:scale-[0.98] cursor-pointer"
+            >
+              <Plus className="w-5 h-5" />
+              <span>Add New {activeTab === 'destinations' ? 'Destination' : activeTab === 'tours' ? 'Tour' : 'Hotel'}</span>
+            </button>
+          )}
         </header>
+
 
 
         {/* Toast Notification */}
@@ -477,33 +745,35 @@ const AdminDashboard = () => {
         </AnimatePresence>
 
         {/* Controls Block (Search & Sort) */}
-        <div className="bg-white border border-slate-200 p-4 rounded-t-xl flex flex-col md:flex-row md:items-center md:justify-between gap-4 shadow-sm">
-          <div className="relative flex-1 max-w-md">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input 
-              type="text"
-              placeholder={`Search ${activeTab}...`}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-10 pr-4 py-2 text-sm text-slate-850 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
-            />
-          </div>
+        {activeTab !== 'about' && activeTab !== 'contact' && (
+          <div className="bg-white border border-slate-200 p-4 rounded-t-xl flex flex-col md:flex-row md:items-center md:justify-between gap-4 shadow-sm">
+            <div className="relative flex-1 max-w-md">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input 
+                type="text"
+                placeholder={`Search ${activeTab}...`}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-10 pr-4 py-2 text-sm text-slate-850 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
+              />
+            </div>
 
-          <div className="flex items-center space-x-3">
-            <SlidersHorizontal className="w-4 h-4 text-slate-400" />
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Sort by:</span>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
-              className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-700 focus:outline-none focus:border-slate-900 cursor-pointer"
-            >
-              <option value="default">Default / ID</option>
-              <option value="name">Name / Title</option>
-              {activeTab !== 'tours' && <option value="rating">Rating</option>}
-              <option value="price">Starting Price</option>
-            </select>
+            <div className="flex items-center space-x-3">
+              <SlidersHorizontal className="w-4 h-4 text-slate-400" />
+              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Sort by:</span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as any)}
+                className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-700 focus:outline-none focus:border-slate-900 cursor-pointer"
+              >
+                <option value="default">Default / ID</option>
+                <option value="name">Name / Title</option>
+                {activeTab !== 'tours' && <option value="rating">Rating</option>}
+                <option value="price">Starting Price</option>
+              </select>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Content list block */}
         {loading ? (
@@ -513,6 +783,640 @@ const AdminDashboard = () => {
               <span className="text-xs text-slate-500 font-medium tracking-wide">Syncing data objects...</span>
             </div>
           </div>
+        ) : activeTab === 'about' ? (
+          <form onSubmit={handleSaveAbout} className="bg-white border border-slate-200 rounded-xl p-8 shadow-sm space-y-8 max-w-4xl mx-auto">
+            {/* About Tab Navigation */}
+            <div className="flex space-x-6 border-b border-slate-200 pb-2">
+              {[
+                { id: 'philosophy', label: 'Philosophy' },
+                { id: 'stats', label: 'Key Statistics' },
+                { id: 'pillars', label: 'Standards & Pillars' }
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setAboutTab(tab.id as any)}
+                  className={`pb-2 text-xs font-bold uppercase tracking-wider transition-colors border-b-2 cursor-pointer ${
+                    aboutTab === tab.id 
+                      ? 'border-slate-900 text-slate-900' 
+                      : 'border-transparent text-slate-400 hover:text-slate-900'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* TAB 1: PHILOSOPHY */}
+            {aboutTab === 'philosophy' && (
+              <div className="space-y-4">
+                <h3 className="text-sm font-bold text-slate-405 uppercase tracking-wider border-b border-slate-100 pb-1.5 flex items-center space-x-2">
+                  <span className="w-1.5 h-1.5 bg-slate-900 rounded-full"></span>
+                  <span>Our Philosophy Copy</span>
+                </h3>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Philosophy Description</label>
+                  <textarea 
+                    rows={6}
+                    required 
+                    value={aboutForm.philosophyText || ''} 
+                    onChange={e => setAboutForm({...aboutForm, philosophyText: e.target.value})}
+                    className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                    placeholder="Describe your tour philosophy..."
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* TAB 2: KEY STATISTICS */}
+            {aboutTab === 'stats' && (
+              <div className="space-y-6">
+                <h3 className="text-sm font-bold text-slate-405 uppercase tracking-wider border-b border-slate-100 pb-1.5 flex items-center space-x-2">
+                  <span className="w-1.5 h-1.5 bg-slate-900 rounded-full"></span>
+                  <span>Key Statistics (4 Items)</span>
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Stat 1 */}
+                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-150/60 space-y-3">
+                    <span className="text-xs font-bold text-slate-405 uppercase tracking-wider block">Statistic 1</span>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[10px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">Value (e.g. 2010)</label>
+                        <input 
+                          type="text" 
+                          required 
+                          value={aboutForm.stat1Val || ''} 
+                          onChange={e => setAboutForm({...aboutForm, stat1Val: e.target.value})}
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">Label (e.g. Founded)</label>
+                        <input 
+                          type="text" 
+                          required 
+                          value={aboutForm.stat1Label || ''} 
+                          onChange={e => setAboutForm({...aboutForm, stat1Label: e.target.value})}
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Stat 2 */}
+                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-150/60 space-y-3">
+                    <span className="text-xs font-bold text-slate-405 uppercase tracking-wider block">Statistic 2</span>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[10px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">Value (e.g. 50+ Local)</label>
+                        <input 
+                          type="text" 
+                          required 
+                          value={aboutForm.stat2Val || ''} 
+                          onChange={e => setAboutForm({...aboutForm, stat2Val: e.target.value})}
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">Label (e.g. Guides)</label>
+                        <input 
+                          type="text" 
+                          required 
+                          value={aboutForm.stat2Label || ''} 
+                          onChange={e => setAboutForm({...aboutForm, stat2Label: e.target.value})}
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Stat 3 */}
+                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-150/60 space-y-3">
+                    <span className="text-xs font-bold text-slate-405 uppercase tracking-wider block">Statistic 3</span>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[10px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">Value (e.g. All 20 Dzongkhags)</label>
+                        <input 
+                          type="text" 
+                          required 
+                          value={aboutForm.stat3Val || ''} 
+                          onChange={e => setAboutForm({...aboutForm, stat3Val: e.target.value})}
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">Label (e.g. Regions)</label>
+                        <input 
+                          type="text" 
+                          required 
+                          value={aboutForm.stat3Label || ''} 
+                          onChange={e => setAboutForm({...aboutForm, stat3Label: e.target.value})}
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Stat 4 */}
+                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-150/60 space-y-3">
+                    <span className="text-xs font-bold text-slate-405 uppercase tracking-wider block">Statistic 4</span>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[10px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">Value (e.g. 100% GNH)</label>
+                        <input 
+                          type="text" 
+                          required 
+                          value={aboutForm.stat4Val || ''} 
+                          onChange={e => setAboutForm({...aboutForm, stat4Val: e.target.value})}
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">Label (e.g. Happiness)</label>
+                        <input 
+                          type="text" 
+                          required 
+                          value={aboutForm.stat4Label || ''} 
+                          onChange={e => setAboutForm({...aboutForm, stat4Label: e.target.value})}
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 3: STANDARDS & PILLARS */}
+            {aboutTab === 'pillars' && (
+              <div className="space-y-6">
+                <h3 className="text-sm font-bold text-slate-405 uppercase tracking-wider border-b border-slate-100 pb-1.5 flex items-center space-x-2">
+                  <span className="w-1.5 h-1.5 bg-slate-900 rounded-full"></span>
+                  <span>Standards of Integrity (4 Pillars)</span>
+                </h3>
+                <div className="grid grid-cols-1 gap-6">
+                  {/* Pillar 1 */}
+                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-150/60 space-y-3">
+                    <span className="text-xs font-bold text-slate-405 uppercase tracking-wider block">Pillar 1</span>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="md:col-span-1">
+                        <label className="block text-[10px] font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Title</label>
+                        <input 
+                          type="text" 
+                          required 
+                          value={aboutForm.pillar1Title || ''} 
+                          onChange={e => setAboutForm({...aboutForm, pillar1Title: e.target.value})}
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="block text-[10px] font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Description</label>
+                        <input 
+                          type="text" 
+                          required 
+                          value={aboutForm.pillar1Desc || ''} 
+                          onChange={e => setAboutForm({...aboutForm, pillar1Desc: e.target.value})}
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Pillar 2 */}
+                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-150/60 space-y-3">
+                    <span className="text-xs font-bold text-slate-405 uppercase tracking-wider block">Pillar 2</span>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="md:col-span-1">
+                        <label className="block text-[10px] font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Title</label>
+                        <input 
+                          type="text" 
+                          required 
+                          value={aboutForm.pillar2Title || ''} 
+                          onChange={e => setAboutForm({...aboutForm, pillar2Title: e.target.value})}
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="block text-[10px] font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Description</label>
+                        <input 
+                          type="text" 
+                          required 
+                          value={aboutForm.pillar2Desc || ''} 
+                          onChange={e => setAboutForm({...aboutForm, pillar2Desc: e.target.value})}
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Pillar 3 */}
+                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-150/60 space-y-3">
+                    <span className="text-xs font-bold text-slate-405 uppercase tracking-wider block">Pillar 3</span>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="md:col-span-1">
+                        <label className="block text-[10px] font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Title</label>
+                        <input 
+                          type="text" 
+                          required 
+                          value={aboutForm.pillar3Title || ''} 
+                          onChange={e => setAboutForm({...aboutForm, pillar3Title: e.target.value})}
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="block text-[10px] font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Description</label>
+                        <input 
+                          type="text" 
+                          required 
+                          value={aboutForm.pillar3Desc || ''} 
+                          onChange={e => setAboutForm({...aboutForm, pillar3Desc: e.target.value})}
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Pillar 4 */}
+                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-150/60 space-y-3">
+                    <span className="text-xs font-bold text-slate-405 uppercase tracking-wider block">Pillar 4</span>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="md:col-span-1">
+                        <label className="block text-[10px] font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Title</label>
+                        <input 
+                          type="text" 
+                          required 
+                          value={aboutForm.pillar4Title || ''} 
+                          onChange={e => setAboutForm({...aboutForm, pillar4Title: e.target.value})}
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="block text-[10px] font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Description</label>
+                        <input 
+                          type="text" 
+                          required 
+                          value={aboutForm.pillar4Desc || ''} 
+                          onChange={e => setAboutForm({...aboutForm, pillar4Desc: e.target.value})}
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Save Button */}
+            <div className="flex justify-end pt-4 border-t border-slate-100">
+              <button
+                type="submit"
+                className="flex items-center space-x-2 bg-slate-900 hover:bg-black text-white font-bold px-6 py-3 rounded-lg transition-all duration-200 shadow-sm active:scale-[0.98] cursor-pointer"
+              >
+                <Save className="w-5 h-5" />
+                <span>Save About Content</span>
+              </button>
+            </div>
+          </form>
+        ) : activeTab === 'contact' ? (
+          <form onSubmit={handleSaveContact} className="bg-white border border-slate-200 rounded-xl p-8 shadow-sm space-y-8 max-w-4xl mx-auto">
+            {/* Contact Tab Navigation */}
+            <div className="flex space-x-6 border-b border-slate-200 pb-2">
+              {[
+                { id: 'banner', label: 'Banner & Over-title' },
+                { id: 'channels', label: 'Direct Channels' },
+                { id: 'footer', label: 'Footer Settings' }
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setContactTab(tab.id as any)}
+                  className={`pb-2 text-xs font-bold uppercase tracking-wider transition-colors border-b-2 cursor-pointer ${
+                    contactTab === tab.id 
+                      ? 'border-slate-900 text-slate-900' 
+                      : 'border-transparent text-slate-400 hover:text-slate-900'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* TAB 1: BANNER & OVER-TITLE */}
+            {contactTab === 'banner' && (
+              <div className="space-y-8">
+                {/* Section 1: Hero Banner copy */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-bold text-slate-405 uppercase tracking-wider border-b border-slate-100 pb-1.5 flex items-center space-x-2">
+                    <span className="w-1.5 h-1.5 bg-slate-900 rounded-full"></span>
+                    <span>Hero Banner</span>
+                  </h3>
+                  <div className="grid grid-cols-1 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Hero Title</label>
+                      <input 
+                        type="text" 
+                        required 
+                        value={contactForm.heroTitle || ''} 
+                        onChange={e => setContactForm({...contactForm, heroTitle: e.target.value})}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Hero Subtitle</label>
+                      <textarea 
+                        rows={3}
+                        required 
+                        value={contactForm.heroSubtitle || ''} 
+                        onChange={e => setContactForm({...contactForm, heroSubtitle: e.target.value})}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 2: Direct Channels Section Copy */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-bold text-slate-405 uppercase tracking-wider border-b border-slate-100 pb-1.5 flex items-center space-x-2">
+                    <span className="w-1.5 h-1.5 bg-slate-900 rounded-full"></span>
+                    <span>Direct Channels Info</span>
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Section Over-title (e.g. Direct Channels)</label>
+                      <input 
+                        type="text" 
+                        required 
+                        value={contactForm.channelTitle || ''} 
+                        onChange={e => setContactForm({...contactForm, channelTitle: e.target.value})}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Section Title (e.g. How to Reach Us)</label>
+                      <input 
+                        type="text" 
+                        required 
+                        value={contactForm.channelSubtitle || ''} 
+                        onChange={e => setContactForm({...contactForm, channelSubtitle: e.target.value})}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Description text</label>
+                      <textarea 
+                        rows={3}
+                        required 
+                        value={contactForm.channelDesc || ''} 
+                        onChange={e => setContactForm({...contactForm, channelDesc: e.target.value})}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 2: DIRECT CHANNELS DETAILS */}
+            {contactTab === 'channels' && (
+              <div className="space-y-8">
+                {/* Section 3: The Base Address */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-bold text-slate-405 uppercase tracking-wider border-b border-slate-100 pb-1.5 flex items-center space-x-2">
+                    <span className="w-1.5 h-1.5 bg-slate-900 rounded-full"></span>
+                    <span>The Base (Office Address)</span>
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Title (e.g. The Base)</label>
+                      <input 
+                        type="text" 
+                        required 
+                        value={contactForm.baseTitle || ''} 
+                        onChange={e => setContactForm({...contactForm, baseTitle: e.target.value})}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Address Line 1</label>
+                      <input 
+                        type="text" 
+                        required 
+                        value={contactForm.baseLine1 || ''} 
+                        onChange={e => setContactForm({...contactForm, baseLine1: e.target.value})}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Address Line 2</label>
+                      <input 
+                        type="text" 
+                        required 
+                        value={contactForm.baseLine2 || ''} 
+                        onChange={e => setContactForm({...contactForm, baseLine2: e.target.value})}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900" 
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 4: Phones */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-bold text-slate-405 uppercase tracking-wider border-b border-slate-100 pb-1.5 flex items-center space-x-2">
+                    <span className="w-1.5 h-1.5 bg-slate-900 rounded-full"></span>
+                    <span>Digital Call (Phones)</span>
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Title (e.g. Digital Call)</label>
+                      <input 
+                        type="text" 
+                        required 
+                        value={contactForm.callTitle || ''} 
+                        onChange={e => setContactForm({...contactForm, callTitle: e.target.value})}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Phone Line 1</label>
+                      <input 
+                        type="text" 
+                        required 
+                        value={contactForm.callLine1 || ''} 
+                        onChange={e => setContactForm({...contactForm, callLine1: e.target.value})}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Phone Line 2</label>
+                      <input 
+                        type="text" 
+                        required 
+                        value={contactForm.callLine2 || ''} 
+                        onChange={e => setContactForm({...contactForm, callLine2: e.target.value})}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900" 
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 5: Emails */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-bold text-slate-405 uppercase tracking-wider border-b border-slate-100 pb-1.5 flex items-center space-x-2">
+                    <span className="w-1.5 h-1.5 bg-slate-900 rounded-full"></span>
+                    <span>Electronic Mail (Emails)</span>
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Title (e.g. Electronic Mail)</label>
+                      <input 
+                        type="text" 
+                        required 
+                        value={contactForm.emailTitle || ''} 
+                        onChange={e => setContactForm({...contactForm, emailTitle: e.target.value})}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Email Line 1</label>
+                      <input 
+                        type="email" 
+                        required 
+                        value={contactForm.emailLine1 || ''} 
+                        onChange={e => setContactForm({...contactForm, emailLine1: e.target.value})}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Email Line 2</label>
+                      <input 
+                        type="email" 
+                        required 
+                        value={contactForm.emailLine2 || ''} 
+                        onChange={e => setContactForm({...contactForm, emailLine2: e.target.value})}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900" 
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 3: FOOTER CONTACT & SOCIALS */}
+            {contactTab === 'footer' && (
+              <div className="space-y-8">
+                {/* Section 6: Footer Contact & Socials */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-bold text-slate-405 uppercase tracking-wider border-b border-slate-100 pb-1.5 flex items-center space-x-2">
+                    <span className="w-1.5 h-1.5 bg-slate-900 rounded-full"></span>
+                    <span>Footer Contact Details</span>
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Footer Phone</label>
+                      <input 
+                        type="text" 
+                        required 
+                        value={contactForm.footerPhone || ''} 
+                        onChange={e => setContactForm({...contactForm, footerPhone: e.target.value})}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Footer Email</label>
+                      <input 
+                        type="email" 
+                        required 
+                        value={contactForm.footerEmail || ''} 
+                        onChange={e => setContactForm({...contactForm, footerEmail: e.target.value})}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Footer WhatsApp</label>
+                      <input 
+                        type="text" 
+                        required 
+                        value={contactForm.footerWhatsapp || ''} 
+                        onChange={e => setContactForm({...contactForm, footerWhatsapp: e.target.value})}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Footer Location</label>
+                      <input 
+                        type="text" 
+                        required 
+                        value={contactForm.footerLocation || ''} 
+                        onChange={e => setContactForm({...contactForm, footerLocation: e.target.value})}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900" 
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Social Networks labels */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-bold text-slate-405 uppercase tracking-wider border-b border-slate-100 pb-1.5 flex items-center space-x-2">
+                    <span className="w-1.5 h-1.5 bg-slate-900 rounded-full"></span>
+                    <span>Social Media Labels</span>
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Instagram Label</label>
+                      <input 
+                        type="text" 
+                        required 
+                        value={contactForm.footerInstagram || ''} 
+                        onChange={e => setContactForm({...contactForm, footerInstagram: e.target.value})}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Facebook Label</label>
+                      <input 
+                        type="text" 
+                        required 
+                        value={contactForm.footerFacebook || ''} 
+                        onChange={e => setContactForm({...contactForm, footerFacebook: e.target.value})}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">YouTube Label</label>
+                      <input 
+                        type="text" 
+                        required 
+                        value={contactForm.footerYoutube || ''} 
+                        onChange={e => setContactForm({...contactForm, footerYoutube: e.target.value})}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">TikTok Label</label>
+                      <input 
+                        type="text" 
+                        required 
+                        value={contactForm.footerTiktok || ''} 
+                        onChange={e => setContactForm({...contactForm, footerTiktok: e.target.value})}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900" 
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Save Button */}
+            <div className="flex justify-end pt-4 border-t border-slate-100">
+              <button
+                type="submit"
+                className="flex items-center space-x-2 bg-slate-900 hover:bg-black text-white font-bold px-6 py-3 rounded-lg transition-all duration-200 shadow-sm active:scale-[0.98] cursor-pointer"
+              >
+                <Save className="w-5 h-5" />
+                <span>Save Contact Content</span>
+              </button>
+            </div>
+          </form>
         ) : (
           <div className="bg-white border-x border-b border-slate-200 rounded-b-xl overflow-hidden shadow-sm">
             {displayedItems.length === 0 ? (
@@ -555,21 +1459,23 @@ const AdminDashboard = () => {
                               <span className="font-semibold">{d.rating}</span>
                             </div>
                           </td>
-                          <td className="p-4 text-right space-x-1 pr-6">
-                            <button 
-                              onClick={() => handleOpenEdit('destinations', d)}
-                              className="p-2 hover:bg-slate-100 text-slate-700 hover:text-black rounded-lg transition cursor-pointer"
-                              title="Edit"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </button>
-                            <button 
-                              onClick={() => handleDelete('destinations', d.id)}
-                              className="p-2 hover:bg-slate-100 text-slate-500 hover:text-rose-600 rounded-lg transition cursor-pointer"
-                              title="Delete"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
+                          <td className="p-4 text-right pr-6">
+                            <div className="flex justify-end items-center space-x-1">
+                              <button 
+                                onClick={() => handleOpenEdit('destinations', d)}
+                                className="p-2 hover:bg-slate-100 text-slate-700 hover:text-black rounded-lg transition cursor-pointer"
+                                title="Edit"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </button>
+                              <button 
+                                onClick={() => handleDelete('destinations', d.id)}
+                                className="p-2 hover:bg-slate-100 text-slate-500 hover:text-rose-600 rounded-lg transition cursor-pointer"
+                                title="Delete"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -610,21 +1516,23 @@ const AdminDashboard = () => {
                               {t.difficulty}
                             </span>
                           </td>
-                          <td className="p-4 text-right space-x-1 pr-6">
-                            <button 
-                              onClick={() => handleOpenEdit('tours', t)}
-                              className="p-2 hover:bg-slate-100 text-slate-700 hover:text-black rounded-lg transition cursor-pointer"
-                              title="Edit"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </button>
-                            <button 
-                              onClick={() => handleDelete('tours', t.id)}
-                              className="p-2 hover:bg-slate-100 text-slate-500 hover:text-rose-600 rounded-lg transition cursor-pointer"
-                              title="Delete"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
+                          <td className="p-4 text-right pr-6">
+                            <div className="flex justify-end items-center space-x-1">
+                              <button 
+                                onClick={() => handleOpenEdit('tours', t)}
+                                className="p-2 hover:bg-slate-100 text-slate-700 hover:text-black rounded-lg transition cursor-pointer"
+                                title="Edit"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </button>
+                              <button 
+                                onClick={() => handleDelete('tours', t.id)}
+                                className="p-2 hover:bg-slate-100 text-slate-500 hover:text-rose-600 rounded-lg transition cursor-pointer"
+                                title="Delete"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -664,21 +1572,23 @@ const AdminDashboard = () => {
                               <span className="font-semibold">{h.rating}</span>
                             </div>
                           </td>
-                          <td className="p-4 text-right space-x-1 pr-6">
-                            <button 
-                              onClick={() => handleOpenEdit('hotels', h)}
-                              className="p-2 hover:bg-slate-100 text-slate-700 hover:text-black rounded-lg transition cursor-pointer"
-                              title="Edit"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </button>
-                            <button 
-                              onClick={() => handleDelete('hotels', h.id)}
-                              className="p-2 hover:bg-slate-100 text-slate-500 hover:text-rose-600 rounded-lg transition cursor-pointer"
-                              title="Delete"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
+                          <td className="p-4 text-right pr-6">
+                            <div className="flex justify-end items-center space-x-1">
+                              <button 
+                                onClick={() => handleOpenEdit('hotels', h)}
+                                className="p-2 hover:bg-slate-100 text-slate-700 hover:text-black rounded-lg transition cursor-pointer"
+                                title="Edit"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </button>
+                              <button 
+                                onClick={() => handleDelete('hotels', h.id)}
+                                className="p-2 hover:bg-slate-100 text-slate-500 hover:text-rose-600 rounded-lg transition cursor-pointer"
+                                title="Delete"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -775,16 +1685,12 @@ const AdminDashboard = () => {
                             className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
                           />
                         </div>
-                        <div className="col-span-1 md:col-span-2">
-                          <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Image URL</label>
-                          <input 
-                            type="text" 
-                            required 
-                            value={destForm.image || ''} 
-                            onChange={e => setDestForm({...destForm, image: e.target.value})}
-                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200 font-mono" 
-                          />
-                        </div>
+                        <ImageUploadField 
+                          label="Destination Photo"
+                          value={destForm.image || ''}
+                          onChange={val => setDestForm({...destForm, image: val})}
+                          onUpload={file => handleFileUpload(file, 'destinations')}
+                        />
                         <div>
                           <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Rating (1.0 to 5.0)</label>
                           <input 
@@ -1065,137 +1971,264 @@ const AdminDashboard = () => {
                   </div>
                 )}
 
-                {/* TOUR FORM FIELDS */}
                 {editType === 'tours' && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    {editId === null && (
-                      <div className="col-span-1 md:col-span-2">
-                        <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Unique Tour Code (slug, e.g. custom-expedition)</label>
-                        <input 
-                          type="text" 
-                          required 
-                          placeholder="e.g. eco-bhutan-trek"
-                          value={tourForm.id || ''} 
-                          onChange={e => setTourForm({...tourForm, id: e.target.value})}
-                          className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200 font-mono" 
+                  <div className="space-y-6">
+                    {/* Modal Tab Buttons */}
+                    <div className="flex space-x-6 border-b border-slate-200 pb-2 mb-4">
+                      {(['overview', 'itinerary', 'advice'] as const).map(tab => (
+                        <button
+                          key={tab}
+                          type="button"
+                          onClick={() => setModalTab(tab as any)}
+                          className={`pb-2 text-xs font-bold uppercase tracking-wider transition-colors border-b-2 cursor-pointer ${
+                            modalTab === tab 
+                              ? 'border-slate-900 text-slate-900' 
+                              : 'border-transparent text-slate-400 hover:text-slate-900'
+                          }`}
+                        >
+                          {tab}
+                        </button>
+                      ))}
+                    </div>
+
+                    {modalTab === 'overview' && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        {editId === null && (
+                          <div className="col-span-1 md:col-span-2">
+                            <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Unique Tour Code (slug, e.g. custom-expedition)</label>
+                            <input 
+                              type="text" 
+                              required 
+                              placeholder="e.g. eco-bhutan-trek"
+                              value={tourForm.id || ''} 
+                              onChange={e => setTourForm({...tourForm, id: e.target.value})}
+                              className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200 font-mono" 
+                            />
+                          </div>
+                        )}
+                        <div className="col-span-1 md:col-span-2">
+                          <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Tour Title</label>
+                          <input 
+                            type="text" 
+                            required 
+                            value={tourForm.title || ''} 
+                            onChange={e => setTourForm({...tourForm, title: e.target.value})}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Duration text (e.g. 5 Days)</label>
+                          <input 
+                            type="text" 
+                            required 
+                            value={tourForm.duration || ''} 
+                            onChange={e => setTourForm({...tourForm, duration: e.target.value})}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Nights (Integer count)</label>
+                          <input 
+                            type="number" 
+                            required 
+                            value={tourForm.nights || 0} 
+                            onChange={e => setTourForm({...tourForm, nights: parseInt(e.target.value) || 0})}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Price tag (e.g. $1,299)</label>
+                          <input 
+                            type="text" 
+                            required 
+                            value={tourForm.price || ''} 
+                            onChange={e => setTourForm({...tourForm, price: e.target.value})}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Numerical price value (e.g. 1299)</label>
+                          <input 
+                            type="number" 
+                            required 
+                            value={tourForm.priceVal || 0} 
+                            onChange={e => setTourForm({...tourForm, priceVal: parseInt(e.target.value) || 0})}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                          />
+                        </div>
+                        <ImageUploadField 
+                          label="Tour Photo"
+                          value={tourForm.image || ''}
+                          onChange={val => setTourForm({...tourForm, image: val})}
+                          onUpload={file => handleFileUpload(file, 'tours')}
                         />
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Category</label>
+                          <select 
+                            value={tourForm.category || 'Cultural'} 
+                            onChange={e => setTourForm({...tourForm, category: e.target.value})}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 cursor-pointer" 
+                          >
+                            <option value="Cultural">Cultural</option>
+                            <option value="Adventure">Adventure</option>
+                            <option value="Luxury">Luxury</option>
+                            <option value="Trekking">Trekking</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Difficulty</label>
+                          <select 
+                            value={tourForm.difficulty || 'Easy'} 
+                            onChange={e => setTourForm({...tourForm, difficulty: e.target.value})}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 cursor-pointer" 
+                          >
+                            <option value="Easy">Easy</option>
+                            <option value="Moderate">Moderate</option>
+                            <option value="Challenging">Challenging</option>
+                          </select>
+                        </div>
+                        <div className="col-span-1 md:col-span-2">
+                          <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Description Summary</label>
+                          <textarea 
+                            required 
+                            rows={2} 
+                            value={tourForm.descText || tourForm.desc || ''} 
+                            onChange={e => setTourForm({...tourForm, descText: e.target.value})}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                          />
+                        </div>
+                        <div className="col-span-1 md:col-span-2">
+                          <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Inclusions (one per line)</label>
+                          <textarea 
+                            rows={3} 
+                            placeholder="TCB Certified guide&#10;Meals&#10;Transfers"
+                            value={tourForm.inclusions?.join('\n') || ''} 
+                            onChange={e => setTourForm({...tourForm, inclusions: e.target.value.split('\n').filter(Boolean)})}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200 font-mono" 
+                          />
+                        </div>
+                        <div className="col-span-1 md:col-span-2">
+                          <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Exclusions (one per line)</label>
+                          <textarea 
+                            rows={3} 
+                            placeholder="Flights&#10;Insurance&#10;Personal tips"
+                            value={tourForm.exclusions?.join('\n') || ''} 
+                            onChange={e => setTourForm({...tourForm, exclusions: e.target.value.split('\n').filter(Boolean)})}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200 font-mono" 
+                          />
+                        </div>
                       </div>
                     )}
-                    <div className="col-span-1 md:col-span-2">
-                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Tour Title</label>
-                      <input 
-                        type="text" 
-                        required 
-                        value={tourForm.title || ''} 
-                        onChange={e => setTourForm({...tourForm, title: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Duration text (e.g. 5 Days)</label>
-                      <input 
-                        type="text" 
-                        required 
-                        value={tourForm.duration || ''} 
-                        onChange={e => setTourForm({...tourForm, duration: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Nights (Integer count)</label>
-                      <input 
-                        type="number" 
-                        required 
-                        value={tourForm.nights || 0} 
-                        onChange={e => setTourForm({...tourForm, nights: parseInt(e.target.value) || 0})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Price tag (e.g. $1,299)</label>
-                      <input 
-                        type="text" 
-                        required 
-                        value={tourForm.price || ''} 
-                        onChange={e => setTourForm({...tourForm, price: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Numerical price value (e.g. 1299)</label>
-                      <input 
-                        type="number" 
-                        required 
-                        value={tourForm.priceVal || 0} 
-                        onChange={e => setTourForm({...tourForm, priceVal: parseInt(e.target.value) || 0})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
-                      />
-                    </div>
-                    <div className="col-span-1 md:col-span-2">
-                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Image URL</label>
-                      <input 
-                        type="text" 
-                        required 
-                        value={tourForm.image || ''} 
-                        onChange={e => setTourForm({...tourForm, image: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200 font-mono" 
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Category</label>
-                      <select 
-                        value={tourForm.category || 'Cultural'} 
-                        onChange={e => setTourForm({...tourForm, category: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 cursor-pointer" 
-                      >
-                        <option value="Cultural">Cultural</option>
-                        <option value="Adventure">Adventure</option>
-                        <option value="Luxury">Luxury</option>
-                        <option value="Trekking">Trekking</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Difficulty</label>
-                      <select 
-                        value={tourForm.difficulty || 'Easy'} 
-                        onChange={e => setTourForm({...tourForm, difficulty: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 cursor-pointer" 
-                      >
-                        <option value="Easy">Easy</option>
-                        <option value="Moderate">Moderate</option>
-                        <option value="Challenging">Challenging</option>
-                      </select>
-                    </div>
-                    <div className="col-span-1 md:col-span-2">
-                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Description Summary</label>
-                      <textarea 
-                        required 
-                        rows={2} 
-                        value={tourForm.desc || ''} 
-                        onChange={e => setTourForm({...tourForm, desc: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
-                      />
-                    </div>
-                    <div className="col-span-1 md:col-span-2">
-                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Inclusions (one per line)</label>
-                      <textarea 
-                        rows={3} 
-                        placeholder="TCB Certified guide&#10;Meals&#10;Transfers"
-                        value={tourForm.inclusions?.join('\n') || ''} 
-                        onChange={e => setTourForm({...tourForm, inclusions: e.target.value.split('\n').filter(Boolean)})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200 font-mono" 
-                      />
-                    </div>
-                    <div className="col-span-1 md:col-span-2">
-                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Exclusions (one per line)</label>
-                      <textarea 
-                        rows={3} 
-                        placeholder="Flights&#10;Insurance&#10;Personal tips"
-                        value={tourForm.exclusions?.join('\n') || ''} 
-                        onChange={e => setTourForm({...tourForm, exclusions: e.target.value.split('\n').filter(Boolean)})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200 font-mono" 
-                      />
-                    </div>
+
+                    {modalTab === 'itinerary' && (
+                      <div className="space-y-4">
+                        <h4 className="text-sm font-bold text-slate-900 mb-3 uppercase tracking-wider">Daily Itinerary</h4>
+                        {(tourForm.itinerary || []).map((it: any, idx: number) => (
+                          <div key={idx} className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3 relative group">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newIt = [...(tourForm.itinerary || [])];
+                                newIt.splice(idx, 1);
+                                setTourForm({ ...tourForm, itinerary: newIt });
+                              }}
+                              className="absolute top-3 right-3 text-rose-500 hover:text-rose-700 p-1 hover:bg-slate-200 rounded transition cursor-pointer"
+                              title="Delete Day"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                            <div className="grid grid-cols-6 gap-3">
+                              <div className="col-span-1">
+                                <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Day</label>
+                                <input 
+                                  type="number" 
+                                  value={it.day || ''} 
+                                  onChange={e => {
+                                    const newIt = [...(tourForm.itinerary || [])];
+                                    newIt[idx] = { ...newIt[idx], day: parseInt(e.target.value) || (idx + 1) };
+                                    setTourForm({ ...tourForm, itinerary: newIt });
+                                  }}
+                                  className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900 font-mono" 
+                                />
+                              </div>
+                              <div className="col-span-5">
+                                <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Title</label>
+                                <input 
+                                  type="text" 
+                                  value={it.title || ''} 
+                                  onChange={e => {
+                                    const newIt = [...(tourForm.itinerary || [])];
+                                    newIt[idx] = { ...newIt[idx], title: e.target.value };
+                                    setTourForm({ ...tourForm, itinerary: newIt });
+                                  }}
+                                  className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                                />
+                              </div>
+                            </div>
+                            <div>
+                              <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Description</label>
+                              <textarea 
+                                rows={2}
+                                value={it.desc || ''} 
+                                onChange={e => {
+                                    const newIt = [...(tourForm.itinerary || [])];
+                                    newIt[idx] = { ...newIt[idx], desc: e.target.value };
+                                    setTourForm({ ...tourForm, itinerary: newIt });
+                                }}
+                                className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                              />
+                            </div>
+                          </div>
+                        ))}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const nextDay = (tourForm.itinerary || []).length + 1;
+                            setTourForm({
+                              ...tourForm,
+                              itinerary: [...(tourForm.itinerary || []), { day: nextDay, title: '', desc: '' }]
+                            });
+                          }}
+                          className="flex items-center space-x-1.5 px-3 py-1.5 bg-slate-900 hover:bg-black text-white rounded-lg text-xs font-semibold transition cursor-pointer"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>Add Day</span>
+                        </button>
+                      </div>
+                    )}
+
+                    {modalTab === 'advice' && (
+                      <div className="space-y-5">
+                        <h4 className="text-sm font-bold text-slate-900 mb-3 uppercase tracking-wider">Practical Advice</h4>
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Bhutan Entry Visa & Permit</label>
+                          <textarea 
+                            rows={3} 
+                            value={tourForm.visaAdvice || ''} 
+                            onChange={e => setTourForm({...tourForm, visaAdvice: e.target.value})}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Altitude & Packing Information</label>
+                          <textarea 
+                            rows={3} 
+                            value={tourForm.altitudeAdvice || ''} 
+                            onChange={e => setTourForm({...tourForm, altitudeAdvice: e.target.value})}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Currency & Connectivity</label>
+                          <textarea 
+                            rows={3} 
+                            value={tourForm.currencyAdvice || ''} 
+                            onChange={e => setTourForm({...tourForm, currencyAdvice: e.target.value})}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -1232,16 +2265,12 @@ const AdminDashboard = () => {
                         className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
                       />
                     </div>
-                    <div className="col-span-1 md:col-span-2">
-                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Image URL</label>
-                      <input 
-                        type="text" 
-                        required 
-                        value={hotelForm.image || ''} 
-                        onChange={e => setHotelForm({...hotelForm, image: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200 font-mono" 
-                      />
-                    </div>
+                        <ImageUploadField 
+                          label="Hotel Photo"
+                          value={hotelForm.image || ''}
+                          onChange={val => setHotelForm({...hotelForm, image: val})}
+                          onUpload={file => handleFileUpload(file, 'hotels')}
+                        />
                     <div>
                       <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Rating (1.0 to 5.0)</label>
                       <input 

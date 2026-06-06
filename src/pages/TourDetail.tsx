@@ -73,6 +73,23 @@ const TourDetail = () => {
     setExpandedDay(expandedDay === day ? null : day)
   }
 
+  let displayDesc = tour.desc;
+  let displayVisa = "We coordinate the entire visa process. The standard e-visa is applied in advance, and approval takes 3-5 days. The mandatory one-time $40 visa fee is handled on your behalf when booking this package.";
+  let displayAltitude = "This tour reaches altitudes of up to 3,100 meters (Dochula Pass). Most trails are moderate. We recommend hiking shoes, thermal base layers, and modest clothing that covers shoulders and knees for visiting sacred temples (Dzongs).";
+  let displayCurrency = "Bhutan's currency is the Ngultrum (equivalent to the Indian Rupee). Indian Rupees are accepted across Bhutan, but 500/2000 denomination notes are restricted. International credit cards are only accepted at premium luxury resorts; we recommend carrying some USD cash for personal expenses.";
+
+  try {
+    if (tour.desc.trim().startsWith('{')) {
+      const parsed = JSON.parse(tour.desc);
+      if (parsed.text) displayDesc = parsed.text;
+      if (parsed.visaAdvice) displayVisa = parsed.visaAdvice;
+      if (parsed.altitudeAdvice) displayAltitude = parsed.altitudeAdvice;
+      if (parsed.currencyAdvice) displayCurrency = parsed.currencyAdvice;
+    }
+  } catch (e) {
+    // Fail silently
+  }
+
   return (
     <PageTransition>
       <div className="bg-bg-light min-h-[100dvh] pb-32">
@@ -111,7 +128,7 @@ const TourDetail = () => {
                 {tour.title}
               </h1>
               <p className="text-white/85 text-xs md:text-sm font-light max-w-2xl mx-auto leading-relaxed uppercase tracking-[0.15em]">
-                {tour.desc}
+                {displayDesc}
               </p>
             </motion.div>
           </div>
@@ -224,19 +241,19 @@ const TourDetail = () => {
                   <div>
                     <h4 className="font-heading font-medium text-lg text-primary mb-3">Bhutan Entry Visa & Permit</h4>
                     <p className="text-secondary text-sm font-light leading-relaxed tracking-wide">
-                      We coordinate the entire visa process. The standard e-visa is applied in advance, and approval takes 3-5 days. The mandatory one-time $40 visa fee is handled on your behalf when booking this package.
+                      {displayVisa}
                     </p>
                   </div>
                   <div>
                     <h4 className="font-heading font-medium text-lg text-primary mb-3">Altitude & Packing Information</h4>
                     <p className="text-secondary text-sm font-light leading-relaxed tracking-wide">
-                      This tour reaches altitudes of up to 3,100 meters (Dochula Pass). Most trails are moderate. We recommend hiking shoes, thermal base layers, and modest clothing that covers shoulders and knees for visiting sacred temples (Dzongs).
+                      {displayAltitude}
                     </p>
                   </div>
                   <div>
                     <h4 className="font-heading font-medium text-lg text-primary mb-3">Currency & Connectivity</h4>
                     <p className="text-secondary text-sm font-light leading-relaxed tracking-wide">
-                      Bhutan's currency is the Ngultrum (equivalent to the Indian Rupee). Indian Rupees are accepted across Bhutan, but 500/2000 denomination notes are restricted. International credit cards are only accepted at premium luxury resorts; we recommend carrying some USD cash for personal expenses.
+                      {displayCurrency}
                     </p>
                   </div>
                 </div>

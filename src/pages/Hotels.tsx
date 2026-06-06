@@ -109,7 +109,16 @@ const Hotels = () => {
                         <span className="text-xl font-heading font-semibold text-primary">{hotel.price} <span className="text-xs font-normal text-secondary">/ night</span></span>
                       </div>
                       <button
-                        onClick={() => navigate('/booking')}
+                        onClick={() => navigate('/booking', {
+                          state: {
+                            destinationName: hotel.name,
+                            image: hotel.image,
+                            totalPrice: parseFloat(hotel.price.replace(/[^0-9.]/g, '')) || 1800,
+                            nights: 1,
+                            adults: 2,
+                            type: 'hotel'
+                          }
+                        })}
                         className="btn-accent !px-6 !py-2.5 !text-[10px] !rounded-full font-bold uppercase tracking-wider flex items-center gap-1.5"
                       >
                         <span>Inquire Stays</span>

@@ -1,13 +1,54 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { motion } from "framer-motion"
 import { Phone, Mail, MapPin, Send, Instagram, Twitter, Facebook, Globe } from "lucide-react"
 import PageTransition from "../components/common/PageTransition"
 
+type ContactData = {
+  heroTitle: string
+  heroSubtitle: string
+  channelTitle: string
+  channelSubtitle: string
+  channelDesc: string
+  baseTitle: string
+  baseLine1: string
+  baseLine2: string
+  callTitle: string
+  callLine1: string
+  callLine2: string
+  emailTitle: string
+  emailLine1: string
+  emailLine2: string
+}
+
 const Contact = () => {
   const [searchParams] = useSearchParams()
   const initialType = searchParams.get('type') === 'flight' ? 'Flight Booking Inquiry' : 'General Inquiry'
   const [inquiryType, setInquiryType] = useState(initialType)
+
+  const [data, setData] = useState<ContactData | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/contact`)
+      .then(res => res.json())
+      .then(d => {
+        setData(d)
+        setLoading(false)
+      })
+      .catch(err => {
+        console.error(err)
+        setLoading(false)
+      })
+  }, [])
+
+  if (loading || !data) {
+    return (
+      <div className="p-40 text-center min-h-[100dvh] bg-bg-light text-2xl font-heading font-medium text-primary animate-pulse">
+        Loading Contact Details...
+      </div>
+    )
+  }
 
   return (
     <PageTransition>
@@ -32,7 +73,7 @@ const Contact = () => {
               transition={{ duration: 1, ease: "easeOut" }}
               className="text-white text-5xl md:text-7xl lg:text-8xl font-heading mb-6 leading-[1.1] font-medium"
             >
-              Contact <span className="text-accent italic font-normal">Thimphu</span>
+              {data.heroTitle.split(" ")[0]} <span className="text-accent italic font-normal">{data.heroTitle.split(" ").slice(1).join(" ")}</span>
             </motion.h1>
 
             <motion.p
@@ -41,7 +82,7 @@ const Contact = () => {
               transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
               className="text-white/80 text-xs md:text-sm font-light max-w-2xl mx-auto leading-relaxed tracking-[0.15em] uppercase"
             >
-              Our local travel architects are stationed directly in the capital, ready to craft your bespoke Bhutanese journey.
+              {data.heroSubtitle}
             </motion.p>
           </div>
         </section>
@@ -52,10 +93,10 @@ const Contact = () => {
             {/* Contact Info (5 cols) */}
             <div className="lg:col-span-5 space-y-8">
               <div>
-                <span className="text-accent font-semibold uppercase tracking-[0.2em] text-[10px] mb-2 block">Direct Channels</span>
-                <h2 className="text-2xl md:text-3xl font-heading font-medium text-primary tracking-tight mb-3">How to Reach Us</h2>
+                <span className="text-accent font-semibold uppercase tracking-[0.2em] text-[10px] mb-2 block">{data.channelTitle}</span>
+                <h2 className="text-2xl md:text-3xl font-heading font-medium text-primary tracking-tight mb-3">{data.channelSubtitle}</h2>
                 <p className="text-secondary font-light text-sm sm:text-base leading-relaxed">
-                  Whether you prefer a traditional wire transfer, a digital dialogue, or a direct call to our Himalayan base, we are here to assist.
+                  {data.channelDesc}
                 </p>
               </div>
 
@@ -63,18 +104,18 @@ const Contact = () => {
                 {[
                   {
                     icon: MapPin,
-                    title: "The Base",
-                    lines: ["Changlam Square, 2nd Floor", "Thimphu, Kingdom of Bhutan"]
+                    title: data.baseTitle,
+                    lines: [data.baseLine1, data.baseLine2]
                   },
                   {
                     icon: Phone,
-                    title: "Digital Call",
-                    lines: ["+975 2 334567", "+975 17 609800 (WhatsApp)"]
+                    title: data.callTitle,
+                    lines: [data.callLine1, data.callLine2]
                   },
                   {
                     icon: Mail,
-                    title: "Electronic Mail",
-                    lines: ["explore@helptourismbhutan.bt", "concierge@helptourismbhutan.bt"]
+                    title: data.emailTitle,
+                    lines: [data.emailLine1, data.emailLine2]
                   }
                 ].map((item, idx) => (
                   <motion.div
