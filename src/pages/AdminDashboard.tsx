@@ -58,7 +58,7 @@ type LuxuryHotel = {
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState<'destinations' | 'tours' | 'hotels' | 'about' | 'contact'>('destinations')
+  const [activeTab, setActiveTab] = useState<'destinations' | 'tours' | 'hotels' | 'about' | 'contact' | 'testimonials'>('destinations')
   
   // Data States
   const [destinations, setDestinations] = useState<Destination[]>([])
@@ -79,6 +79,7 @@ const AdminDashboard = () => {
   const [modalTab, setModalTab] = useState<'overview' | 'itinerary' | 'amenities' | 'reviews' | 'advice'>('overview')
   const [contactTab, setContactTab] = useState<'banner' | 'channels' | 'footer'>('banner')
   const [aboutTab, setAboutTab] = useState<'philosophy' | 'stats' | 'pillars'>('philosophy')
+  const [testimonialsTab, setTestimonialsTab] = useState<number>(0)
   
   // Form values
   const [destForm, setDestForm] = useState<Partial<Destination>>({})
@@ -86,17 +87,19 @@ const AdminDashboard = () => {
   const [hotelForm, setHotelForm] = useState<Partial<LuxuryHotel>>({})
   const [aboutForm, setAboutForm] = useState<any>({})
   const [contactForm, setContactForm] = useState<any>({})
+  const [testimonialsForm, setTestimonialsForm] = useState<any[]>([])
 
   // Fetch all data
   const fetchData = async () => {
     setLoading(true)
     try {
-      const [destRes, toursRes, hotelsRes, aboutRes, contactRes] = await Promise.all([
+      const [destRes, toursRes, hotelsRes, aboutRes, contactRes, testimonialsRes] = await Promise.all([
         fetch(`${API_BASE}/api/destinations`),
         fetch(`${API_BASE}/api/tours`),
         fetch(`${API_BASE}/api/hotels`),
         fetch(`${API_BASE}/api/about`),
-        fetch(`${API_BASE}/api/contact`)
+        fetch(`${API_BASE}/api/contact`),
+        fetch(`${API_BASE}/api/testimonials`)
       ])
       
       const destData = await destRes.json()
@@ -104,12 +107,14 @@ const AdminDashboard = () => {
       const hotelsData = await hotelsRes.json()
       const aboutData = await aboutRes.json()
       const contactData = await contactRes.json()
+      const testimonialsData = await testimonialsRes.json()
       
       setDestinations(destData)
       setTours(toursData)
       setHotels(hotelsData)
       setAboutForm(aboutData)
       setContactForm(contactData)
+      setTestimonialsForm(testimonialsData)
     } catch (err: any) {
       console.error(err)
       showToast('Error loading data from server.', 'error')
@@ -330,7 +335,7 @@ const AdminDashboard = () => {
 
   const [uploading, setUploading] = useState(false)
 
-  const handleFileUpload = async (file: File, type: 'destinations' | 'tours' | 'hotels') => {
+  const handleFileUpload = async (file: File, type: 'destinations' | 'tours' | 'hotels' | 'testimonials', index?: number) => {
     setUploading(true)
     try {
       const reader = new FileReader()
@@ -351,6 +356,12 @@ const AdminDashboard = () => {
           setTourForm(prev => ({ ...prev, image: data.url }))
         } else if (type === 'hotels') {
           setHotelForm(prev => ({ ...prev, image: data.url }))
+        } else if (type === 'testimonials' && typeof index === 'number') {
+          setTestimonialsForm(prev => {
+            const updated = [...prev]
+            updated[index] = { ...updated[index], avatar: data.url }
+            return updated
+          })
         }
         
         showToast('Image uploaded successfully!', 'success')
@@ -360,6 +371,25 @@ const AdminDashboard = () => {
       showToast('Error uploading image.', 'error')
     } finally {
       setUploading(false)
+    }
+  }
+
+  const handleSaveTestimonials = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    try {
+      const res = await fetch(`${API_BASE}/api/testimonials`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(testimonialsForm)
+      })
+      if (!res.ok) throw new Error('Failed to save testimonials')
+      showToast('Customer reviews updated successfully!', 'success')
+      fetchData()
+    } catch (err: any) {
+      console.error(err)
+      showToast(err.message || 'Error saving testimonials.', 'error')
+      setLoading(false)
     }
   }
 
@@ -668,6 +698,20 @@ const AdminDashboard = () => {
               </div>
             </button>
 
+            <button
+              onClick={() => { setActiveTab('testimonials'); setSearchQuery(''); }}
+              className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${
+                activeTab === 'testimonials'
+                  ? 'bg-slate-100 text-slate-900 border-l-2 border-slate-900'
+                  : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+              }`}
+            >
+              <div className="flex items-center space-x-3">
+                <Star className={`w-4 h-4 ${activeTab === 'testimonials' ? 'text-slate-900' : 'text-slate-400'}`} />
+                <span>Voice of the Valley</span>
+              </div>
+            </button>
+
           </nav>
         </div>
 
@@ -698,7 +742,9 @@ const AdminDashboard = () => {
                   ? 'Hotels' 
                   : activeTab === 'about' 
                   ? 'About Us' 
-                  : 'Contact Us'}
+                  : activeTab === 'contact'
+                  ? 'Contact Us'
+                  : 'Voice of the Valley'}
               </span>
               <ChevronRight className="w-5 h-5 text-slate-400" />
               <span className="text-slate-500 text-lg font-medium">Dashboard</span>
@@ -708,11 +754,13 @@ const AdminDashboard = () => {
                 ? 'Manage legacy stats, philosophy copy, and the four standards of integrity.' 
                 : activeTab === 'contact'
                 ? 'Manage office locations, phone channels, and support email addresses.'
+                : activeTab === 'testimonials'
+                ? 'Manage Voice of the Valley Customer Reviews displayed on the home page.'
                 : 'Manage database objects, details, ratings, and media galleries.'}
             </p>
           </div>
 
-          {activeTab !== 'about' && activeTab !== 'contact' && (
+          {activeTab !== 'about' && activeTab !== 'contact' && activeTab !== 'testimonials' && (
             <button
               onClick={() => handleOpenEdit(activeTab as any)}
               className="flex items-center justify-center space-x-2 bg-slate-900 hover:bg-black text-white font-bold px-5 py-2.5 rounded-lg transition-all duration-200 shadow-sm active:scale-[0.98] cursor-pointer"
@@ -745,7 +793,7 @@ const AdminDashboard = () => {
         </AnimatePresence>
 
         {/* Controls Block (Search & Sort) */}
-        {activeTab !== 'about' && activeTab !== 'contact' && (
+        {activeTab !== 'about' && activeTab !== 'contact' && activeTab !== 'testimonials' && (
           <div className="bg-white border border-slate-200 p-4 rounded-t-xl flex flex-col md:flex-row md:items-center md:justify-between gap-4 shadow-sm">
             <div className="relative flex-1 max-w-md">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -1416,6 +1464,179 @@ const AdminDashboard = () => {
                 <span>Save Contact Content</span>
               </button>
             </div>
+          </form>
+        ) : activeTab === 'testimonials' ? (
+          <form onSubmit={handleSaveTestimonials} className="bg-white border border-slate-200 rounded-xl p-8 shadow-sm space-y-8 max-w-4xl mx-auto">
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 pb-4 gap-4">
+                <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider flex items-center space-x-2">
+                  <span className="w-1.5 h-1.5 bg-slate-900 rounded-full"></span>
+                  <span>Voice of the Valley Customer Reviews</span>
+                </h3>
+                
+                <button
+                  type="button"
+                  onClick={() => {
+                    const nextId = testimonialsForm.length > 0 ? Math.max(...testimonialsForm.map(t => t.id || 0)) + 1 : 1
+                    const newTestimonial = {
+                      id: nextId,
+                      name: '',
+                      role: '',
+                      content: '',
+                      avatar: 'https://i.pravatar.cc/200?u=new' + nextId,
+                      rating: 5
+                    }
+                    const updated = [...testimonialsForm, newTestimonial]
+                    setTestimonialsForm(updated)
+                    setTestimonialsTab(updated.length - 1)
+                  }}
+                  className="flex items-center space-x-1.5 px-3 py-1.5 bg-slate-900 hover:bg-black text-white rounded-lg text-xs font-semibold transition cursor-pointer self-start"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add Review</span>
+                </button>
+              </div>
+
+              {/* Review Tabs Navigation */}
+              {testimonialsForm.length > 0 ? (
+                <div className="flex flex-wrap gap-2 border-b border-slate-100 pb-2">
+                  {testimonialsForm.map((_, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setTestimonialsTab(idx)}
+                      className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-colors border cursor-pointer ${
+                        testimonialsTab === idx 
+                          ? 'bg-slate-900 text-white border-slate-900' 
+                          : 'bg-slate-50 text-slate-500 hover:text-slate-900 hover:bg-slate-100 border-slate-200'
+                      }`}
+                    >
+                      Review #{idx + 1}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+              
+              <div className="space-y-8">
+                {testimonialsForm.length > 0 && testimonialsForm[testimonialsTab] ? (
+                  <div className="p-6 bg-slate-50 rounded-xl border border-slate-200 space-y-4">
+                    <div className="flex items-center justify-between border-b border-slate-150 pb-2">
+                      <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Review #{testimonialsTab + 1} Settings</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (window.confirm(`Are you sure you want to delete Review #${testimonialsTab + 1}?`)) {
+                            const updated = [...testimonialsForm]
+                            updated.splice(testimonialsTab, 1)
+                            setTestimonialsForm(updated)
+                            setTestimonialsTab(Math.max(0, testimonialsTab - 1))
+                          }
+                        }}
+                        className="flex items-center space-x-1 px-2.5 py-1 text-[10px] bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg font-bold uppercase tracking-wider transition cursor-pointer border border-rose-250"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                        <span>Delete Review</span>
+                      </button>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">Customer Name</label>
+                        <input 
+                          type="text" 
+                          required 
+                          value={testimonialsForm[testimonialsTab].name || ''} 
+                          onChange={e => {
+                            const updated = [...testimonialsForm]
+                            updated[testimonialsTab] = { ...updated[testimonialsTab], name: e.target.value }
+                            setTestimonialsForm(updated)
+                          }}
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-[10px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">Role / Bio (e.g. Cultural Historian • Thimphu Resident)</label>
+                        <input 
+                          type="text" 
+                          required 
+                          value={testimonialsForm[testimonialsTab].role || ''} 
+                          onChange={e => {
+                            const updated = [...testimonialsForm]
+                            updated[testimonialsTab] = { ...updated[testimonialsTab], role: e.target.value }
+                            setTestimonialsForm(updated)
+                          }}
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                        />
+                      </div>
+
+                      <div className="md:col-span-2">
+                        <label className="block text-[10px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">Review Content</label>
+                        <textarea 
+                          rows={3}
+                          required 
+                          value={testimonialsForm[testimonialsTab].content || testimonialsForm[testimonialsTab].text || ''} 
+                          onChange={e => {
+                            const updated = [...testimonialsForm]
+                            updated[testimonialsTab] = { ...updated[testimonialsTab], content: e.target.value, text: e.target.value }
+                            setTestimonialsForm(updated)
+                          }}
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">Rating (1 to 5 Stars)</label>
+                        <input 
+                          type="number" 
+                          min={1}
+                          max={5}
+                          required 
+                          value={testimonialsForm[testimonialsTab].rating || 5} 
+                          onChange={e => {
+                            const updated = [...testimonialsForm]
+                            updated[testimonialsTab] = { ...updated[testimonialsTab], rating: parseInt(e.target.value) || 5 }
+                            setTestimonialsForm(updated)
+                          }}
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                        />
+                      </div>
+
+                      <div className="md:col-span-2">
+                        <ImageUploadField 
+                          label={`Avatar Photo for Review #${testimonialsTab + 1}`}
+                          value={testimonialsForm[testimonialsTab].avatar || ''}
+                          onChange={val => {
+                            const updated = [...testimonialsForm]
+                            updated[testimonialsTab] = { ...updated[testimonialsTab], avatar: val }
+                            setTestimonialsForm(updated)
+                          }}
+                          onUpload={file => handleFileUpload(file, 'testimonials', testimonialsTab)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-12 bg-slate-50 rounded-xl border border-slate-200 border-dashed">
+                    <span className="text-xs text-slate-400 font-semibold block">No customer reviews configured</span>
+                    <span className="text-[10px] text-slate-400 block mt-1">Click the "Add Review" button above to get started.</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Save Button */}
+            {testimonialsForm.length > 0 && (
+              <div className="flex justify-end pt-4 border-t border-slate-100">
+                <button
+                  type="submit"
+                  className="flex items-center space-x-2 bg-slate-900 hover:bg-black text-white font-bold px-6 py-3 rounded-lg transition-all duration-200 shadow-sm active:scale-[0.98] cursor-pointer"
+                >
+                  <Save className="w-5 h-5" />
+                  <span>Save Customer Reviews</span>
+                </button>
+              </div>
+            )}
           </form>
         ) : (
           <div className="bg-white border-x border-b border-slate-200 rounded-b-xl overflow-hidden shadow-sm">

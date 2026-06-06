@@ -710,7 +710,58 @@ app.put('/api/contact', (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+const TESTIMONIALS_FILE = path.join(__dirname, '../testimonials.json');
+const defaultTestimonials = [
+  {
+    id: 1,
+    name: "Dr. Tashi Wangdi",
+    role: "Cultural Historian • Thimphu Resident",
+    content: "The level of authenticity Help Tourism Bhutan brings to their itineraries is unparalleled. They don't just show you the Dzongs; they introduce you to the spirit and the building blocks of Bhutan.",
+    avatar: "https://i.pravatar.cc/200?u=bhutan1",
+    rating: 5
+  },
+  {
+    id: 2,
+    name: "Jameson Brooks",
+    role: "Visual Artist • Punakha Riverside Gala, Oct 2025",
+    content: "Lighting is everything. My guide was so well-trained that he knew the exact minute the sun would hit the Tiger's Nest waterfall for that perfect frame. Truly exceptional local knowledge.",
+    avatar: "https://i.pravatar.cc/200?u=photog",
+    rating: 5
+  },
+  {
+    id: 3,
+    name: "Anya Petrova",
+    role: "Solo Traveler • Snow Lion High Trek, Sep 2025",
+    content: "Safety and soul. These are the two things I found. As a solo female traveler, I felt completely protected and spiritually recharged. The homestays were the highlight of my life.",
+    avatar: "https://i.pravatar.cc/200?u=anya",
+    rating: 5
+  }
+];
+
+app.get('/api/testimonials', (req, res) => {
+  try {
+    if (fs.existsSync(TESTIMONIALS_FILE)) {
+      const data = fs.readFileSync(TESTIMONIALS_FILE, 'utf8');
+      return res.json(JSON.parse(data));
+    }
+  } catch (e) {
+    console.error("Failed to read testimonials.json:", e);
+  }
+  res.json(defaultTestimonials);
 });
+
+app.put('/api/testimonials', (req, res) => {
+  try {
+    fs.writeFileSync(TESTIMONIALS_FILE, JSON.stringify(req.body, null, 2), 'utf8');
+    res.json(req.body);
+  } catch (err: any) {
+    console.error("Failed to save testimonials.json:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.listen(PORT, () => {
+  console.log("Server running on port " + PORT);
+});
+
 
