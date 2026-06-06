@@ -47,7 +47,7 @@ const Booking = () => {
 
 Please assist me with finalizing this booking and completing the payment via bank wire/invoice.`
 
-        return `https://wa.me/97517609800?text=${encodeURIComponent(baseText)}`
+        return `https://wa.me/97517517119?text=${encodeURIComponent(baseText)}`
     }
 
     const getEmailUrl = () => {
@@ -298,7 +298,7 @@ Thank you!`
                                                     </p>
                                                     <div className="pt-2 text-xs font-medium space-y-2 text-primary">
                                                         <p>📞 Phone: <span className="font-semibold text-accent">+975 2 334567</span></p>
-                                                        <p>💬 WhatsApp: <span className="font-semibold text-accent">+975 17 609800</span></p>
+                                                        <p>💬 WhatsApp: <span className="font-semibold text-accent">+975 17517119</span></p>
                                                         <p>✉️ Email: <a href="mailto:explore@helptourismbhutan.bt" className="font-semibold text-accent underline">explore@helptourismbhutan.bt</a></p>
                                                     </div>
                                                 </div>

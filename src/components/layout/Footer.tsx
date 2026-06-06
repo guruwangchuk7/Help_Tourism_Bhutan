@@ -29,7 +29,7 @@ const Footer = () => {
 
   const phone = data?.footerPhone || '+975 2 334567'
   const email = data?.footerEmail || 'explore@helptourismbhutan.bt'
-  const whatsapp = data?.footerWhatsapp || '+975 17 609800 (WhatsApp)'
+  const whatsapp = data?.footerWhatsapp || '+975 17517119 (WhatsApp)'
   const location = data?.footerLocation || 'Thimphu, Bhutan'
   const instagram = data?.footerInstagram || 'Instagram'
   const facebook = data?.footerFacebook || 'Facebook'
