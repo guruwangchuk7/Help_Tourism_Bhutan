@@ -13,6 +13,7 @@ import Contact from "./pages/Contact"
 import Hotels from "./pages/Hotels"
 import Flights from "./pages/Flights"
 import SdfInfo from "./pages/SdfInfo"
+import AdminDashboard from "./pages/AdminDashboard"
 import ScrollToTop from "./components/layout/ScrollToTop"
 
 const App = () => (
@@ -34,6 +35,7 @@ const App = () => (
         <Route path="flights" element={<Flights />} />
         <Route path="sdf" element={<SdfInfo />} />
       </Route>
+      <Route path="/admin" element={<AdminDashboard />} />
     </Routes>
   </>
 )

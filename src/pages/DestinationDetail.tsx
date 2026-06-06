@@ -1,18 +1,43 @@
 import { useNavigate, useParams } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
 import { MapPin, ArrowLeft, Calendar, Users, Clock, MessageSquare, Heart, Share2, Star, Globe, ArrowRight, Wifi, Mountain, Bath, Car, Utensils, Sparkles, Minus, Plus } from "lucide-react"
-import { destinations } from "../data/destinations"
 import { useState, useEffect } from "react"
 import PageTransition from "../components/common/PageTransition"
+
+type Destination = {
+  id: number
+  name: string
+  image: string
+  description: string
+  attractions: string[]
+  price: string
+  rating: number
+  location: string
+}
 
 const DestinationDetail = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const destination = destinations.find(d => d.id === Number(id))
+  const [destination, setDestination] = useState<Destination | null>(null)
+  const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('overview')
   const [startDate, setStartDate] = useState("")
   const [endDate, setEndDate] = useState("")
   const [adults, setAdults] = useState(2)
+
+  useEffect(() => {
+    setLoading(true)
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/destinations/${id}`)
+      .then(res => res.json())
+      .then(data => {
+        setDestination(data)
+        setLoading(false)
+      })
+      .catch(err => {
+        console.error(err)
+        setLoading(false)
+      })
+  }, [id])
 
   const calculateNights = () => {
     if (!startDate || !endDate) return 1
@@ -33,6 +58,7 @@ const DestinationDetail = () => {
     window.scrollTo(0, 0)
   }, [id])
 
+  if (loading) return <div className="p-40 text-center text-2xl font-heading font-medium text-primary animate-pulse">Loading Expedition Valley Details...</div>
   if (!destination) return <div className="p-20 text-center text-2xl font-heading font-medium text-primary">Destination missed. Back to Home?</div>
 
   const itinerary = [

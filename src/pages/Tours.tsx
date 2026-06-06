@@ -1,10 +1,43 @@
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Heart, ArrowRight, CloudRain, Sun, Snowflake } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import PageTransition from "../components/common/PageTransition"
 
+const iconMap: { [key: string]: any } = {
+  Sun,
+  CloudRain,
+  Heart,
+  Snowflake
+}
+
+type TourEdition = {
+  id: number
+  tour_id: string
+  title: string
+  period: string
+  price: string
+  image: string
+  icon: string
+}
+
 const Tours = () => {
   const navigate = useNavigate()
+  const [editions, setEditions] = useState<TourEdition[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tours/editions`)
+      .then(res => res.json())
+      .then(data => {
+        setEditions(data)
+        setLoading(false)
+      })
+      .catch(err => {
+        console.error(err)
+        setLoading(false)
+      })
+  }, [])
 
   return (
     <PageTransition>
@@ -45,25 +78,27 @@ const Tours = () => {
 
         {/* Seasonal Tours Grid */}
         <div className="max-w-7xl mx-auto px-6 py-20 pb-32">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-            {[
-              { id: "bhutan-highlights", title: "The Paro Tshechu Edition", period: "Spring (March-May)", icon: Sun, color: "bg-primary/5", text: "text-primary", img: "/paro-taksang.jpg", price: "$3,499" },
-              { id: "adventure-bhutan", title: "Snow Lion High Trek", period: "Summer (June-Aug)", icon: CloudRain, color: "bg-primary/5", text: "text-primary", img: "/airport.jpg", price: "$2,899" },
-              { id: "cultural-journey", title: "Punakha Riverside Gala", period: "Fall (Sept-Nov)", icon: Heart, color: "bg-primary/5", text: "text-primary", img: "/punakha-dzong.jpg", price: "$4,199" },
-              { id: "luxury-escape", title: "Black-Necked Crane Haven", period: "Winter (Dec-Feb)", icon: Snowflake, color: "bg-primary/5", text: "text-primary", img: "/monk.jpg", price: "$2,299" },
-            ].map((tour, idx) => (
-              <motion.div
-                key={idx}
-                whileHover={{ y: -10 }}
-                onClick={() => navigate(`/tours/${tour.id}`)}
-                className="bg-white rounded-[3rem] overflow-hidden shadow-minimal hover:shadow-premium group border border-primary/5 p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center transition-all duration-500 cursor-pointer"
-              >
+          {loading ? (
+            <div className="py-40 text-center">
+              <p className="text-2xl font-heading italic text-gray-400 animate-pulse">Loading Seasonal Expeditions...</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+              {editions.map((tour, idx) => {
+                const IconComponent = iconMap[tour.icon] || Sun;
+                return (
+                  <motion.div
+                    key={idx}
+                    whileHover={{ y: -10 }}
+                    onClick={() => navigate(`/tours/${tour.tour_id}`)}
+                    className="bg-white rounded-[3rem] overflow-hidden shadow-minimal hover:shadow-premium group border border-primary/5 p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center transition-all duration-500 cursor-pointer"
+                  >
                 <div className="w-full md:w-56 h-56 rounded-[2rem] overflow-hidden shrink-0 shadow-glass border border-primary/5">
-                  <img src={tour.img} className="w-full h-full object-cover group-hover:scale-105 transition-all duration-1000" alt="" />
+                  <img src={tour.image} className="w-full h-full object-cover group-hover:scale-105 transition-all duration-1000" alt="" />
                 </div>
                 <div className="flex-1 w-full">
-                  <div className={`inline-flex items-center space-x-2 ${tour.color} ${tour.text} px-4 py-2 rounded-full mb-6`}>
-                    <tour.icon className="w-4 h-4" />
+                  <div className="inline-flex items-center space-x-2 bg-primary/5 text-primary px-4 py-2 rounded-full mb-6">
+                    <IconComponent className="w-4 h-4" />
                     <span className="text-[9px] font-semibold uppercase tracking-[0.2em] font-body">{tour.period}</span>
                   </div>
                   <h3 className="text-2xl sm:text-3xl font-heading font-medium text-primary leading-tight mb-4 tracking-wide">{tour.title}</h3>
@@ -75,7 +110,7 @@ const Tours = () => {
                       <span className="text-2xl font-heading font-semibold text-primary">{tour.price}</span>
                     </div>
                     <button
-                      onClick={(e) => { e.stopPropagation(); navigate(`/tours/${tour.id}`); }}
+                      onClick={(e) => { e.stopPropagation(); navigate(`/tours/${tour.tour_id}`); }}
                       className="w-12 h-12 bg-bg-alt text-primary rounded-full flex items-center justify-center group-hover:bg-accent group-hover:text-white transition-all duration-500 shadow-minimal group-hover:shadow-lg cursor-pointer"
                     >
                       <ArrowRight className="w-5 h-5" />
@@ -83,8 +118,10 @@ const Tours = () => {
                   </div>
                 </div>
               </motion.div>
-            ))}
+            )
+          })}
           </div>
+          )}
         </div>
       </div>
     </PageTransition>

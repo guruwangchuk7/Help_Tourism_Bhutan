@@ -1,21 +1,59 @@
 import { useState, useEffect } from "react"
 import { useParams, useNavigate, Link } from "react-router-dom"
 import { motion } from "framer-motion"
-import { tours } from "../data/tours"
 import { ArrowLeft, Clock, ShieldCheck, ChevronDown, Check, X } from "lucide-react"
 import PageTransition from "../components/common/PageTransition"
+
+type Tour = {
+  id: string
+  title: string
+  duration: string
+  nights: number
+  price: string
+  priceVal: number
+  image: string
+  desc: string
+  category: string
+  difficulty: "Easy" | "Moderate" | "Challenging"
+  inclusions: string[]
+  exclusions: string[]
+  itinerary: { day: number; title: string; desc: string }[]
+}
 
 const TourDetail = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const tour = tours.find((t) => t.id === id)
+  const [tour, setTour] = useState<Tour | null>(null)
+  const [loading, setLoading] = useState(true)
 
   const [activeTab, setActiveTab] = useState<"itinerary" | "inclusions" | "essential">("itinerary")
   const [expandedDay, setExpandedDay] = useState<number | null>(1)
 
   useEffect(() => {
+    setLoading(true)
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tours/${id}`)
+      .then(res => res.json())
+      .then(data => {
+        setTour(data)
+        setLoading(false)
+      })
+      .catch(err => {
+        console.error(err)
+        setLoading(false)
+      })
+  }, [id])
+
+  useEffect(() => {
     window.scrollTo(0, 0)
   }, [id])
+
+  if (loading) {
+    return (
+      <div className="p-40 text-center min-h-[100dvh] bg-bg-light text-2xl font-heading font-medium text-primary animate-pulse">
+        Loading Tour Itinerary Details...
+      </div>
+    )
+  }
 
   if (!tour) {
     return (

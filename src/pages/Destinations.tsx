@@ -1,14 +1,39 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, SlidersHorizontal, FilterX } from 'lucide-react'
-import { destinations } from '../data/destinations'
 import DestinationCard from '../components/destinations/DestinationCard'
 import PageTransition from '../components/common/PageTransition'
 
+type Destination = {
+  id: number
+  name: string
+  image: string
+  description: string
+  attractions: string[]
+  price: string
+  rating: number
+  location: string
+}
+
 const Destinations = () => {
+  const [destinations, setDestinations] = useState<Destination[]>([])
   const [filterType, setFilterType] = useState('All')
   const [searchQuery, setSearchQuery] = useState('')
   const [showFilters, setShowFilters] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/destinations`)
+      .then(res => res.json())
+      .then(data => {
+        setDestinations(data)
+        setLoading(false)
+      })
+      .catch(err => {
+        console.error(err)
+        setLoading(false)
+      })
+  }, [])
 
   const categories = ['All', 'Adventure', 'Cultural', 'Luxury', 'Trekking', 'Spiritual']
 
@@ -137,7 +162,11 @@ const Destinations = () => {
             </AnimatePresence>
           </div>
 
-          {filteredDestinations.length > 0 ? (
+          {loading ? (
+            <div className="py-40 text-center">
+              <p className="text-2xl font-heading italic text-gray-400 animate-pulse">Loading Valleys...</p>
+            </div>
+          ) : filteredDestinations.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
               {filteredDestinations.map((dest, idx) => (
                 <motion.div
