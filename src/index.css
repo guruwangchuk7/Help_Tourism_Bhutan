@@ -207,4 +207,27 @@
     font-size: 12px !important; /* small minimal body text */
     line-height: 1.5 !important;
   }
+
+  /* Footer mobile minimization */
+  footer {
+    padding-top: 3rem !important; /* 48px */
+    padding-bottom: 1.5rem !important; /* 24px */
+  }
+  
+  footer .grid {
+    gap: 1.75rem !important; /* 28px gap */
+    padding-bottom: 2rem !important; /* 32px */
+  }
+  
+  footer .mb-6 {
+    margin-bottom: 0.75rem !important; /* reduce logo & links header margins */
+  }
+  
+  footer h4 {
+    margin-bottom: 0.75rem !important;
+  }
+  
+  footer .pt-12 {
+    padding-top: 1.5rem !important;
+  }
 }
