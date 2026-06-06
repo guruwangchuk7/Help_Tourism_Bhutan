@@ -934,6 +934,116 @@ app.put('/api/testimonials', authenticateAdmin, (req, res) => {
   }
 });
 
+const TOURISTS_FILE = path.join(__dirname, '../tourists.json');
+const defaultTourists = [
+  {
+    id: 1,
+    name: "John Doe",
+    nationality: "American",
+    passportNumber: "A1234567",
+    email: "john@doe.com",
+    phone: "+1-202-555-0143",
+    tourName: "4 Days Bhutan Highlights",
+    checkInDate: "2026-10-12",
+    checkOutDate: "2026-10-15",
+    sdfStatus: "Paid",
+    specialRequests: "Vegetarian meals"
+  },
+  {
+    id: 2,
+    name: "Sarah Jenkins",
+    nationality: "British",
+    passportNumber: "B9876543",
+    email: "sarah@jenkins.co.uk",
+    phone: "+44-20-7946-0958",
+    tourName: "Luxury Bhutan Escape",
+    checkInDate: "2026-11-05",
+    checkOutDate: "2026-11-10",
+    sdfStatus: "Paid",
+    specialRequests: "Traditional hot stone bath preferences"
+  }
+];
+
+app.get('/api/tourists', (req, res) => {
+  const cacheKey = 'tourists:list';
+  const cached = getCache(cacheKey);
+  if (cached) return res.json(cached);
+
+  try {
+    if (fs.existsSync(TOURISTS_FILE)) {
+      const data = fs.readFileSync(TOURISTS_FILE, 'utf8');
+      const parsed = JSON.parse(data);
+      setCache(cacheKey, parsed);
+      return res.json(parsed);
+    }
+  } catch (e) {
+    console.error("Failed to read tourists.json:", e);
+  }
+  res.json(defaultTourists);
+});
+
+app.post('/api/tourists', authenticateAdmin, (req, res) => {
+  try {
+    let tourists = defaultTourists;
+    if (fs.existsSync(TOURISTS_FILE)) {
+      const data = fs.readFileSync(TOURISTS_FILE, 'utf8');
+      tourists = JSON.parse(data);
+    }
+    const newTourist = {
+      id: Date.now(),
+      ...req.body
+    };
+    tourists.push(newTourist);
+    fs.writeFileSync(TOURISTS_FILE, JSON.stringify(tourists, null, 2), 'utf8');
+    clearCache('tourists:');
+    res.json(newTourist);
+  } catch (err: any) {
+    console.error("Failed to save tourist:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/tourists/:id', authenticateAdmin, (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    let tourists = defaultTourists;
+    if (fs.existsSync(TOURISTS_FILE)) {
+      const data = fs.readFileSync(TOURISTS_FILE, 'utf8');
+      tourists = JSON.parse(data);
+    }
+    const index = tourists.findIndex(t => t.id === id);
+    if (index !== -1) {
+      tourists[index] = { ...tourists[index], ...req.body };
+      fs.writeFileSync(TOURISTS_FILE, JSON.stringify(tourists, null, 2), 'utf8');
+      clearCache('tourists:');
+      res.json(tourists[index]);
+    } else {
+      res.status(404).json({ error: "Tourist not found" });
+    }
+  } catch (err: any) {
+    console.error("Failed to update tourist:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/tourists/:id', authenticateAdmin, (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    let tourists = defaultTourists;
+    if (fs.existsSync(TOURISTS_FILE)) {
+      const data = fs.readFileSync(TOURISTS_FILE, 'utf8');
+      tourists = JSON.parse(data);
+    }
+    const filtered = tourists.filter(t => t.id !== id);
+    fs.writeFileSync(TOURISTS_FILE, JSON.stringify(filtered, null, 2), 'utf8');
+    clearCache('tourists:');
+    res.json({ success: true });
+  } catch (err: any) {
+    console.error("Failed to delete tourist:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log("Server running on port " + PORT);
 });

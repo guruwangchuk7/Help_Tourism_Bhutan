@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   MapPin, Compass, Hotel, Plus, Edit, Trash2, Save, X,
   ArrowLeft, Star, Search, SlidersHorizontal, ChevronRight,
-  HelpCircle, Upload, Phone
+  HelpCircle, Upload, Phone, Users
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { TableSkeleton } from '../components/common/Skeleton'
@@ -59,12 +59,13 @@ type LuxuryHotel = {
 const API_BASE = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000'
 
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState<'destinations' | 'tours' | 'hotels' | 'about' | 'contact' | 'testimonials'>('destinations')
+  const [activeTab, setActiveTab] = useState<'destinations' | 'tours' | 'hotels' | 'about' | 'contact' | 'testimonials' | 'tourists'>('destinations')
 
   // Data States
   const [destinations, setDestinations] = useState<Destination[]>([])
   const [tours, setTours] = useState<Tour[]>([])
   const [hotels, setHotels] = useState<LuxuryHotel[]>([])
+  const [tourists, setTourists] = useState<any[]>([])
 
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null)
@@ -89,6 +90,9 @@ const AdminDashboard = () => {
   const [aboutForm, setAboutForm] = useState<any>({})
   const [contactForm, setContactForm] = useState<any>({})
   const [testimonialsForm, setTestimonialsForm] = useState<any[]>([])
+  const [touristForm, setTouristForm] = useState<any>({ name: "", nationality: "", passportNumber: "", email: "", phone: "", tourName: "", checkInDate: "", checkOutDate: "", sdfStatus: "Paid", specialRequests: "" })
+  const [editTouristId, setEditTouristId] = useState<number | null>(null)
+  const [showTouristModal, setShowTouristModal] = useState(false)
 
   const [adminKey, setAdminKey] = useState<string | null>(localStorage.getItem('ADMIN_API_KEY'))
 
@@ -96,13 +100,14 @@ const AdminDashboard = () => {
   const fetchData = async () => {
     setLoading(true)
     try {
-      const [destRes, toursRes, hotelsRes, aboutRes, contactRes, testimonialsRes] = await Promise.all([
+      const [destRes, toursRes, hotelsRes, aboutRes, contactRes, testimonialsRes, touristsRes] = await Promise.all([
         fetch(`${API_BASE}/api/destinations`),
         fetch(`${API_BASE}/api/tours`),
         fetch(`${API_BASE}/api/hotels`),
         fetch(`${API_BASE}/api/about`),
         fetch(`${API_BASE}/api/contact`),
-        fetch(`${API_BASE}/api/testimonials`)
+        fetch(`${API_BASE}/api/testimonials`),
+        fetch(`${API_BASE}/api/tourists`)
       ])
 
       const destData = await destRes.json()
@@ -111,6 +116,7 @@ const AdminDashboard = () => {
       const aboutData = await aboutRes.json()
       const contactData = await contactRes.json()
       const testimonialsData = await testimonialsRes.json()
+      const touristsData = await touristsRes.json()
 
       setDestinations(destData)
       setTours(toursData)
@@ -118,6 +124,7 @@ const AdminDashboard = () => {
       setAboutForm(aboutData)
       setContactForm(contactData)
       setTestimonialsForm(testimonialsData)
+      setTourists(touristsData)
     } catch (err: any) {
       console.error(err)
       showToast('Error loading data from server.', 'error')
@@ -501,6 +508,42 @@ const AdminDashboard = () => {
     }
   }
 
+  const handleSaveTourist = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    let url = `${API_BASE}/api/tourists`
+    let method = 'POST'
+    if (editTouristId !== null) {
+      url = `${API_BASE}/api/tourists/${editTouristId}`
+      method = 'PUT'
+    }
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeader()
+        },
+        body: JSON.stringify(touristForm)
+      })
+      if (!res.ok) {
+        if (res.status === 401 || res.status === 403) {
+          localStorage.removeItem('ADMIN_API_KEY')
+          setAdminKey(null)
+        }
+        const errData = await res.json()
+        throw new Error(errData.error || 'Failed to save tourist details')
+      }
+      showToast(editTouristId !== null ? 'Tourist record updated successfully!' : 'Tourist registered successfully!', 'success')
+      setShowTouristModal(false)
+      fetchData()
+    } catch (err: any) {
+      console.error(err)
+      showToast(err.message || 'Error saving tourist details.', 'error')
+      setLoading(false)
+    }
+  }
+
   const ImageUploadField = ({ value, onChange, onUpload, label }: { value: string; onChange: (val: string) => void; onUpload: (file: File) => void; label: string }) => {
     const [dragActive, setDragActive] = useState(false)
 
@@ -772,6 +815,19 @@ const AdminDashboard = () => {
               </div>
             </button>
 
+            <button
+              onClick={() => { setActiveTab('tourists'); setSearchQuery(''); }}
+              className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${activeTab === 'tourists'
+                  ? 'bg-slate-100 text-slate-900 border-l-2 border-slate-900'
+                  : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+                }`}
+            >
+              <div className="flex items-center space-x-3">
+                <Users className={`w-4 h-4 ${activeTab === 'tourists' ? 'text-slate-900' : 'text-slate-400'}`} />
+                <span>Tourist Logbook</span>
+              </div>
+            </button>
+
           </nav>
         </div>
 
@@ -804,7 +860,9 @@ const AdminDashboard = () => {
                         ? 'About Us'
                         : activeTab === 'contact'
                           ? 'Contact Us'
-                          : 'Voice of the Valley'}
+                          : activeTab === 'testimonials'
+                            ? 'Voice of the Valley'
+                            : 'Tourist Logbook'}
               </span>
               <ChevronRight className="w-5 h-5 text-slate-400" />
               <span className="text-slate-500 text-lg font-medium">Dashboard</span>
@@ -816,17 +874,27 @@ const AdminDashboard = () => {
                   ? 'Manage office locations, phone channels, and support email addresses.'
                   : activeTab === 'testimonials'
                     ? 'Manage Voice of the Valley Customer Reviews displayed on the home page.'
-                    : 'Manage database objects, details, ratings, and media galleries.'}
+                    : activeTab === 'tourists'
+                      ? 'Manage database records and registration logbook of tourists who have visited Bhutan.'
+                      : 'Manage database objects, details, ratings, and media galleries.'}
             </p>
           </div>
 
           {activeTab !== 'about' && activeTab !== 'contact' && activeTab !== 'testimonials' && (
             <button
-              onClick={() => handleOpenEdit(activeTab as any)}
+              onClick={() => {
+                if (activeTab === 'tourists') {
+                  setTouristForm({ name: "", nationality: "", passportNumber: "", email: "", phone: "", tourName: "", checkInDate: "", checkOutDate: "", sdfStatus: "Paid", specialRequests: "" })
+                  setEditTouristId(null)
+                  setShowTouristModal(true)
+                } else {
+                  handleOpenEdit(activeTab as any)
+                }
+              }}
               className="flex items-center justify-center space-x-2 bg-slate-900 hover:bg-black text-white font-bold px-5 py-2.5 rounded-lg transition-all duration-200 shadow-sm active:scale-[0.98] cursor-pointer"
             >
               <Plus className="w-5 h-5" />
-              <span>Add New {activeTab === 'destinations' ? 'Destination' : activeTab === 'tours' ? 'Tour' : 'Hotel'}</span>
+              <span>Add New {activeTab === 'destinations' ? 'Destination' : activeTab === 'tours' ? 'Tour' : activeTab === 'hotels' ? 'Hotel' : 'Tourist'}</span>
             </button>
           )}
         </header>
@@ -852,7 +920,7 @@ const AdminDashboard = () => {
         </AnimatePresence>
 
         {/* Controls Block (Search & Sort) */}
-        {activeTab !== 'about' && activeTab !== 'contact' && activeTab !== 'testimonials' && (
+        {activeTab !== 'about' && activeTab !== 'contact' && activeTab !== 'testimonials' && activeTab !== 'tourists' && (
           <div className="bg-white border border-slate-200 p-4 rounded-t-xl flex flex-col md:flex-row md:items-center md:justify-between gap-4 shadow-sm">
             <div className="relative flex-1 max-w-md">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -1689,6 +1757,94 @@ const AdminDashboard = () => {
               </div>
             )}
           </form>
+        ) : activeTab === 'tourists' ? (
+          <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+            <div className="p-6 border-b border-slate-100">
+              <h3 className="font-bold text-slate-900 text-lg">Himalayan Tourist Registry</h3>
+              <p className="text-xs text-slate-500 mt-1">Official logbook of tourists entering the Kingdom of Bhutan.</p>
+            </div>
+            
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-100 text-xs font-bold uppercase tracking-wider text-slate-400 bg-slate-50/70">
+                    <th className="p-4 pl-6">Name & Nationality</th>
+                    <th className="p-4">Contact Details</th>
+                    <th className="p-4">Tour / Package</th>
+                    <th className="p-4">Stay Dates</th>
+                    <th className="p-4">SDF Status</th>
+                    <th className="p-4 text-right pr-6">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-sm text-slate-700">
+                  {tourists.length > 0 ? (
+                    tourists.map((t) => (
+                      <tr key={t.id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="p-4 pl-6">
+                          <div className="font-semibold text-slate-950">{t.name}</div>
+                          <div className="text-xs text-slate-400 font-light mt-0.5">{t.nationality} • PP: {t.passportNumber}</div>
+                        </td>
+                        <td className="p-4">
+                          <div>{t.email}</div>
+                          <div className="text-xs text-slate-400 font-light mt-0.5">{t.phone}</div>
+                        </td>
+                        <td className="p-4 font-medium text-slate-800">{t.tourName}</td>
+                        <td className="p-4 text-xs">
+                          <div>In: {t.checkInDate}</div>
+                          <div className="mt-0.5 text-slate-400">Out: {t.checkOutDate}</div>
+                        </td>
+                        <td className="p-4">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                            t.sdfStatus === 'Paid' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-amber-50 text-amber-700 border border-amber-100'
+                          }`}>
+                            {t.sdfStatus}
+                          </span>
+                        </td>
+                        <td className="p-4 text-right pr-6 space-x-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setTouristForm(t)
+                              setEditTouristId(t.id)
+                              setShowTouristModal(true)
+                            }}
+                            className="p-1.5 hover:bg-slate-100 rounded text-slate-500 hover:text-slate-900 cursor-pointer inline-block"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              if (window.confirm(`Are you sure you want to delete ${t.name} from the logbook?`)) {
+                                try {
+                                  const res = await fetch(`${API_BASE}/api/tourists/${t.id}`, {
+                                    method: 'DELETE',
+                                    headers: getAuthHeader()
+                                  })
+                                  if (!res.ok) throw new Error("Failed to delete tourist")
+                                  setTourists(prev => prev.filter(item => item.id !== t.id))
+                                  showToast(`${t.name} deleted from logbook.`, 'success')
+                                } catch (e: any) {
+                                  showToast(e.message || "Error deleting tourist", "error")
+                                }
+                              }
+                            }}
+                            className="p-1.5 hover:bg-rose-50 rounded text-rose-400 hover:text-rose-600 cursor-pointer inline-block"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={6} className="p-8 text-center text-slate-400 font-light italic">No registered tourists in the database yet.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
         ) : (
           <div className="bg-white border-x border-b border-slate-200 rounded-b-xl overflow-hidden shadow-sm">
             {displayedItems.length === 0 ? (
@@ -2582,6 +2738,175 @@ const AdminDashboard = () => {
                   >
                     <Save className="w-4 h-4" />
                     <span>Save {editType.slice(0, -1)}</span>
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+
+        {showTouristModal && (
+          <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/40 backdrop-blur-md flex justify-center items-start py-12 px-4">
+            <motion.div
+              initial={{ scale: 0.96, opacity: 0, y: 15 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.96, opacity: 0, y: 15 }}
+              transition={{ duration: 0.2 }}
+              className="bg-white border border-slate-200 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden"
+            >
+              {/* Modal Header */}
+              <div className="bg-slate-50 px-6 py-4.5 flex items-center justify-between border-b border-slate-200">
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900 flex items-center space-x-2">
+                    <span className="text-slate-600">{editTouristId !== null ? 'Modify' : 'Register'}</span>
+                    <span>Tourist Entry</span>
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">Please provide all necessary details for tourist visa registry.</p>
+                </div>
+                <button
+                  onClick={() => setShowTouristModal(false)}
+                  className="p-1.5 hover:bg-slate-200 text-slate-400 hover:text-slate-900 rounded-lg cursor-pointer transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Modal Form */}
+              <form onSubmit={handleSaveTourist} className="p-6 space-y-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="col-span-1 md:col-span-2">
+                    <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Full Name</label>
+                    <input
+                      type="text"
+                      required
+                      value={touristForm.name || ''}
+                      onChange={e => setTouristForm({ ...touristForm, name: e.target.value })}
+                      placeholder="e.g. John Doe"
+                      className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Nationality</label>
+                    <input
+                      type="text"
+                      required
+                      value={touristForm.nationality || ''}
+                      onChange={e => setTouristForm({ ...touristForm, nationality: e.target.value })}
+                      placeholder="e.g. American"
+                      className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Passport Number</label>
+                    <input
+                      type="text"
+                      required
+                      value={touristForm.passportNumber || ''}
+                      onChange={e => setTouristForm({ ...touristForm, passportNumber: e.target.value })}
+                      placeholder="e.g. A1234567"
+                      className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200 font-mono"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Contact Email</label>
+                    <input
+                      type="email"
+                      required
+                      value={touristForm.email || ''}
+                      onChange={e => setTouristForm({ ...touristForm, email: e.target.value })}
+                      placeholder="e.g. john@doe.com"
+                      className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Contact Phone</label>
+                    <input
+                      type="text"
+                      required
+                      value={touristForm.phone || ''}
+                      onChange={e => setTouristForm({ ...touristForm, phone: e.target.value })}
+                      placeholder="e.g. +1-202-555-0143"
+                      className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
+                    />
+                  </div>
+
+                  <div className="col-span-1 md:col-span-2">
+                    <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Selected Tour / Package</label>
+                    <input
+                      type="text"
+                      required
+                      value={touristForm.tourName || ''}
+                      onChange={e => setTouristForm({ ...touristForm, tourName: e.target.value })}
+                      placeholder="e.g. 4 Days Bhutan Highlights"
+                      className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Check-in Date</label>
+                    <input
+                      type="date"
+                      required
+                      value={touristForm.checkInDate || ''}
+                      onChange={e => setTouristForm({ ...touristForm, checkInDate: e.target.value })}
+                      className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Check-out Date</label>
+                    <input
+                      type="date"
+                      required
+                      value={touristForm.checkOutDate || ''}
+                      onChange={e => setTouristForm({ ...touristForm, checkOutDate: e.target.value })}
+                      className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
+                    />
+                  </div>
+
+                  <div className="col-span-1 md:col-span-2">
+                    <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">SDF Status</label>
+                    <select
+                      value={touristForm.sdfStatus || 'Paid'}
+                      onChange={e => setTouristForm({ ...touristForm, sdfStatus: e.target.value })}
+                      className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 cursor-pointer"
+                    >
+                      <option value="Paid">Paid</option>
+                      <option value="Pending">Pending</option>
+                    </select>
+                  </div>
+
+                  <div className="col-span-1 md:col-span-2">
+                    <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Special Requests / Notes</label>
+                    <textarea
+                      rows={3}
+                      value={touristForm.specialRequests || ''}
+                      onChange={e => setTouristForm({ ...touristForm, specialRequests: e.target.value })}
+                      placeholder="Any dietary restrictions, medical conditions or VIP requests..."
+                      className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
+                    />
+                  </div>
+                </div>
+
+                {/* Form Buttons */}
+                <div className="flex justify-end space-x-3 pt-4 border-t border-slate-200">
+                  <button
+                    type="button"
+                    onClick={() => setShowTouristModal(false)}
+                    className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg transition-all text-sm font-semibold cursor-pointer active:scale-95"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex items-center space-x-2 px-5 py-2.5 bg-slate-900 hover:bg-black text-white font-bold rounded-lg transition-all cursor-pointer active:scale-95"
+                  >
+                    <Save className="w-4 h-4" />
+                    <span>Save Registry</span>
                   </button>
                 </div>
               </form>
