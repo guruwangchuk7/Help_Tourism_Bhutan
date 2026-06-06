@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
-import { MapPin, ArrowLeft, Calendar, Users, Clock, MessageSquare, Heart, Share2, Star, Globe, ArrowRight, Wifi, Mountain, Bath, Car, Utensils, Sparkles, Minus, Plus } from "lucide-react"
+import { ArrowLeft, Users, MessageSquare, Heart, Share2, Star, ArrowRight, Wifi, Mountain, Bath, Car, Utensils, Sparkles, Minus, Plus } from "lucide-react"
 import { useState, useEffect } from "react"
 import PageTransition from "../components/common/PageTransition"
 
@@ -61,12 +61,55 @@ const DestinationDetail = () => {
   if (loading) return <div className="p-40 text-center text-2xl font-heading font-medium text-primary animate-pulse">Loading Expedition Valley Details...</div>
   if (!destination) return <div className="p-20 text-center text-2xl font-heading font-medium text-primary">Destination missed. Back to Home?</div>
 
-  const itinerary = [
+  // Default values
+  let displayDescription = destination.description;
+  let displayItinerary = [
     { day: "01", title: "Arrival in the Land of Thunder Dragon", detail: "Traditional welcome at Paro International Airport. Private luxury transfer to your valley-view suite. Welcome dinner with cultural performance." },
     { day: "02", title: "Sacred Monasteries & Hidden Arts", detail: "Early morning meditation session at Kyichu Lhakhang. Exclusive access to temple murals and traditional thangka painting workshop." },
     { day: "03", title: "Himalayan Ridge Expedition", detail: "A guided hike through rhododendron forests to a mountain monastery. High-altitude picnic with panoramic Himalayan peaks." },
     { day: "04", title: "Departure & Blessings", detail: "Morning prayer ceremony for safe travels. Final souvenir shopping at the local craft bazaar and transfer to Paro Airport." },
-  ]
+  ];
+  const iconMap: Record<string, any> = { Sparkles, Wifi, Mountain, Bath, Car, Utensils };
+  let displayAmenities = [
+    { icon: Sparkles, label: "Heritage Sanctuary", desc: "Private meditation room overlooking the valley with local incense." },
+    { icon: Wifi, label: "High-Speed Wi-Fi", desc: "Satellite internet connection throughout the premises for connectivity." },
+    { icon: Mountain, label: "Panoramic Terraces", desc: "Elevated viewing balconies with views of local Himalayan ridges." },
+    { icon: Bath, label: "Organic Spa & Baths", desc: "Traditional hot stone bath facilities using fresh mountain herbs." },
+    { icon: Car, label: "Bespoke Transfers", desc: "Assigned luxury SUV and driver for all localized tours and day trips." },
+    { icon: Utensils, label: "Artisanal Kitchen", desc: "In-house culinary experiences focusing on organic farm-to-table cuisine." }
+  ];
+  let displayReviews = [
+    { name: "Elena Rostova", date: "April 2026", rating: 5, avatar: "https://i.pravatar.cc/150?u=elena", text: "Beyond luxury. The silence here is healing. Watching the sunrise from the terrace with hot butter tea is an experience I will carry with me forever. The staff treated us like royalty." },
+    { name: "Marcus Thorne", date: "March 2026", rating: 5, avatar: "https://i.pravatar.cc/150?u=marcus", text: "Incredibly well organized. The local guides are extremely knowledgeable. We got access to temple corridors that are usually closed to the public. Fully worth the journey." }
+  ];
+
+  try {
+    if (destination.description.trim().startsWith('{')) {
+      const parsed = JSON.parse(destination.description);
+      if (parsed.text) displayDescription = parsed.text;
+      if (parsed.itinerary && Array.isArray(parsed.itinerary)) {
+        displayItinerary = parsed.itinerary;
+      }
+      if (parsed.amenities && Array.isArray(parsed.amenities)) {
+        displayAmenities = parsed.amenities.map((a: any) => ({
+          icon: iconMap[a.icon] || Sparkles,
+          label: a.label || "Amenity",
+          desc: a.desc || ""
+        }));
+      }
+      if (parsed.reviews && Array.isArray(parsed.reviews)) {
+        displayReviews = parsed.reviews.map((r: any) => ({
+          name: r.name || "Anonymous",
+          date: r.date || "Recent",
+          rating: r.rating || 5,
+          avatar: r.avatar || `https://i.pravatar.cc/150?u=${encodeURIComponent(r.name || 'user')}`,
+          text: r.text || ""
+        }));
+      }
+    }
+  } catch (e) {
+    // Fail silently, use defaults
+  }
 
   return (
     <PageTransition>
@@ -156,25 +199,10 @@ const DestinationDetail = () => {
                   >
                     <h2 className="text-3xl md:text-4xl lg:text-5xl font-heading font-medium text-primary mb-10 tracking-tight leading-tight">Authentic Bhutanese <br className="hidden md:block" /> Journey <span className="text-accent italic font-normal">Overview</span></h2>
                     <p className="text-secondary font-light text-lg leading-relaxed mb-16 tracking-wide">
-                      {destination.description}
+                      {displayDescription}
                     </p>
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                      {[
-                        { icon: MapPin, label: "Altitude", val: "2,300m" },
-                        { icon: Clock, label: "Ideal Stay", val: "4-5 Days" },
-                        { icon: Calendar, label: "Peak Period", val: "Spring/Fall" },
-                        { icon: Globe, label: "Language", val: "Dzongkha" },
-                      ].map((item, idx) => (
-                        <div key={idx} className="bg-white p-6 rounded-[2rem] shadow-minimal flex flex-col items-center text-center border border-primary/5 hover:shadow-premium transition-shadow duration-500 group">
-                          <div className="w-12 h-12 rounded-full bg-bg-alt flex items-center justify-center mb-4 group-hover:bg-accent group-hover:text-white transition-colors duration-500">
-                            <item.icon className="w-5 h-5 text-primary group-hover:text-white transition-colors" />
-                          </div>
-                          <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-secondary/60 mb-2">{item.label}</span>
-                          <span className="font-heading font-semibold text-primary">{item.val}</span>
-                        </div>
-                      ))}
-                    </div>
+
                   </motion.div>
                 )}
 
@@ -187,7 +215,7 @@ const DestinationDetail = () => {
                     transition={{ duration: 0.3 }}
                     className="space-y-8"
                   >
-                    {itinerary.map((item) => (
+                    {displayItinerary.map((item) => (
                       <div key={item.day} className="group flex flex-col md:flex-row space-y-6 md:space-y-0 md:space-x-10 p-6 sm:p-8 md:p-10 bg-white rounded-[2rem] md:rounded-[2.5rem] shadow-minimal border border-primary/5 hover:shadow-premium transition-all duration-500 relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                         <div className="flex flex-col items-center shrink-0">
@@ -214,14 +242,7 @@ const DestinationDetail = () => {
                     transition={{ duration: 0.3 }}
                     className="grid grid-cols-1 md:grid-cols-2 gap-8"
                   >
-                    {[
-                      { icon: Sparkles, label: "Heritage Sanctuary", desc: "Private meditation room overlooking the valley with local incense." },
-                      { icon: Wifi, label: "High-Speed Wi-Fi", desc: "Satellite internet connection throughout the premises for connectivity." },
-                      { icon: Mountain, label: "Panoramic Terraces", desc: "Elevated viewing balconies with views of local Himalayan ridges." },
-                      { icon: Bath, label: "Organic Spa & Baths", desc: "Traditional hot stone bath facilities using fresh mountain herbs." },
-                      { icon: Car, label: "Bespoke Transfers", desc: "Assigned luxury SUV and driver for all localized tours and day trips." },
-                      { icon: Utensils, label: "Artisanal Kitchen", desc: "In-house culinary experiences focusing on organic farm-to-table cuisine." }
-                    ].map((amenity, idx) => (
+                    {displayAmenities.map((amenity, idx) => (
                       <div key={idx} className="flex items-start space-x-6 p-6 bg-white rounded-[2rem] shadow-minimal border border-primary/5 hover:shadow-premium transition-shadow duration-500">
                         <div className="w-16 h-16 bg-bg-alt rounded-full flex items-center justify-center text-primary shrink-0 border border-primary/5">
                           <amenity.icon className="w-6 h-6 text-primary" />
@@ -244,10 +265,7 @@ const DestinationDetail = () => {
                     transition={{ duration: 0.3 }}
                     className="space-y-8"
                   >
-                    {[
-                      { name: "Elena Rostova", date: "April 2026", rating: 5, avatar: "https://i.pravatar.cc/150?u=elena", text: "Beyond luxury. The silence here is healing. Watching the sunrise from the terrace with hot butter tea is an experience I will carry with me forever. The staff treated us like royalty." },
-                      { name: "Marcus Thorne", date: "March 2026", rating: 5, avatar: "https://i.pravatar.cc/150?u=marcus", text: "Incredibly well organized. The local guides are extremely knowledgeable. We got access to temple corridors that are usually closed to the public. Fully worth the journey." }
-                    ].map((review, idx) => (
+                    {displayReviews.map((review, idx) => (
                       <div key={idx} className="p-8 bg-white rounded-[2rem] shadow-minimal border border-primary/5 space-y-6">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-4">

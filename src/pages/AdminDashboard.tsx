@@ -19,6 +19,10 @@ type Destination = {
   ideal_stay?: string
   peak_period?: string
   language?: string
+  descriptionText?: string
+  itinerary?: { day: string; title: string; detail: string }[]
+  amenities?: { icon: string; label: string; desc: string }[]
+  reviews?: { name: string; date: string; rating: number; text: string }[]
 }
 
 type Tour = {
@@ -68,6 +72,7 @@ const AdminDashboard = () => {
   const [showModal, setShowModal] = useState(false)
   const [editType, setEditType] = useState<'destinations' | 'tours' | 'hotels'>('destinations')
   const [editId, setEditId] = useState<string | number | null>(null) // null = create new
+  const [modalTab, setModalTab] = useState<'overview' | 'itinerary' | 'amenities' | 'reviews'>('overview')
   
   // Form values
   const [destForm, setDestForm] = useState<Partial<Destination>>({})
@@ -130,15 +135,74 @@ const AdminDashboard = () => {
     setEditType(type)
     if (item) {
       setEditId(item.id)
-      if (type === 'destinations') setDestForm(item)
-      else if (type === 'tours') setTourForm(item)
-      else if (type === 'hotels') setHotelForm(item)
+      if (type === 'destinations') {
+        let text = item.description || ''
+        let itinerary = [
+          { day: "01", title: "Arrival in the Land of Thunder Dragon", detail: "Traditional welcome at Paro International Airport. Private luxury transfer to your valley-view suite. Welcome dinner with cultural performance." },
+          { day: "02", title: "Sacred Monasteries & Hidden Arts", detail: "Early morning meditation session at Kyichu Lhakhang. Exclusive access to temple murals and traditional thangka painting workshop." },
+          { day: "03", title: "Himalayan Ridge Expedition", detail: "A guided hike through rhododendron forests to a mountain monastery. High-altitude picnic with panoramic Himalayan peaks." },
+          { day: "04", title: "Departure & Blessings", detail: "Morning prayer ceremony for safe travels. Final souvenir shopping at the local craft bazaar and transfer to Paro Airport." }
+        ]
+        let amenities = [
+          { icon: "Sparkles", label: "Heritage Sanctuary", desc: "Private meditation room overlooking the valley with local incense." },
+          { icon: "Wifi", label: "High-Speed Wi-Fi", desc: "Satellite internet connection throughout the premises for connectivity." },
+          { icon: "Mountain", label: "Panoramic Terraces", desc: "Elevated viewing balconies with views of local Himalayan ridges." },
+          { icon: "Bath", label: "Organic Spa & Baths", desc: "Traditional hot stone bath facilities using fresh mountain herbs." },
+          { icon: "Car", label: "Bespoke Transfers", desc: "Assigned luxury SUV and driver for all localized tours and day trips." },
+          { icon: "Utensils", label: "Artisanal Kitchen", desc: "In-house culinary experiences focusing on organic farm-to-table cuisine." }
+        ]
+        let reviews = [
+          { name: "Elena Rostova", date: "April 2026", rating: 5, text: "Beyond luxury. The silence here is healing. Watching the sunrise from the terrace with hot butter tea is an experience I will carry with me forever. The staff treated us like royalty." },
+          { name: "Marcus Thorne", date: "March 2026", rating: 5, text: "Incredibly well organized. The local guides are extremely knowledgeable. We got access to temple corridors that are usually closed to the public. Fully worth the journey." }
+        ]
+
+        try {
+          if (item.description && item.description.trim().startsWith('{')) {
+            const parsed = JSON.parse(item.description)
+            if (parsed.text) text = parsed.text
+            if (parsed.itinerary) itinerary = parsed.itinerary
+            if (parsed.amenities) amenities = parsed.amenities
+            if (parsed.reviews) reviews = parsed.reviews
+          }
+        } catch (e) {
+          // ignore error
+        }
+
+        setDestForm({
+          ...item,
+          descriptionText: text,
+          itinerary,
+          amenities,
+          reviews
+        })
+      } else if (type === 'tours') {
+        setTourForm(item)
+      } else if (type === 'hotels') {
+        setHotelForm(item)
+      }
     } else {
       setEditId(null)
       if (type === 'destinations') {
         setDestForm({
           name: '', image: '', description: '', price: '', rating: 4.8, location: '',
-          altitude: '2,300m', ideal_stay: '1-2 Days', peak_period: 'Spring/Fall', language: 'Dzongkha'
+          descriptionText: '',
+          itinerary: [
+            { day: "01", title: "Arrival", detail: "Transfer and checking into hotel." },
+            { day: "02", title: "Sightseeing", detail: "Exploring valley landmarks." },
+            { day: "03", title: "Expedition", detail: "Guided trekking activity." },
+            { day: "04", title: "Departure", detail: "Transfer to Paro Airport." }
+          ],
+          amenities: [
+            { icon: "Sparkles", label: "Heritage Sanctuary", desc: "Private meditation room overlooking the valley with local incense." },
+            { icon: "Wifi", label: "High-Speed Wi-Fi", desc: "Satellite internet connection throughout the premises for connectivity." },
+            { icon: "Mountain", label: "Panoramic Terraces", desc: "Elevated viewing balconies with views of local Himalayan ridges." },
+            { icon: "Bath", label: "Organic Spa & Baths", desc: "Traditional hot stone bath facilities using fresh mountain herbs." },
+            { icon: "Car", label: "Bespoke Transfers", desc: "Assigned luxury SUV and driver for all localized tours and day trips." },
+            { icon: "Utensils", label: "Artisanal Kitchen", desc: "In-house culinary experiences focusing organic farm-to-table cuisine." }
+          ],
+          reviews: [
+            { name: "Elena Rostova", date: "April 2026", rating: 5, text: "Beyond luxury. The silence here is healing." }
+          ]
         })
       } else if (type === 'tours') {
         setTourForm({
@@ -151,6 +215,7 @@ const AdminDashboard = () => {
         })
       }
     }
+    setModalTab('overview')
     setShowModal(true)
   }
 
@@ -161,10 +226,26 @@ const AdminDashboard = () => {
     let url = `${API_BASE}/api/${editType}`
     let method = 'POST'
     let bodyData: any = {}
-
-    if (editType === 'destinations') bodyData = destForm
-    else if (editType === 'tours') bodyData = tourForm
-    else if (editType === 'hotels') bodyData = hotelForm
+    if (editType === 'destinations') {
+      const compiledDescription = JSON.stringify({
+        text: destForm.descriptionText || destForm.description || '',
+        itinerary: destForm.itinerary || [],
+        amenities: destForm.amenities || [],
+        reviews: destForm.reviews || []
+      })
+      bodyData = {
+        ...destForm,
+        description: compiledDescription
+      }
+      delete bodyData.descriptionText
+      delete bodyData.itinerary
+      delete bodyData.amenities
+      delete bodyData.reviews
+    } else if (editType === 'tours') {
+      bodyData = tourForm
+    } else if (editType === 'hotels') {
+      bodyData = hotelForm
+    }
 
     if (editId !== null) {
       url = `${API_BASE}/api/${editType}/${editId}`
@@ -643,106 +724,344 @@ const AdminDashboard = () => {
                 
                 {/* DESTINATION FORM FIELDS */}
                 {editType === 'destinations' && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div className="col-span-1 md:col-span-2">
-                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Destination Name</label>
-                      <input 
-                        type="text" 
-                        required 
-                        value={destForm.name || ''} 
-                        onChange={e => setDestForm({...destForm, name: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
-                      />
+                  <div className="space-y-6">
+                    {/* Modal Tab Buttons */}
+                    <div className="flex space-x-6 border-b border-slate-200 pb-2 mb-4">
+                      {(['overview', 'itinerary', 'amenities', 'reviews'] as const).map(tab => (
+                        <button
+                          key={tab}
+                          type="button"
+                          onClick={() => setModalTab(tab)}
+                          className={`pb-2 text-xs font-bold uppercase tracking-wider transition-colors border-b-2 cursor-pointer ${
+                            modalTab === tab 
+                              ? 'border-slate-900 text-slate-900' 
+                              : 'border-transparent text-slate-400 hover:text-slate-900'
+                          }`}
+                        >
+                          {tab}
+                        </button>
+                      ))}
                     </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Valleys / Location</label>
-                      <input 
-                        type="text" 
-                        required 
-                        value={destForm.location || ''} 
-                        onChange={e => setDestForm({...destForm, location: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Starting Price (e.g. $120)</label>
-                      <input 
-                        type="text" 
-                        required 
-                        value={destForm.price || ''} 
-                        onChange={e => setDestForm({...destForm, price: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
-                      />
-                    </div>
-                    <div className="col-span-1 md:col-span-2">
-                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Image URL</label>
-                      <input 
-                        type="text" 
-                        required 
-                        value={destForm.image || ''} 
-                        onChange={e => setDestForm({...destForm, image: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200 font-mono" 
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Rating (1.0 to 5.0)</label>
-                      <input 
-                        type="number" 
-                        step="0.1" 
-                        max="5" 
-                        min="1" 
-                        required 
-                        value={destForm.rating || ''} 
-                        onChange={e => setDestForm({...destForm, rating: parseFloat(e.target.value)})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Altitude</label>
-                      <input 
-                        type="text" 
-                        value={destForm.altitude || ''} 
-                        onChange={e => setDestForm({...destForm, altitude: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Ideal Stay Duration</label>
-                      <input 
-                        type="text" 
-                        value={destForm.ideal_stay || ''} 
-                        onChange={e => setDestForm({...destForm, ideal_stay: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Peak Travel Period</label>
-                      <input 
-                        type="text" 
-                        value={destForm.peak_period || ''} 
-                        onChange={e => setDestForm({...destForm, peak_period: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Local Language</label>
-                      <input 
-                        type="text" 
-                        value={destForm.language || ''} 
-                        onChange={e => setDestForm({...destForm, language: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
-                      />
-                    </div>
-                    <div className="col-span-1 md:col-span-2">
-                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Description</label>
-                      <textarea 
-                        required 
-                        rows={3} 
-                        value={destForm.description || ''} 
-                        onChange={e => setDestForm({...destForm, description: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
-                      />
-                    </div>
+
+                    {modalTab === 'overview' && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div className="col-span-1 md:col-span-2">
+                          <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Destination Name</label>
+                          <input 
+                            type="text" 
+                            required 
+                            value={destForm.name || ''} 
+                            onChange={e => setDestForm({...destForm, name: e.target.value})}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Valleys / Location</label>
+                          <input 
+                            type="text" 
+                            required 
+                            value={destForm.location || ''} 
+                            onChange={e => setDestForm({...destForm, location: e.target.value})}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Starting Price (e.g. $120)</label>
+                          <input 
+                            type="text" 
+                            required 
+                            value={destForm.price || ''} 
+                            onChange={e => setDestForm({...destForm, price: e.target.value})}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                          />
+                        </div>
+                        <div className="col-span-1 md:col-span-2">
+                          <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Image URL</label>
+                          <input 
+                            type="text" 
+                            required 
+                            value={destForm.image || ''} 
+                            onChange={e => setDestForm({...destForm, image: e.target.value})}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200 font-mono" 
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Rating (1.0 to 5.0)</label>
+                          <input 
+                            type="number" 
+                            step="0.1" 
+                            max="5" 
+                            min="1" 
+                            required 
+                            value={destForm.rating || ''} 
+                            onChange={e => setDestForm({...destForm, rating: parseFloat(e.target.value)})}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                          />
+                        </div>
+
+                        <div className="col-span-1 md:col-span-2">
+                          <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Description</label>
+                          <textarea 
+                            required 
+                            rows={3} 
+                            value={destForm.descriptionText || destForm.description || ''} 
+                            onChange={e => setDestForm({...destForm, descriptionText: e.target.value})}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {modalTab === 'itinerary' && (
+                      <div className="space-y-4">
+                        <h4 className="text-sm font-bold text-slate-900 mb-3 uppercase tracking-wider">Itinerary</h4>
+                        {(destForm.itinerary || []).map((it: any, idx: number) => (
+                          <div key={idx} className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3 relative group">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newIt = [...(destForm.itinerary || [])];
+                                newIt.splice(idx, 1);
+                                setDestForm({ ...destForm, itinerary: newIt });
+                              }}
+                              className="absolute top-3 right-3 text-rose-500 hover:text-rose-700 p-1 hover:bg-slate-200 rounded transition cursor-pointer"
+                              title="Delete Day"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                            <div className="grid grid-cols-6 gap-3">
+                              <div className="col-span-1">
+                                <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Day</label>
+                                <input 
+                                  type="text" 
+                                  value={it.day || ''} 
+                                  onChange={e => {
+                                    const newIt = [...(destForm.itinerary || [])];
+                                    newIt[idx] = { ...newIt[idx], day: e.target.value };
+                                    setDestForm({ ...destForm, itinerary: newIt });
+                                  }}
+                                  className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                                />
+                              </div>
+                              <div className="col-span-5">
+                                <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Title</label>
+                                <input 
+                                  type="text" 
+                                  value={it.title || ''} 
+                                  onChange={e => {
+                                    const newIt = [...(destForm.itinerary || [])];
+                                    newIt[idx] = { ...newIt[idx], title: e.target.value };
+                                    setDestForm({ ...destForm, itinerary: newIt });
+                                  }}
+                                  className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                                />
+                              </div>
+                            </div>
+                            <div>
+                              <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Details</label>
+                              <textarea 
+                                rows={2}
+                                value={it.detail || ''} 
+                                onChange={e => {
+                                    const newIt = [...(destForm.itinerary || [])];
+                                    newIt[idx] = { ...newIt[idx], detail: e.target.value };
+                                    setDestForm({ ...destForm, itinerary: newIt });
+                                }}
+                                className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                              />
+                            </div>
+                          </div>
+                        ))}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const nextDay = String((destForm.itinerary || []).length + 1).padStart(2, '0');
+                            setDestForm({
+                              ...destForm,
+                              itinerary: [...(destForm.itinerary || []), { day: nextDay, title: '', detail: '' }]
+                            });
+                          }}
+                          className="flex items-center space-x-1.5 px-3 py-1.5 bg-slate-900 hover:bg-black text-white rounded-lg text-xs font-semibold transition cursor-pointer"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>Add Day</span>
+                        </button>
+                      </div>
+                    )}
+
+                    {modalTab === 'amenities' && (
+                      <div className="space-y-4">
+                        <h4 className="text-sm font-bold text-slate-900 mb-3 uppercase tracking-wider">Amenities</h4>
+                        {(destForm.amenities || []).map((am: any, idx: number) => (
+                          <div key={idx} className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3 relative group">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newAm = [...(destForm.amenities || [])];
+                                newAm.splice(idx, 1);
+                                setDestForm({ ...destForm, amenities: newAm });
+                              }}
+                              className="absolute top-3 right-3 text-rose-500 hover:text-rose-700 p-1 hover:bg-slate-200 rounded transition cursor-pointer"
+                              title="Delete Amenity"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                              <div>
+                                <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Icon</label>
+                                <select
+                                  value={am.icon || 'Sparkles'}
+                                  onChange={e => {
+                                    const newAm = [...(destForm.amenities || [])];
+                                    newAm[idx] = { ...newAm[idx], icon: e.target.value };
+                                    setDestForm({ ...destForm, amenities: newAm });
+                                  }}
+                                  className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900 cursor-pointer"
+                                >
+                                  <option value="Sparkles">Sparkles (Sanctuary)</option>
+                                  <option value="Wifi">Wifi (Internet)</option>
+                                  <option value="Mountain">Mountain (View)</option>
+                                  <option value="Bath">Bath (Spa)</option>
+                                  <option value="Car">Car (SUV/Transfers)</option>
+                                  <option value="Utensils">Utensils (Kitchen)</option>
+                                </select>
+                              </div>
+                              <div className="col-span-2">
+                                <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Label</label>
+                                <input 
+                                  type="text" 
+                                  value={am.label || ''} 
+                                  onChange={e => {
+                                    const newAm = [...(destForm.amenities || [])];
+                                    newAm[idx] = { ...newAm[idx], label: e.target.value };
+                                    setDestForm({ ...destForm, amenities: newAm });
+                                  }}
+                                  className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                                />
+                              </div>
+                            </div>
+                            <div>
+                              <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Description</label>
+                              <input 
+                                type="text" 
+                                value={am.desc || ''} 
+                                onChange={e => {
+                                  const newAm = [...(destForm.amenities || [])];
+                                  newAm[idx] = { ...newAm[idx], desc: e.target.value };
+                                  setDestForm({ ...destForm, amenities: newAm });
+                                }}
+                                className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                              />
+                            </div>
+                          </div>
+                        ))}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setDestForm({
+                              ...destForm,
+                              amenities: [...(destForm.amenities || []), { icon: 'Sparkles', label: '', desc: '' }]
+                            });
+                          }}
+                          className="flex items-center space-x-1.5 px-3 py-1.5 bg-slate-900 hover:bg-black text-white rounded-lg text-xs font-semibold transition cursor-pointer"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>Add Amenity</span>
+                        </button>
+                      </div>
+                    )}
+
+                    {modalTab === 'reviews' && (
+                      <div className="space-y-4">
+                        <h4 className="text-sm font-bold text-slate-900 mb-3 uppercase tracking-wider">Reviews</h4>
+                        {(destForm.reviews || []).map((rv: any, idx: number) => (
+                          <div key={idx} className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3 relative group">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newRv = [...(destForm.reviews || [])];
+                                newRv.splice(idx, 1);
+                                setDestForm({ ...destForm, reviews: newRv });
+                              }}
+                              className="absolute top-3 right-3 text-rose-500 hover:text-rose-700 p-1 hover:bg-slate-200 rounded transition cursor-pointer"
+                              title="Delete Review"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                              <div>
+                                <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Reviewer Name</label>
+                                <input 
+                                  type="text" 
+                                  value={rv.name || ''} 
+                                  onChange={e => {
+                                    const newRv = [...(destForm.reviews || [])];
+                                    newRv[idx] = { ...newRv[idx], name: e.target.value };
+                                    setDestForm({ ...destForm, reviews: newRv });
+                                  }}
+                                  className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Date</label>
+                                <input 
+                                  type="text" 
+                                  value={rv.date || ''} 
+                                  onChange={e => {
+                                    const newRv = [...(destForm.reviews || [])];
+                                    newRv[idx] = { ...newRv[idx], date: e.target.value };
+                                    setDestForm({ ...destForm, reviews: newRv });
+                                  }}
+                                  className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900 font-mono" 
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Rating (1 to 5)</label>
+                                <input 
+                                  type="number" 
+                                  min="1" 
+                                  max="5"
+                                  value={rv.rating || 5} 
+                                  onChange={e => {
+                                    const newRv = [...(destForm.reviews || [])];
+                                    newRv[idx] = { ...newRv[idx], rating: parseInt(e.target.value) || 5 };
+                                    setDestForm({ ...destForm, reviews: newRv });
+                                  }}
+                                  className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900 font-mono" 
+                                />
+                              </div>
+                            </div>
+                            <div>
+                              <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Comment Text</label>
+                              <textarea 
+                                rows={2}
+                                value={rv.text || ''} 
+                                onChange={e => {
+                                  const newRv = [...(destForm.reviews || [])];
+                                  newRv[idx] = { ...newRv[idx], text: e.target.value };
+                                  setDestForm({ ...destForm, reviews: newRv });
+                                }}
+                                className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                              />
+                            </div>
+                          </div>
+                        ))}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const currentDate = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                            setDestForm({
+                              ...destForm,
+                              reviews: [...(destForm.reviews || []), { name: '', date: currentDate, rating: 5, text: '' }]
+                            });
+                          }}
+                          className="flex items-center space-x-1.5 px-3 py-1.5 bg-slate-900 hover:bg-black text-white rounded-lg text-xs font-semibold transition cursor-pointer"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>Add Review</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
 
