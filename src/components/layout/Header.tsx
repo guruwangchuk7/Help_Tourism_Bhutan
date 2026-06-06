@@ -129,20 +129,20 @@ const Header = () => {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-0 bg-[#FAFAFA] z-[120] lg:hidden flex flex-col p-8 pt-32 h-screen w-screen overflow-y-auto"
+            className="fixed inset-0 bg-[#FAFAFA] z-[120] lg:hidden flex flex-col p-6 pt-24 h-screen w-screen overflow-y-auto"
           >
-            <div className="flex flex-col space-y-6">
+            <div className="flex flex-col space-y-2">
               {navLinks.map((link) => (
                 <Link
                   key={link.name}
                   to={link.path}
-                  className="text-2xl sm:text-3xl font-heading font-medium text-primary hover:text-accent transition-colors py-2 border-b border-primary/5"
+                  className="text-lg sm:text-xl font-heading font-medium text-primary hover:text-accent transition-colors py-2.5 border-b border-primary/5"
                 >
                   {link.name}
                 </Link>
               ))}
-              <div className="pt-6 flex flex-col space-y-4">
-                <Link to="/plan" className="btn-accent w-full text-base py-3.5">Get Free Itinerary</Link>
+              <div className="pt-4 flex flex-col space-y-3">
+                <Link to="/plan" className="btn-accent w-full text-xs py-3">Get Free Itinerary</Link>
               </div>
             </div>
           </motion.div>
