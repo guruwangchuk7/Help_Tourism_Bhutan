@@ -214,6 +214,21 @@
     padding-bottom: 1.5rem !important; /* 24px */
   }
   
+  footer, footer a, footer li, footer span, footer p {
+    font-size: 13px !important; /* compact link and text size */
+    line-height: 1.5 !important;
+  }
+  
+  footer h4 {
+    font-size: 11px !important; /* compact section headers */
+    margin-bottom: 0.75rem !important;
+    letter-spacing: 0.15em !important;
+  }
+
+  footer .text-xl {
+    font-size: 18px !important; /* compact logo title */
+  }
+  
   footer .grid {
     gap: 1.75rem !important; /* 28px gap */
     padding-bottom: 2rem !important; /* 32px */
@@ -221,10 +236,6 @@
   
   footer .mb-6 {
     margin-bottom: 0.75rem !important; /* reduce logo & links header margins */
-  }
-  
-  footer h4 {
-    margin-bottom: 0.75rem !important;
   }
   
   footer .pt-12 {
