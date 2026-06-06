@@ -46,29 +46,29 @@ const Testimonials = () => {
                     </h2>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
+                <div className="flex md:grid flex-row md:grid-cols-3 gap-6 md:gap-16 overflow-x-auto md:overflow-visible pb-8 md:pb-0 snap-x snap-mandatory scrollbar-hide">
                     {list.slice(0, 3).map((t, idx) => (
                         <motion.div
                             key={t.id}
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             transition={{ delay: idx * 0.1 }}
-                            className="flex flex-col h-full bg-[#FAFAFA] p-12 rounded-3xl group"
+                            className="flex flex-col h-full bg-[#FAFAFA] p-6 md:p-12 rounded-3xl group w-[85%] md:w-auto shrink-0 snap-center"
                         >
-                            <div className="flex items-center gap-1 mb-8">
+                            <div className="flex items-center gap-1 mb-6 md:mb-8">
                                 {[...Array(t.rating || 5)].map((_, i) => (
                                     <Star key={i} className="w-4 h-4 text-accent fill-accent" />
                                 ))}
                             </div>
 
-                            <p className="text-secondary text-lg font-light tracking-wide leading-relaxed mb-12 flex-1">
+                            <p className="text-secondary text-sm md:text-lg font-light tracking-wide leading-relaxed mb-6 md:mb-12 flex-1 italic">
                                 "{t.content}"
                             </p>
 
-                            <div className="mt-auto flex items-center space-x-4 pt-8 border-t border-primary/5">
+                            <div className="mt-auto flex items-center space-x-4 pt-6 md:pt-8 border-t border-primary/5">
                                 <img src={t.avatar || "https://i.pravatar.cc/200"} alt={t.name} className="w-12 h-12 rounded-full object-cover shadow-minimal transition-transform duration-500 group-hover:scale-105" />
                                 <div className="flex flex-col">
-                                    <h4 className="font-heading font-semibold text-primary text-base mb-1 tracking-wide">{t.name}</h4>
+                                    <h4 className="font-heading font-semibold text-primary text-sm md:text-base mb-1 tracking-wide">{t.name}</h4>
                                     <span className="text-[9px] font-medium uppercase tracking-[0.2em] text-secondary/60">{t.role}</span>
                                 </div>
                             </div>

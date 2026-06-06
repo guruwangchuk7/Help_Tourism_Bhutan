@@ -201,7 +201,7 @@ const TourDetail = () => {
               )}
 
               {activeTab === "inclusions" && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-10 bg-white border border-primary/5 rounded-[2rem] p-10 shadow-minimal">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10 bg-white border border-primary/5 rounded-[2rem] p-6 sm:p-8 md:p-10 shadow-minimal">
                   {/* Inclusions */}
                   <div>
                     <h4 className="font-heading font-semibold text-primary text-base mb-6 uppercase tracking-wider flex items-center gap-2">
@@ -237,7 +237,7 @@ const TourDetail = () => {
               )}
 
               {activeTab === "essential" && (
-                <div className="bg-white border border-primary/5 rounded-[2rem] p-10 shadow-minimal space-y-8">
+                <div className="bg-white border border-primary/5 rounded-[2rem] p-6 sm:p-8 md:p-10 shadow-minimal space-y-8">
                   <div>
                     <h4 className="font-heading font-medium text-lg text-primary mb-3">Bhutan Entry Visa & Permit</h4>
                     <p className="text-secondary text-sm font-light leading-relaxed tracking-wide">

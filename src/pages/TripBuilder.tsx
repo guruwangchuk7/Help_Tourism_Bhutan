@@ -97,7 +97,7 @@ const TripBuilder = () => {
           )}
 
           {/* Form Content */}
-          <div className="bg-white rounded-[2.5rem] p-8 md:p-12 border border-primary/5 shadow-premium max-w-3xl mx-auto min-h-[400px] flex flex-col justify-between">
+          <div className="bg-white rounded-[2.5rem] p-4 sm:p-8 md:p-12 border border-primary/5 shadow-premium max-w-3xl mx-auto min-h-[400px] flex flex-col justify-between">
             <AnimatePresence mode="wait">
               {step === 1 && (
                 <motion.div
@@ -196,7 +196,7 @@ const TripBuilder = () => {
                   {/* Target Month */}
                   <div className="space-y-2 pt-4 border-t border-primary/5">
                     <label className="text-xs font-semibold uppercase tracking-wider text-secondary">Preferred Travel Period</label>
-                    <div className="grid grid-cols-4 gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                       {["Spring (Mar-May)", "Summer (Jun-Aug)", "Fall (Sep-Nov)", "Winter (Dec-Feb)"].map((m) => (
                         <button
                           key={m}
@@ -306,14 +306,14 @@ const TripBuilder = () => {
                   </div>
 
                   {/* Budget Estimation card */}
-                  <div className="bg-bg-alt/70 border border-primary/5 rounded-2xl p-6 mt-6 flex justify-between items-center">
+                  <div className="bg-bg-alt/70 border border-primary/5 rounded-2xl p-6 mt-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
                       <span className="text-[9px] font-bold text-secondary/60 uppercase tracking-widest block mb-0.5">Estimated Expenditure</span>
                       <span className="text-2xl font-heading font-semibold text-primary">
                         ${calculateEstimate().toLocaleString("en-US", { minimumFractionDigits: 2 })}
                       </span>
                     </div>
-                    <div className="text-right text-[10px] text-secondary font-light max-w-[180px] leading-relaxed">
+                    <div className="text-left sm:text-right text-[10px] text-secondary font-light max-w-xs sm:max-w-[180px] leading-relaxed">
                       Includes visa, mandatory government SDF, hotels, guide, transfers, & food.
                     </div>
                   </div>

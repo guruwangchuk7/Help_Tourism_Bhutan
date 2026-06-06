@@ -64,7 +64,7 @@ const Destinations = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, ease: "easeOut" }}
-              className="text-white text-5xl md:text-7xl lg:text-8xl font-heading mb-6 leading-[1.1] font-medium"
+              className="text-white text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-heading mb-6 leading-[1.1] font-medium"
             >
               The <span className="text-accent italic font-normal">Archives</span>
             </motion.h1>

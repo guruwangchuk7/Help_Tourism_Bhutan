@@ -158,7 +158,7 @@ const SdfInfo = () => {
                   {/* Nationality selector */}
                   <div>
                     <label className="text-[10px] font-bold text-secondary uppercase tracking-wider mb-2 block">Origin / Nationality</label>
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                       {[
                         { id: "standard", label: "International" },
                         { id: "indian", label: "Indian" },

@@ -44,7 +44,7 @@ const Footer = () => {
           <div className="lg:col-span-3">
             <Link to="/" className="flex items-center space-x-3 group mb-6">
               <Compass className="w-8 h-8 text-accent transition-all duration-500 group-hover:rotate-45" />
-              <span className="text-3xl font-heading font-semibold text-primary tracking-wide">Help Tourism Bhutan</span>
+              <span className="text-xl sm:text-2xl md:text-3xl font-heading font-semibold text-primary tracking-wide">Help Tourism Bhutan</span>
             </Link>
             <p className="text-secondary text-sm font-light leading-relaxed max-w-sm tracking-wide">
               Your gateway to authentic Bhutanese luxury. We curate experiences that connect you with the soul of the Dragon Kingdom.

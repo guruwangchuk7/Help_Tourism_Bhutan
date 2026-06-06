@@ -275,10 +275,10 @@ const Home = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.8 }}
-            className="bg-white text-primary border border-primary/5 rounded-[3rem] p-12 md:p-20 text-center relative overflow-hidden shadow-minimal"
+            className="bg-white text-primary border border-primary/5 rounded-[3rem] p-6 sm:p-12 md:p-20 text-center relative overflow-hidden shadow-minimal"
           >
             <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center">
-              <h2 className="text-4xl md:text-6xl font-heading font-medium mb-6 leading-tight">Ready for Your Bhutan Adventure?</h2>
+              <h2 className="text-2xl sm:text-4xl md:text-6xl font-heading font-medium mb-6 leading-tight">Ready for Your Bhutan Adventure?</h2>
               <p className="text-secondary text-lg mb-10 font-light max-w-xl leading-relaxed">
                 Let our local experts create a personalized itinerary for you.
               </p>

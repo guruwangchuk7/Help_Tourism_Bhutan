@@ -71,7 +71,7 @@ const Contact = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, ease: "easeOut" }}
-              className="text-white text-5xl md:text-7xl lg:text-8xl font-heading mb-6 leading-[1.1] font-medium"
+              className="text-white text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-heading mb-6 leading-[1.1] font-medium"
             >
               {data.heroTitle.split(" ")[0]} <span className="text-accent italic font-normal">{data.heroTitle.split(" ").slice(1).join(" ")}</span>
             </motion.h1>
@@ -88,8 +88,8 @@ const Contact = () => {
         </section>
 
         {/* Content Section */}
-        <div className="max-w-6xl mx-auto px-6 py-28 pb-32">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-20 items-start">
+        <div className="max-w-6xl mx-auto px-6 py-12 md:py-28 pb-20 md:pb-32">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-20 items-start">
             {/* Contact Info (5 cols) */}
             <motion.div 
               initial={{ opacity: 0, x: -30 }}

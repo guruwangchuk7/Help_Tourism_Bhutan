@@ -74,9 +74,9 @@ const Header = () => {
     >
       <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
         {/* Left: Brand Logo */}
-        <Link to="/" className="flex items-center space-x-3 group relative z-[130] -top-[4px]">
-          <Compass className={`w-7 h-7 transition-all duration-300 group-hover:rotate-45 ${activeHeader || mobileMenuOpen ? 'text-accent' : 'text-white'}`} />
-          <span className={`text-2xl font-heading font-semibold tracking-wide ${activeHeader || mobileMenuOpen ? 'text-primary' : 'text-white'}`}>
+        <Link to="/" className="flex items-center space-x-2 sm:space-x-3 group relative z-[130] -top-[4px]">
+          <Compass className={`w-6 h-6 sm:w-7 sm:h-7 transition-all duration-300 group-hover:rotate-45 ${activeHeader || mobileMenuOpen ? 'text-accent' : 'text-white'}`} />
+          <span className={`text-base sm:text-xl md:text-2xl font-heading font-semibold tracking-wide ${activeHeader || mobileMenuOpen ? 'text-primary' : 'text-white'}`}>
             Help Tourism Bhutan
           </span>
         </Link>
@@ -131,18 +131,18 @@ const Header = () => {
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
             className="fixed inset-0 bg-[#FAFAFA] z-[120] lg:hidden flex flex-col p-8 pt-32 h-screen w-screen overflow-y-auto"
           >
-            <div className="flex flex-col space-y-8">
+            <div className="flex flex-col space-y-6">
               {navLinks.map((link) => (
                 <Link
                   key={link.name}
                   to={link.path}
-                  className="text-4xl font-heading font-medium text-primary hover:text-accent transition-colors py-2 border-b border-primary/5"
+                  className="text-2xl sm:text-3xl font-heading font-medium text-primary hover:text-accent transition-colors py-2 border-b border-primary/5"
                 >
                   {link.name}
                 </Link>
               ))}
-              <div className="pt-10 flex flex-col space-y-4">
-                <Link to="/plan" className="btn-accent w-full text-lg">Get Free Itinerary</Link>
+              <div className="pt-6 flex flex-col space-y-4">
+                <Link to="/plan" className="btn-accent w-full text-base py-3.5">Get Free Itinerary</Link>
               </div>
             </div>
           </motion.div>
