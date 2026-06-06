@@ -242,3 +242,12 @@
     padding-top: 1.5rem !important;
   }
 }
+
+/* Utility: hide scrollbar */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

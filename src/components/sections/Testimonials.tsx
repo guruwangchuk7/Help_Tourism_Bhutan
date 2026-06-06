@@ -37,44 +37,79 @@ const Testimonials = () => {
     }
 
     return (
-        <section className="section-padding px-6 bg-white">
-            <div className="max-w-7xl mx-auto">
-                <div className="text-center mb-24 max-w-4xl mx-auto">
-                    <span className="text-primary font-semibold tracking-[0.4em] uppercase text-[10px] mb-8 block">Voice of the Valley</span>
-                    <h2 className="text-5xl md:text-7xl font-heading font-medium tracking-tight leading-none text-primary">
+        <section className="section-padding bg-white overflow-hidden">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6">
+                {/* Heading */}
+                <div className="text-center mb-8 sm:mb-12">
+                    <span className="text-primary font-semibold tracking-[0.4em] uppercase text-[9px] mb-2 block">Voice of the Valley</span>
+                    <h2 className="text-2xl sm:text-4xl md:text-6xl font-heading font-medium tracking-tight leading-tight text-primary">
                         Customer <span className="italic font-normal">Reviews</span>
                     </h2>
                 </div>
+            </div>
 
-                <div className="flex md:grid flex-row md:grid-cols-3 gap-6 md:gap-16 overflow-x-auto md:overflow-visible pb-8 md:pb-0 snap-x snap-mandatory scrollbar-hide">
-                    {list.slice(0, 3).map((t, idx) => (
-                        <motion.div
-                            key={t.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            transition={{ delay: idx * 0.1 }}
-                            className="flex flex-col h-full bg-[#FAFAFA] p-6 md:p-12 rounded-3xl group w-[280px] md:w-auto shrink-0 snap-center"
-                        >
-                            <div className="flex items-center gap-1 mb-6 md:mb-8">
-                                {[...Array(t.rating || 5)].map((_, i) => (
-                                    <Star key={i} className="w-4 h-4 text-accent fill-accent" />
-                                ))}
+            {/* Mobile: horizontal scroll | md+: 3-col grid */}
+            <div className="md:hidden flex gap-3 overflow-x-auto px-4 pb-4 snap-x snap-mandatory scrollbar-hide">
+                {list.slice(0, 3).map((t, _idx) => (
+                    <div
+                        key={t.id}
+                        className="flex flex-col bg-[#FAFAFA] p-4 rounded-2xl shrink-0 w-[240px] snap-start"
+                    >
+                        <div className="flex items-center gap-0.5 mb-2">
+                            {[...Array(t.rating || 5)].map((_, i) => (
+                                <Star key={i} className="w-3 h-3 text-accent fill-accent" />
+                            ))}
+                        </div>
+                        <p className="text-secondary text-xs font-light leading-relaxed mb-3 flex-1 italic line-clamp-4">
+                            &ldquo;{t.content}&rdquo;
+                        </p>
+                        <div className="flex items-center gap-2 pt-3 border-t border-primary/5">
+                            <img
+                                src={t.avatar || "https://i.pravatar.cc/200"}
+                                alt={t.name}
+                                className="w-7 h-7 rounded-full object-cover shrink-0"
+                            />
+                            <div>
+                                <span className="font-heading font-semibold text-primary text-[11px] block">{t.name}</span>
+                                <span className="text-[9px] font-light text-secondary/50 block">{t.role}</span>
                             </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
 
-                            <span className="text-secondary text-xs md:text-lg font-light tracking-wide leading-relaxed mb-4 md:mb-12 flex-1 italic block">
-                                "{t.content}"
-                            </span>
-
-                            <div className="mt-auto flex items-center space-x-3 pt-4 md:pt-8 border-t border-primary/5">
-                                <img src={t.avatar || "https://i.pravatar.cc/200"} alt={t.name} className="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover shadow-minimal transition-transform duration-500 group-hover:scale-105" />
-                                <div className="flex flex-col">
-                                    <span className="font-heading font-semibold text-primary text-xs md:text-base mb-0.5 tracking-wide block">{t.name}</span>
-                                    <span className="text-[9px] md:text-[11px] font-light text-secondary/60 leading-tight block tracking-normal mt-0.5">{t.role}</span>
-                                </div>
+            {/* Desktop: 3-column grid */}
+            <div className="hidden md:grid grid-cols-3 gap-8 max-w-7xl mx-auto px-6">
+                {list.slice(0, 3).map((t, idx) => (
+                    <motion.div
+                        key={t.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: idx * 0.1 }}
+                        className="flex flex-col bg-[#FAFAFA] p-8 rounded-3xl"
+                    >
+                        <div className="flex items-center gap-1 mb-5">
+                            {[...Array(t.rating || 5)].map((_, i) => (
+                                <Star key={i} className="w-4 h-4 text-accent fill-accent" />
+                            ))}
+                        </div>
+                        <p className="text-secondary text-sm font-light leading-relaxed mb-8 flex-1 italic">
+                            &ldquo;{t.content}&rdquo;
+                        </p>
+                        <div className="flex items-center gap-3 pt-5 border-t border-primary/5">
+                            <img
+                                src={t.avatar || "https://i.pravatar.cc/200"}
+                                alt={t.name}
+                                className="w-10 h-10 rounded-full object-cover shrink-0"
+                            />
+                            <div>
+                                <span className="font-heading font-semibold text-primary text-sm block">{t.name}</span>
+                                <span className="text-[11px] font-light text-secondary/60 block mt-0.5">{t.role}</span>
                             </div>
-                        </motion.div>
-                    ))}
-                </div>
+                        </div>
+                    </motion.div>
+                ))}
             </div>
         </section>
     )
