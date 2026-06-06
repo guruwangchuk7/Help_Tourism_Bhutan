@@ -964,10 +964,33 @@ const defaultTourists = [
   }
 ];
 
-app.get('/api/tourists', (req, res) => {
+app.get('/api/tourists', async (req, res) => {
   const cacheKey = 'tourists:list';
   const cached = getCache(cacheKey);
   if (cached) return res.json(cached);
+
+  if (dbConnected) {
+    try {
+      const data = await supabaseFetch('/tourists?select=*&order=id.asc');
+      const formatted = data.map((t: any) => ({
+        id: t.id,
+        name: t.name,
+        nationality: t.nationality,
+        passportNumber: t.passport_number || t.passportNumber,
+        email: t.email,
+        phone: t.phone,
+        tourName: t.tour_name || t.tourName,
+        checkInDate: t.check_in_date || t.checkInDate,
+        checkOutDate: t.check_out_date || t.checkOutDate,
+        sdfStatus: t.sdf_status || t.sdfStatus,
+        specialRequests: t.special_requests || t.specialRequests
+      }));
+      setCache(cacheKey, formatted);
+      return res.json(formatted);
+    } catch (err: any) {
+      console.error("Supabase fetch error for tourists, falling back to local file:", err.message);
+    }
+  }
 
   try {
     if (fs.existsSync(TOURISTS_FILE)) {
@@ -982,7 +1005,50 @@ app.get('/api/tourists', (req, res) => {
   res.json(defaultTourists);
 });
 
-app.post('/api/tourists', authenticateAdmin, (req, res) => {
+app.post('/api/tourists', authenticateAdmin, async (req, res) => {
+  const body = req.body;
+  const dbPayload = {
+    name: body.name,
+    nationality: body.nationality,
+    passport_number: body.passportNumber,
+    email: body.email,
+    phone: body.phone,
+    tour_name: body.tourName,
+    check_in_date: body.checkInDate,
+    check_out_date: body.checkOutDate,
+    sdf_status: body.sdfStatus,
+    special_requests: body.specialRequests
+  };
+
+  if (dbConnected) {
+    try {
+      const inserted = await supabaseFetch('/tourists', {
+        method: 'POST',
+        headers: { 'Prefer': 'return=representation' },
+        body: JSON.stringify(dbPayload)
+      });
+      clearCache('tourists:');
+      if (inserted && inserted.length > 0) {
+        const t = inserted[0];
+        return res.json({
+          id: t.id,
+          name: t.name,
+          nationality: t.nationality,
+          passportNumber: t.passport_number || t.passportNumber,
+          email: t.email,
+          phone: t.phone,
+          tourName: t.tour_name || t.tourName,
+          checkInDate: t.check_in_date || t.checkInDate,
+          checkOutDate: t.check_out_date || t.checkOutDate,
+          sdfStatus: t.sdf_status || t.sdfStatus,
+          specialRequests: t.special_requests || t.specialRequests
+        });
+      }
+    } catch (err: any) {
+      console.error("Supabase insert error for tourists, falling back to local file:", err.message);
+    }
+  }
+
   try {
     let tourists = defaultTourists;
     if (fs.existsSync(TOURISTS_FILE)) {
@@ -991,7 +1057,7 @@ app.post('/api/tourists', authenticateAdmin, (req, res) => {
     }
     const newTourist = {
       id: Date.now(),
-      ...req.body
+      ...body
     };
     tourists.push(newTourist);
     fs.writeFileSync(TOURISTS_FILE, JSON.stringify(tourists, null, 2), 'utf8');
@@ -1003,9 +1069,52 @@ app.post('/api/tourists', authenticateAdmin, (req, res) => {
   }
 });
 
-app.put('/api/tourists/:id', authenticateAdmin, (req, res) => {
+app.put('/api/tourists/:id', authenticateAdmin, async (req, res) => {
+  const id = Number(req.params.id);
+  const body = req.body;
+  const dbPayload = {
+    name: body.name,
+    nationality: body.nationality,
+    passport_number: body.passportNumber,
+    email: body.email,
+    phone: body.phone,
+    tour_name: body.tourName,
+    check_in_date: body.checkInDate,
+    check_out_date: body.checkOutDate,
+    sdf_status: body.sdfStatus,
+    special_requests: body.specialRequests
+  };
+
+  if (dbConnected) {
+    try {
+      const updated = await supabaseFetch(`/tourists?id=eq.${id}`, {
+        method: 'PATCH',
+        headers: { 'Prefer': 'return=representation' },
+        body: JSON.stringify(dbPayload)
+      });
+      clearCache('tourists:');
+      if (updated && updated.length > 0) {
+        const t = updated[0];
+        return res.json({
+          id: t.id,
+          name: t.name,
+          nationality: t.nationality,
+          passportNumber: t.passport_number || t.passportNumber,
+          email: t.email,
+          phone: t.phone,
+          tourName: t.tour_name || t.tourName,
+          checkInDate: t.check_in_date || t.checkInDate,
+          checkOutDate: t.check_out_date || t.checkOutDate,
+          sdfStatus: t.sdf_status || t.sdfStatus,
+          specialRequests: t.special_requests || t.specialRequests
+        });
+      }
+    } catch (err: any) {
+      console.error("Supabase update error for tourists, falling back to local file:", err.message);
+    }
+  }
+
   try {
-    const id = Number(req.params.id);
     let tourists = defaultTourists;
     if (fs.existsSync(TOURISTS_FILE)) {
       const data = fs.readFileSync(TOURISTS_FILE, 'utf8');
@@ -1013,7 +1122,7 @@ app.put('/api/tourists/:id', authenticateAdmin, (req, res) => {
     }
     const index = tourists.findIndex(t => t.id === id);
     if (index !== -1) {
-      tourists[index] = { ...tourists[index], ...req.body };
+      tourists[index] = { ...tourists[index], ...body };
       fs.writeFileSync(TOURISTS_FILE, JSON.stringify(tourists, null, 2), 'utf8');
       clearCache('tourists:');
       res.json(tourists[index]);
@@ -1026,9 +1135,22 @@ app.put('/api/tourists/:id', authenticateAdmin, (req, res) => {
   }
 });
 
-app.delete('/api/tourists/:id', authenticateAdmin, (req, res) => {
+app.delete('/api/tourists/:id', authenticateAdmin, async (req, res) => {
+  const id = Number(req.params.id);
+
+  if (dbConnected) {
+    try {
+      await supabaseFetch(`/tourists?id=eq.${id}`, {
+        method: 'DELETE'
+      });
+      clearCache('tourists:');
+      return res.json({ success: true });
+    } catch (err: any) {
+      console.error("Supabase delete error for tourists, falling back to local file:", err.message);
+    }
+  }
+
   try {
-    const id = Number(req.params.id);
     let tourists = defaultTourists;
     if (fs.existsSync(TOURISTS_FILE)) {
       const data = fs.readFileSync(TOURISTS_FILE, 'utf8');
