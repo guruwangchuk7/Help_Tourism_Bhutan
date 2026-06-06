@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  MapPin, Compass, Hotel, Plus, Edit, Trash2, Save, X, 
-  ArrowLeft, Star, Search, SlidersHorizontal, ChevronRight, 
+import {
+  MapPin, Compass, Hotel, Plus, Edit, Trash2, Save, X,
+  ArrowLeft, Star, Search, SlidersHorizontal, ChevronRight,
   HelpCircle, Upload, Phone
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
@@ -59,15 +59,15 @@ const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState<'destinations' | 'tours' | 'hotels' | 'about' | 'contact' | 'testimonials'>('destinations')
-  
+
   // Data States
   const [destinations, setDestinations] = useState<Destination[]>([])
   const [tours, setTours] = useState<Tour[]>([])
   const [hotels, setHotels] = useState<LuxuryHotel[]>([])
-  
+
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null)
-  
+
   // Search and sorting states
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState<'name' | 'price' | 'rating' | 'default'>('default')
@@ -80,7 +80,7 @@ const AdminDashboard = () => {
   const [contactTab, setContactTab] = useState<'banner' | 'channels' | 'footer'>('banner')
   const [aboutTab, setAboutTab] = useState<'philosophy' | 'stats' | 'pillars'>('philosophy')
   const [testimonialsTab, setTestimonialsTab] = useState<number>(0)
-  
+
   // Form values
   const [destForm, setDestForm] = useState<Partial<Destination>>({})
   const [tourForm, setTourForm] = useState<Partial<Tour>>({})
@@ -101,14 +101,14 @@ const AdminDashboard = () => {
         fetch(`${API_BASE}/api/contact`),
         fetch(`${API_BASE}/api/testimonials`)
       ])
-      
+
       const destData = await destRes.json()
       const toursData = await toursRes.json()
       const hotelsData = await hotelsRes.json()
       const aboutData = await aboutRes.json()
       const contactData = await contactRes.json()
       const testimonialsData = await testimonialsRes.json()
-      
+
       setDestinations(destData)
       setTours(toursData)
       setHotels(hotelsData)
@@ -135,13 +135,13 @@ const AdminDashboard = () => {
   // DELETE handler
   const handleDelete = async (type: 'destinations' | 'tours' | 'hotels', id: string | number) => {
     if (!window.confirm(`Are you sure you want to delete this ${type.slice(0, -1)}?`)) return
-    
+
     try {
       const res = await fetch(`${API_BASE}/api/${type}/${id}`, {
         method: 'DELETE'
       })
       if (!res.ok) throw new Error('Delete failed')
-      
+
       showToast('Item deleted successfully!', 'success')
       fetchData()
     } catch (err: any) {
@@ -207,7 +207,7 @@ const AdminDashboard = () => {
             if (parsed.altitudeAdvice) altitudeAdvice = parsed.altitudeAdvice
             if (parsed.currencyAdvice) currencyAdvice = parsed.currencyAdvice
           }
-        } catch (e) {}
+        } catch (e) { }
 
         setTourForm({
           ...item,
@@ -270,7 +270,7 @@ const AdminDashboard = () => {
   // Save handler
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     let url = `${API_BASE}/api/${editType}`
     let method = 'POST'
     let bodyData: any = {}
@@ -349,7 +349,7 @@ const AdminDashboard = () => {
         })
         if (!res.ok) throw new Error('Upload failed')
         const data = await res.json()
-        
+
         if (type === 'destinations') {
           setDestForm(prev => ({ ...prev, image: data.url }))
         } else if (type === 'tours') {
@@ -363,7 +363,7 @@ const AdminDashboard = () => {
             return updated
           })
         }
-        
+
         showToast('Image uploaded successfully!', 'success')
       }
     } catch (err: any) {
@@ -463,25 +463,24 @@ const AdminDashboard = () => {
     return (
       <div className="col-span-1 md:col-span-2 space-y-2">
         <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">{label}</label>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-          <div 
-            className={`md:col-span-7 border-2 border-dashed rounded-xl p-5 text-center flex flex-col items-center justify-center transition-all ${
-              dragActive ? "border-slate-900 bg-slate-50" : "border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-slate-400"
-            }`}
+          <div
+            className={`md:col-span-7 border-2 border-dashed rounded-xl p-5 text-center flex flex-col items-center justify-center transition-all ${dragActive ? "border-slate-900 bg-slate-50" : "border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-slate-400"
+              }`}
             onDragEnter={handleDrag}
             onDragOver={handleDrag}
             onDragLeave={handleDrag}
             onDrop={handleDrop}
           >
-            <input 
-              type="file" 
+            <input
+              type="file"
               id={`file-upload-${label.replace(/\s+/g, '-')}`}
-              className="hidden" 
+              className="hidden"
               accept="image/*"
-              onChange={handleChange} 
+              onChange={handleChange}
             />
-            <label 
+            <label
               htmlFor={`file-upload-${label.replace(/\s+/g, '-')}`}
               className="cursor-pointer flex flex-col items-center space-y-2 w-full"
             >
@@ -499,9 +498,9 @@ const AdminDashboard = () => {
 
           <div className="md:col-span-5 flex flex-col justify-between space-y-3">
             <div className="relative">
-              <input 
-                type="text" 
-                placeholder="Or paste external image URL..." 
+              <input
+                type="text"
+                placeholder="Or paste external image URL..."
                 value={value}
                 onChange={e => onChange(e.target.value)}
                 className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 font-mono focus:outline-none focus:border-slate-900"
@@ -527,8 +526,8 @@ const AdminDashboard = () => {
     if (activeTab === 'destinations') {
       let result = [...destinations]
       if (searchQuery) {
-        result = result.filter(d => 
-          d.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        result = result.filter(d =>
+          d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           d.location.toLowerCase().includes(searchQuery.toLowerCase())
         )
       }
@@ -547,7 +546,7 @@ const AdminDashboard = () => {
     } else if (activeTab === 'tours') {
       let result = [...tours]
       if (searchQuery) {
-        result = result.filter(t => 
+        result = result.filter(t =>
           t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
           t.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
           t.id.toLowerCase().includes(searchQuery.toLowerCase())
@@ -564,7 +563,7 @@ const AdminDashboard = () => {
     } else {
       let result = [...hotels]
       if (searchQuery) {
-        result = result.filter(h => 
+        result = result.filter(h =>
           h.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           h.location.toLowerCase().includes(searchQuery.toLowerCase())
         )
@@ -615,68 +614,61 @@ const AdminDashboard = () => {
 
             <button
               onClick={() => { setActiveTab('destinations'); setSearchQuery(''); }}
-              className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${
-                activeTab === 'destinations'
+              className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${activeTab === 'destinations'
                   ? 'bg-slate-100 text-slate-900 border-l-2 border-slate-900'
                   : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
-              }`}
+                }`}
             >
               <div className="flex items-center space-x-3">
                 <MapPin className={`w-4 h-4 ${activeTab === 'destinations' ? 'text-slate-900' : 'text-slate-400'}`} />
                 <span>Destinations</span>
               </div>
-              <span className={`text-xs px-2 py-0.5 rounded-full font-mono ${
-                activeTab === 'destinations' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600'
-              }`}>
+              <span className={`text-xs px-2 py-0.5 rounded-full font-mono ${activeTab === 'destinations' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600'
+                }`}>
                 {totalDestinationsCount}
               </span>
             </button>
 
             <button
               onClick={() => { setActiveTab('tours'); setSearchQuery(''); }}
-              className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${
-                activeTab === 'tours'
+              className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${activeTab === 'tours'
                   ? 'bg-slate-100 text-slate-900 border-l-2 border-slate-900'
                   : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
-              }`}
+                }`}
             >
               <div className="flex items-center space-x-3">
                 <Compass className={`w-4 h-4 ${activeTab === 'tours' ? 'text-slate-900' : 'text-slate-400'}`} />
                 <span>Tours</span>
               </div>
-              <span className={`text-xs px-2 py-0.5 rounded-full font-mono ${
-                activeTab === 'tours' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600'
-              }`}>
+              <span className={`text-xs px-2 py-0.5 rounded-full font-mono ${activeTab === 'tours' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600'
+                }`}>
                 {totalToursCount}
               </span>
             </button>
 
             <button
               onClick={() => { setActiveTab('hotels'); setSearchQuery(''); }}
-              className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${
-                activeTab === 'hotels'
+              className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${activeTab === 'hotels'
                   ? 'bg-slate-100 text-slate-900 border-l-2 border-slate-900'
                   : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
-              }`}
+                }`}
             >
               <div className="flex items-center space-x-3">
                 <Hotel className={`w-4 h-4 ${activeTab === 'hotels' ? 'text-slate-900' : 'text-slate-400'}`} />
                 <span>Hotels</span>
               </div>
-              <span className={`text-xs px-2 py-0.5 rounded-full font-mono ${
-                activeTab === 'hotels' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600'
-              }`}>
+              <span className={`text-xs px-2 py-0.5 rounded-full font-mono ${activeTab === 'hotels' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600'
+                }`}>
                 {totalHotelsCount}
               </span>
             </button>
 
             <button
               onClick={() => { setActiveTab('about'); setSearchQuery(''); }}
-              className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${
-                activeTab === 'about'
+              className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${activeTab === 'about'
                   ? 'bg-slate-100 text-slate-900 border-l-2 border-slate-900'
                   : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
-              }`}
+                }`}
             >
               <div className="flex items-center space-x-3">
                 <HelpCircle className={`w-4 h-4 ${activeTab === 'about' ? 'text-slate-900' : 'text-slate-400'}`} />
@@ -686,11 +678,10 @@ const AdminDashboard = () => {
 
             <button
               onClick={() => { setActiveTab('contact'); setSearchQuery(''); }}
-              className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${
-                activeTab === 'contact'
+              className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${activeTab === 'contact'
                   ? 'bg-slate-100 text-slate-900 border-l-2 border-slate-900'
                   : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
-              }`}
+                }`}
             >
               <div className="flex items-center space-x-3">
                 <Phone className={`w-4 h-4 ${activeTab === 'contact' ? 'text-slate-900' : 'text-slate-400'}`} />
@@ -700,11 +691,10 @@ const AdminDashboard = () => {
 
             <button
               onClick={() => { setActiveTab('testimonials'); setSearchQuery(''); }}
-              className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${
-                activeTab === 'testimonials'
+              className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${activeTab === 'testimonials'
                   ? 'bg-slate-100 text-slate-900 border-l-2 border-slate-900'
                   : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
-              }`}
+                }`}
             >
               <div className="flex items-center space-x-3">
                 <Star className={`w-4 h-4 ${activeTab === 'testimonials' ? 'text-slate-900' : 'text-slate-400'}`} />
@@ -717,8 +707,8 @@ const AdminDashboard = () => {
 
         {/* Sidebar Footer */}
         <div className="p-4 border-t border-slate-100">
-          <Link 
-            to="/" 
+          <Link
+            to="/"
             className="w-full flex items-center justify-center space-x-2 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 transition px-4 py-2.5 rounded-lg text-sm font-semibold border border-slate-200"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -734,29 +724,29 @@ const AdminDashboard = () => {
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 flex items-center space-x-2">
               <span>
-                {activeTab === 'destinations' 
-                  ? 'Destinations' 
-                  : activeTab === 'tours' 
-                  ? 'Tours' 
-                  : activeTab === 'hotels' 
-                  ? 'Hotels' 
-                  : activeTab === 'about' 
-                  ? 'About Us' 
-                  : activeTab === 'contact'
-                  ? 'Contact Us'
-                  : 'Voice of the Valley'}
+                {activeTab === 'destinations'
+                  ? 'Destinations'
+                  : activeTab === 'tours'
+                    ? 'Tours'
+                    : activeTab === 'hotels'
+                      ? 'Hotels'
+                      : activeTab === 'about'
+                        ? 'About Us'
+                        : activeTab === 'contact'
+                          ? 'Contact Us'
+                          : 'Voice of the Valley'}
               </span>
               <ChevronRight className="w-5 h-5 text-slate-400" />
               <span className="text-slate-500 text-lg font-medium">Dashboard</span>
             </h1>
             <p className="text-xs text-slate-500 mt-1">
-              {activeTab === 'about' 
-                ? 'Manage legacy stats, philosophy copy, and the four standards of integrity.' 
+              {activeTab === 'about'
+                ? 'Manage legacy stats, philosophy copy, and the four standards of integrity.'
                 : activeTab === 'contact'
-                ? 'Manage office locations, phone channels, and support email addresses.'
-                : activeTab === 'testimonials'
-                ? 'Manage Voice of the Valley Customer Reviews displayed on the home page.'
-                : 'Manage database objects, details, ratings, and media galleries.'}
+                  ? 'Manage office locations, phone channels, and support email addresses.'
+                  : activeTab === 'testimonials'
+                    ? 'Manage Voice of the Valley Customer Reviews displayed on the home page.'
+                    : 'Manage database objects, details, ratings, and media galleries.'}
             </p>
           </div>
 
@@ -776,15 +766,14 @@ const AdminDashboard = () => {
         {/* Toast Notification */}
         <AnimatePresence>
           {message && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: -20, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -20, scale: 0.95 }}
-              className={`fixed top-8 right-8 z-50 px-5 py-3.5 rounded-xl shadow-2xl flex items-center space-x-3 border ${
-                message.type === 'success' 
-                  ? 'bg-slate-900 border-slate-950 text-white' 
+              className={`fixed top-8 right-8 z-50 px-5 py-3.5 rounded-xl shadow-2xl flex items-center space-x-3 border ${message.type === 'success'
+                  ? 'bg-slate-900 border-slate-950 text-white'
                   : 'bg-rose-50 border-rose-200 text-rose-800'
-              }`}
+                }`}
             >
               <div className={`w-2 h-2 rounded-full ${message.type === 'success' ? 'bg-emerald-400' : 'bg-rose-500'}`} />
               <span className="text-sm font-semibold">{message.text}</span>
@@ -797,7 +786,7 @@ const AdminDashboard = () => {
           <div className="bg-white border border-slate-200 p-4 rounded-t-xl flex flex-col md:flex-row md:items-center md:justify-between gap-4 shadow-sm">
             <div className="relative flex-1 max-w-md">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input 
+              <input
                 type="text"
                 placeholder={`Search ${activeTab}...`}
                 value={searchQuery}
@@ -844,11 +833,10 @@ const AdminDashboard = () => {
                   key={tab.id}
                   type="button"
                   onClick={() => setAboutTab(tab.id as any)}
-                  className={`pb-2 text-xs font-bold uppercase tracking-wider transition-colors border-b-2 cursor-pointer ${
-                    aboutTab === tab.id 
-                      ? 'border-slate-900 text-slate-900' 
+                  className={`pb-2 text-xs font-bold uppercase tracking-wider transition-colors border-b-2 cursor-pointer ${aboutTab === tab.id
+                      ? 'border-slate-900 text-slate-900'
                       : 'border-transparent text-slate-400 hover:text-slate-900'
-                  }`}
+                    }`}
                 >
                   {tab.label}
                 </button>
@@ -864,12 +852,12 @@ const AdminDashboard = () => {
                 </h3>
                 <div>
                   <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Philosophy Description</label>
-                  <textarea 
+                  <textarea
                     rows={6}
-                    required 
-                    value={aboutForm.philosophyText || ''} 
-                    onChange={e => setAboutForm({...aboutForm, philosophyText: e.target.value})}
-                    className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                    required
+                    value={aboutForm.philosophyText || ''}
+                    onChange={e => setAboutForm({ ...aboutForm, philosophyText: e.target.value })}
+                    className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
                     placeholder="Describe your tour philosophy..."
                   />
                 </div>
@@ -890,22 +878,22 @@ const AdminDashboard = () => {
                     <div className="grid grid-cols-2 gap-3">
                       <div>
                         <label className="block text-[10px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">Value (e.g. 2010)</label>
-                        <input 
-                          type="text" 
-                          required 
-                          value={aboutForm.stat1Val || ''} 
-                          onChange={e => setAboutForm({...aboutForm, stat1Val: e.target.value})}
-                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                        <input
+                          type="text"
+                          required
+                          value={aboutForm.stat1Val || ''}
+                          onChange={e => setAboutForm({ ...aboutForm, stat1Val: e.target.value })}
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
                         />
                       </div>
                       <div>
                         <label className="block text-[10px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">Label (e.g. Founded)</label>
-                        <input 
-                          type="text" 
-                          required 
-                          value={aboutForm.stat1Label || ''} 
-                          onChange={e => setAboutForm({...aboutForm, stat1Label: e.target.value})}
-                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                        <input
+                          type="text"
+                          required
+                          value={aboutForm.stat1Label || ''}
+                          onChange={e => setAboutForm({ ...aboutForm, stat1Label: e.target.value })}
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
                         />
                       </div>
                     </div>
@@ -917,22 +905,22 @@ const AdminDashboard = () => {
                     <div className="grid grid-cols-2 gap-3">
                       <div>
                         <label className="block text-[10px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">Value (e.g. 50+ Local)</label>
-                        <input 
-                          type="text" 
-                          required 
-                          value={aboutForm.stat2Val || ''} 
-                          onChange={e => setAboutForm({...aboutForm, stat2Val: e.target.value})}
-                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                        <input
+                          type="text"
+                          required
+                          value={aboutForm.stat2Val || ''}
+                          onChange={e => setAboutForm({ ...aboutForm, stat2Val: e.target.value })}
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
                         />
                       </div>
                       <div>
                         <label className="block text-[10px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">Label (e.g. Guides)</label>
-                        <input 
-                          type="text" 
-                          required 
-                          value={aboutForm.stat2Label || ''} 
-                          onChange={e => setAboutForm({...aboutForm, stat2Label: e.target.value})}
-                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                        <input
+                          type="text"
+                          required
+                          value={aboutForm.stat2Label || ''}
+                          onChange={e => setAboutForm({ ...aboutForm, stat2Label: e.target.value })}
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
                         />
                       </div>
                     </div>
@@ -944,22 +932,22 @@ const AdminDashboard = () => {
                     <div className="grid grid-cols-2 gap-3">
                       <div>
                         <label className="block text-[10px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">Value (e.g. All 20 Dzongkhags)</label>
-                        <input 
-                          type="text" 
-                          required 
-                          value={aboutForm.stat3Val || ''} 
-                          onChange={e => setAboutForm({...aboutForm, stat3Val: e.target.value})}
-                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                        <input
+                          type="text"
+                          required
+                          value={aboutForm.stat3Val || ''}
+                          onChange={e => setAboutForm({ ...aboutForm, stat3Val: e.target.value })}
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
                         />
                       </div>
                       <div>
                         <label className="block text-[10px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">Label (e.g. Regions)</label>
-                        <input 
-                          type="text" 
-                          required 
-                          value={aboutForm.stat3Label || ''} 
-                          onChange={e => setAboutForm({...aboutForm, stat3Label: e.target.value})}
-                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                        <input
+                          type="text"
+                          required
+                          value={aboutForm.stat3Label || ''}
+                          onChange={e => setAboutForm({ ...aboutForm, stat3Label: e.target.value })}
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
                         />
                       </div>
                     </div>
@@ -971,22 +959,22 @@ const AdminDashboard = () => {
                     <div className="grid grid-cols-2 gap-3">
                       <div>
                         <label className="block text-[10px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">Value (e.g. 100% GNH)</label>
-                        <input 
-                          type="text" 
-                          required 
-                          value={aboutForm.stat4Val || ''} 
-                          onChange={e => setAboutForm({...aboutForm, stat4Val: e.target.value})}
-                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                        <input
+                          type="text"
+                          required
+                          value={aboutForm.stat4Val || ''}
+                          onChange={e => setAboutForm({ ...aboutForm, stat4Val: e.target.value })}
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
                         />
                       </div>
                       <div>
                         <label className="block text-[10px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">Label (e.g. Happiness)</label>
-                        <input 
-                          type="text" 
-                          required 
-                          value={aboutForm.stat4Label || ''} 
-                          onChange={e => setAboutForm({...aboutForm, stat4Label: e.target.value})}
-                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                        <input
+                          type="text"
+                          required
+                          value={aboutForm.stat4Label || ''}
+                          onChange={e => setAboutForm({ ...aboutForm, stat4Label: e.target.value })}
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
                         />
                       </div>
                     </div>
@@ -1009,22 +997,22 @@ const AdminDashboard = () => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="md:col-span-1">
                         <label className="block text-[10px] font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Title</label>
-                        <input 
-                          type="text" 
-                          required 
-                          value={aboutForm.pillar1Title || ''} 
-                          onChange={e => setAboutForm({...aboutForm, pillar1Title: e.target.value})}
-                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                        <input
+                          type="text"
+                          required
+                          value={aboutForm.pillar1Title || ''}
+                          onChange={e => setAboutForm({ ...aboutForm, pillar1Title: e.target.value })}
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
                         />
                       </div>
                       <div className="md:col-span-2">
                         <label className="block text-[10px] font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Description</label>
-                        <input 
-                          type="text" 
-                          required 
-                          value={aboutForm.pillar1Desc || ''} 
-                          onChange={e => setAboutForm({...aboutForm, pillar1Desc: e.target.value})}
-                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                        <input
+                          type="text"
+                          required
+                          value={aboutForm.pillar1Desc || ''}
+                          onChange={e => setAboutForm({ ...aboutForm, pillar1Desc: e.target.value })}
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
                         />
                       </div>
                     </div>
@@ -1036,22 +1024,22 @@ const AdminDashboard = () => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="md:col-span-1">
                         <label className="block text-[10px] font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Title</label>
-                        <input 
-                          type="text" 
-                          required 
-                          value={aboutForm.pillar2Title || ''} 
-                          onChange={e => setAboutForm({...aboutForm, pillar2Title: e.target.value})}
-                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                        <input
+                          type="text"
+                          required
+                          value={aboutForm.pillar2Title || ''}
+                          onChange={e => setAboutForm({ ...aboutForm, pillar2Title: e.target.value })}
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
                         />
                       </div>
                       <div className="md:col-span-2">
                         <label className="block text-[10px] font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Description</label>
-                        <input 
-                          type="text" 
-                          required 
-                          value={aboutForm.pillar2Desc || ''} 
-                          onChange={e => setAboutForm({...aboutForm, pillar2Desc: e.target.value})}
-                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                        <input
+                          type="text"
+                          required
+                          value={aboutForm.pillar2Desc || ''}
+                          onChange={e => setAboutForm({ ...aboutForm, pillar2Desc: e.target.value })}
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
                         />
                       </div>
                     </div>
@@ -1063,22 +1051,22 @@ const AdminDashboard = () => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="md:col-span-1">
                         <label className="block text-[10px] font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Title</label>
-                        <input 
-                          type="text" 
-                          required 
-                          value={aboutForm.pillar3Title || ''} 
-                          onChange={e => setAboutForm({...aboutForm, pillar3Title: e.target.value})}
-                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                        <input
+                          type="text"
+                          required
+                          value={aboutForm.pillar3Title || ''}
+                          onChange={e => setAboutForm({ ...aboutForm, pillar3Title: e.target.value })}
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
                         />
                       </div>
                       <div className="md:col-span-2">
                         <label className="block text-[10px] font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Description</label>
-                        <input 
-                          type="text" 
-                          required 
-                          value={aboutForm.pillar3Desc || ''} 
-                          onChange={e => setAboutForm({...aboutForm, pillar3Desc: e.target.value})}
-                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                        <input
+                          type="text"
+                          required
+                          value={aboutForm.pillar3Desc || ''}
+                          onChange={e => setAboutForm({ ...aboutForm, pillar3Desc: e.target.value })}
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
                         />
                       </div>
                     </div>
@@ -1090,22 +1078,22 @@ const AdminDashboard = () => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="md:col-span-1">
                         <label className="block text-[10px] font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Title</label>
-                        <input 
-                          type="text" 
-                          required 
-                          value={aboutForm.pillar4Title || ''} 
-                          onChange={e => setAboutForm({...aboutForm, pillar4Title: e.target.value})}
-                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                        <input
+                          type="text"
+                          required
+                          value={aboutForm.pillar4Title || ''}
+                          onChange={e => setAboutForm({ ...aboutForm, pillar4Title: e.target.value })}
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
                         />
                       </div>
                       <div className="md:col-span-2">
                         <label className="block text-[10px] font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Description</label>
-                        <input 
-                          type="text" 
-                          required 
-                          value={aboutForm.pillar4Desc || ''} 
-                          onChange={e => setAboutForm({...aboutForm, pillar4Desc: e.target.value})}
-                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                        <input
+                          type="text"
+                          required
+                          value={aboutForm.pillar4Desc || ''}
+                          onChange={e => setAboutForm({ ...aboutForm, pillar4Desc: e.target.value })}
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
                         />
                       </div>
                     </div>
@@ -1138,11 +1126,10 @@ const AdminDashboard = () => {
                   key={tab.id}
                   type="button"
                   onClick={() => setContactTab(tab.id as any)}
-                  className={`pb-2 text-xs font-bold uppercase tracking-wider transition-colors border-b-2 cursor-pointer ${
-                    contactTab === tab.id 
-                      ? 'border-slate-900 text-slate-900' 
+                  className={`pb-2 text-xs font-bold uppercase tracking-wider transition-colors border-b-2 cursor-pointer ${contactTab === tab.id
+                      ? 'border-slate-900 text-slate-900'
                       : 'border-transparent text-slate-400 hover:text-slate-900'
-                  }`}
+                    }`}
                 >
                   {tab.label}
                 </button>
@@ -1161,22 +1148,22 @@ const AdminDashboard = () => {
                   <div className="grid grid-cols-1 gap-4">
                     <div>
                       <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Hero Title</label>
-                      <input 
-                        type="text" 
-                        required 
-                        value={contactForm.heroTitle || ''} 
-                        onChange={e => setContactForm({...contactForm, heroTitle: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                      <input
+                        type="text"
+                        required
+                        value={contactForm.heroTitle || ''}
+                        onChange={e => setContactForm({ ...contactForm, heroTitle: e.target.value })}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
                       />
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Hero Subtitle</label>
-                      <textarea 
+                      <textarea
                         rows={3}
-                        required 
-                        value={contactForm.heroSubtitle || ''} 
-                        onChange={e => setContactForm({...contactForm, heroSubtitle: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                        required
+                        value={contactForm.heroSubtitle || ''}
+                        onChange={e => setContactForm({ ...contactForm, heroSubtitle: e.target.value })}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
                       />
                     </div>
                   </div>
@@ -1191,32 +1178,32 @@ const AdminDashboard = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Section Over-title (e.g. Direct Channels)</label>
-                      <input 
-                        type="text" 
-                        required 
-                        value={contactForm.channelTitle || ''} 
-                        onChange={e => setContactForm({...contactForm, channelTitle: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                      <input
+                        type="text"
+                        required
+                        value={contactForm.channelTitle || ''}
+                        onChange={e => setContactForm({ ...contactForm, channelTitle: e.target.value })}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
                       />
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Section Title (e.g. How to Reach Us)</label>
-                      <input 
-                        type="text" 
-                        required 
-                        value={contactForm.channelSubtitle || ''} 
-                        onChange={e => setContactForm({...contactForm, channelSubtitle: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                      <input
+                        type="text"
+                        required
+                        value={contactForm.channelSubtitle || ''}
+                        onChange={e => setContactForm({ ...contactForm, channelSubtitle: e.target.value })}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
                       />
                     </div>
                     <div className="md:col-span-2">
                       <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Description text</label>
-                      <textarea 
+                      <textarea
                         rows={3}
-                        required 
-                        value={contactForm.channelDesc || ''} 
-                        onChange={e => setContactForm({...contactForm, channelDesc: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                        required
+                        value={contactForm.channelDesc || ''}
+                        onChange={e => setContactForm({ ...contactForm, channelDesc: e.target.value })}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
                       />
                     </div>
                   </div>
@@ -1236,32 +1223,32 @@ const AdminDashboard = () => {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Title (e.g. The Base)</label>
-                      <input 
-                        type="text" 
-                        required 
-                        value={contactForm.baseTitle || ''} 
-                        onChange={e => setContactForm({...contactForm, baseTitle: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                      <input
+                        type="text"
+                        required
+                        value={contactForm.baseTitle || ''}
+                        onChange={e => setContactForm({ ...contactForm, baseTitle: e.target.value })}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
                       />
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Address Line 1</label>
-                      <input 
-                        type="text" 
-                        required 
-                        value={contactForm.baseLine1 || ''} 
-                        onChange={e => setContactForm({...contactForm, baseLine1: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                      <input
+                        type="text"
+                        required
+                        value={contactForm.baseLine1 || ''}
+                        onChange={e => setContactForm({ ...contactForm, baseLine1: e.target.value })}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
                       />
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Address Line 2</label>
-                      <input 
-                        type="text" 
-                        required 
-                        value={contactForm.baseLine2 || ''} 
-                        onChange={e => setContactForm({...contactForm, baseLine2: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900" 
+                      <input
+                        type="text"
+                        required
+                        value={contactForm.baseLine2 || ''}
+                        onChange={e => setContactForm({ ...contactForm, baseLine2: e.target.value })}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900"
                       />
                     </div>
                   </div>
@@ -1276,32 +1263,32 @@ const AdminDashboard = () => {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Title (e.g. Digital Call)</label>
-                      <input 
-                        type="text" 
-                        required 
-                        value={contactForm.callTitle || ''} 
-                        onChange={e => setContactForm({...contactForm, callTitle: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900" 
+                      <input
+                        type="text"
+                        required
+                        value={contactForm.callTitle || ''}
+                        onChange={e => setContactForm({ ...contactForm, callTitle: e.target.value })}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900"
                       />
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Phone Line 1</label>
-                      <input 
-                        type="text" 
-                        required 
-                        value={contactForm.callLine1 || ''} 
-                        onChange={e => setContactForm({...contactForm, callLine1: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900" 
+                      <input
+                        type="text"
+                        required
+                        value={contactForm.callLine1 || ''}
+                        onChange={e => setContactForm({ ...contactForm, callLine1: e.target.value })}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900"
                       />
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Phone Line 2</label>
-                      <input 
-                        type="text" 
-                        required 
-                        value={contactForm.callLine2 || ''} 
-                        onChange={e => setContactForm({...contactForm, callLine2: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900" 
+                      <input
+                        type="text"
+                        required
+                        value={contactForm.callLine2 || ''}
+                        onChange={e => setContactForm({ ...contactForm, callLine2: e.target.value })}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900"
                       />
                     </div>
                   </div>
@@ -1316,32 +1303,32 @@ const AdminDashboard = () => {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Title (e.g. Electronic Mail)</label>
-                      <input 
-                        type="text" 
-                        required 
-                        value={contactForm.emailTitle || ''} 
-                        onChange={e => setContactForm({...contactForm, emailTitle: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900" 
+                      <input
+                        type="text"
+                        required
+                        value={contactForm.emailTitle || ''}
+                        onChange={e => setContactForm({ ...contactForm, emailTitle: e.target.value })}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900"
                       />
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Email Line 1</label>
-                      <input 
-                        type="email" 
-                        required 
-                        value={contactForm.emailLine1 || ''} 
-                        onChange={e => setContactForm({...contactForm, emailLine1: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900" 
+                      <input
+                        type="email"
+                        required
+                        value={contactForm.emailLine1 || ''}
+                        onChange={e => setContactForm({ ...contactForm, emailLine1: e.target.value })}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900"
                       />
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Email Line 2</label>
-                      <input 
-                        type="email" 
-                        required 
-                        value={contactForm.emailLine2 || ''} 
-                        onChange={e => setContactForm({...contactForm, emailLine2: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900" 
+                      <input
+                        type="email"
+                        required
+                        value={contactForm.emailLine2 || ''}
+                        onChange={e => setContactForm({ ...contactForm, emailLine2: e.target.value })}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900"
                       />
                     </div>
                   </div>
@@ -1361,42 +1348,42 @@ const AdminDashboard = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Footer Phone</label>
-                      <input 
-                        type="text" 
-                        required 
-                        value={contactForm.footerPhone || ''} 
-                        onChange={e => setContactForm({...contactForm, footerPhone: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900" 
+                      <input
+                        type="text"
+                        required
+                        value={contactForm.footerPhone || ''}
+                        onChange={e => setContactForm({ ...contactForm, footerPhone: e.target.value })}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900"
                       />
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Footer Email</label>
-                      <input 
-                        type="email" 
-                        required 
-                        value={contactForm.footerEmail || ''} 
-                        onChange={e => setContactForm({...contactForm, footerEmail: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900" 
+                      <input
+                        type="email"
+                        required
+                        value={contactForm.footerEmail || ''}
+                        onChange={e => setContactForm({ ...contactForm, footerEmail: e.target.value })}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900"
                       />
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Footer WhatsApp</label>
-                      <input 
-                        type="text" 
-                        required 
-                        value={contactForm.footerWhatsapp || ''} 
-                        onChange={e => setContactForm({...contactForm, footerWhatsapp: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900" 
+                      <input
+                        type="text"
+                        required
+                        value={contactForm.footerWhatsapp || ''}
+                        onChange={e => setContactForm({ ...contactForm, footerWhatsapp: e.target.value })}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900"
                       />
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Footer Location</label>
-                      <input 
-                        type="text" 
-                        required 
-                        value={contactForm.footerLocation || ''} 
-                        onChange={e => setContactForm({...contactForm, footerLocation: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900" 
+                      <input
+                        type="text"
+                        required
+                        value={contactForm.footerLocation || ''}
+                        onChange={e => setContactForm({ ...contactForm, footerLocation: e.target.value })}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900"
                       />
                     </div>
                   </div>
@@ -1411,42 +1398,42 @@ const AdminDashboard = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Instagram Label</label>
-                      <input 
-                        type="text" 
-                        required 
-                        value={contactForm.footerInstagram || ''} 
-                        onChange={e => setContactForm({...contactForm, footerInstagram: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900" 
+                      <input
+                        type="text"
+                        required
+                        value={contactForm.footerInstagram || ''}
+                        onChange={e => setContactForm({ ...contactForm, footerInstagram: e.target.value })}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900"
                       />
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Facebook Label</label>
-                      <input 
-                        type="text" 
-                        required 
-                        value={contactForm.footerFacebook || ''} 
-                        onChange={e => setContactForm({...contactForm, footerFacebook: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900" 
+                      <input
+                        type="text"
+                        required
+                        value={contactForm.footerFacebook || ''}
+                        onChange={e => setContactForm({ ...contactForm, footerFacebook: e.target.value })}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900"
                       />
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">YouTube Label</label>
-                      <input 
-                        type="text" 
-                        required 
-                        value={contactForm.footerYoutube || ''} 
-                        onChange={e => setContactForm({...contactForm, footerYoutube: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900" 
+                      <input
+                        type="text"
+                        required
+                        value={contactForm.footerYoutube || ''}
+                        onChange={e => setContactForm({ ...contactForm, footerYoutube: e.target.value })}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900"
                       />
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">TikTok Label</label>
-                      <input 
-                        type="text" 
-                        required 
-                        value={contactForm.footerTiktok || ''} 
-                        onChange={e => setContactForm({...contactForm, footerTiktok: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900" 
+                      <input
+                        type="text"
+                        required
+                        value={contactForm.footerTiktok || ''}
+                        onChange={e => setContactForm({ ...contactForm, footerTiktok: e.target.value })}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900"
                       />
                     </div>
                   </div>
@@ -1473,7 +1460,7 @@ const AdminDashboard = () => {
                   <span className="w-1.5 h-1.5 bg-slate-900 rounded-full"></span>
                   <span>Voice of the Valley Customer Reviews</span>
                 </h3>
-                
+
                 <button
                   type="button"
                   onClick={() => {
@@ -1505,18 +1492,17 @@ const AdminDashboard = () => {
                       key={idx}
                       type="button"
                       onClick={() => setTestimonialsTab(idx)}
-                      className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-colors border cursor-pointer ${
-                        testimonialsTab === idx 
-                          ? 'bg-slate-900 text-white border-slate-900' 
+                      className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-colors border cursor-pointer ${testimonialsTab === idx
+                          ? 'bg-slate-900 text-white border-slate-900'
                           : 'bg-slate-50 text-slate-500 hover:text-slate-900 hover:bg-slate-100 border-slate-200'
-                      }`}
+                        }`}
                     >
                       Review #{idx + 1}
                     </button>
                   ))}
                 </div>
               ) : null}
-              
+
               <div className="space-y-8">
                 {testimonialsForm.length > 0 && testimonialsForm[testimonialsTab] ? (
                   <div className="p-6 bg-slate-50 rounded-xl border border-slate-200 space-y-4">
@@ -1538,72 +1524,72 @@ const AdminDashboard = () => {
                         <span>Delete Review</span>
                       </button>
                     </div>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-[10px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">Customer Name</label>
-                        <input 
-                          type="text" 
-                          required 
-                          value={testimonialsForm[testimonialsTab].name || ''} 
+                        <input
+                          type="text"
+                          required
+                          value={testimonialsForm[testimonialsTab].name || ''}
                           onChange={e => {
                             const updated = [...testimonialsForm]
                             updated[testimonialsTab] = { ...updated[testimonialsTab], name: e.target.value }
                             setTestimonialsForm(updated)
                           }}
-                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
                         />
                       </div>
-                      
+
                       <div>
                         <label className="block text-[10px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">Role / Bio (e.g. Cultural Historian • Thimphu Resident)</label>
-                        <input 
-                          type="text" 
-                          required 
-                          value={testimonialsForm[testimonialsTab].role || ''} 
+                        <input
+                          type="text"
+                          required
+                          value={testimonialsForm[testimonialsTab].role || ''}
                           onChange={e => {
                             const updated = [...testimonialsForm]
                             updated[testimonialsTab] = { ...updated[testimonialsTab], role: e.target.value }
                             setTestimonialsForm(updated)
                           }}
-                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
                         />
                       </div>
 
                       <div className="md:col-span-2">
                         <label className="block text-[10px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">Review Content</label>
-                        <textarea 
+                        <textarea
                           rows={3}
-                          required 
-                          value={testimonialsForm[testimonialsTab].content || testimonialsForm[testimonialsTab].text || ''} 
+                          required
+                          value={testimonialsForm[testimonialsTab].content || testimonialsForm[testimonialsTab].text || ''}
                           onChange={e => {
                             const updated = [...testimonialsForm]
                             updated[testimonialsTab] = { ...updated[testimonialsTab], content: e.target.value, text: e.target.value }
                             setTestimonialsForm(updated)
                           }}
-                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
                         />
                       </div>
 
                       <div>
                         <label className="block text-[10px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">Rating (1 to 5 Stars)</label>
-                        <input 
-                          type="number" 
+                        <input
+                          type="number"
                           min={1}
                           max={5}
-                          required 
-                          value={testimonialsForm[testimonialsTab].rating || 5} 
+                          required
+                          value={testimonialsForm[testimonialsTab].rating || 5}
                           onChange={e => {
                             const updated = [...testimonialsForm]
                             updated[testimonialsTab] = { ...updated[testimonialsTab], rating: parseInt(e.target.value) || 5 }
                             setTestimonialsForm(updated)
                           }}
-                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
                         />
                       </div>
 
                       <div className="md:col-span-2">
-                        <ImageUploadField 
+                        <ImageUploadField
                           label={`Avatar Photo for Review #${testimonialsTab + 1}`}
                           value={testimonialsForm[testimonialsTab].avatar || ''}
                           onChange={val => {
@@ -1682,14 +1668,14 @@ const AdminDashboard = () => {
                           </td>
                           <td className="p-4 text-right pr-6">
                             <div className="flex justify-end items-center space-x-1">
-                              <button 
+                              <button
                                 onClick={() => handleOpenEdit('destinations', d)}
                                 className="p-2 hover:bg-slate-100 text-slate-700 hover:text-black rounded-lg transition cursor-pointer"
                                 title="Edit"
                               >
                                 <Edit className="w-4 h-4" />
                               </button>
-                              <button 
+                              <button
                                 onClick={() => handleDelete('destinations', d.id)}
                                 className="p-2 hover:bg-slate-100 text-slate-500 hover:text-rose-600 rounded-lg transition cursor-pointer"
                                 title="Delete"
@@ -1739,14 +1725,14 @@ const AdminDashboard = () => {
                           </td>
                           <td className="p-4 text-right pr-6">
                             <div className="flex justify-end items-center space-x-1">
-                              <button 
+                              <button
                                 onClick={() => handleOpenEdit('tours', t)}
                                 className="p-2 hover:bg-slate-100 text-slate-700 hover:text-black rounded-lg transition cursor-pointer"
                                 title="Edit"
                               >
                                 <Edit className="w-4 h-4" />
                               </button>
-                              <button 
+                              <button
                                 onClick={() => handleDelete('tours', t.id)}
                                 className="p-2 hover:bg-slate-100 text-slate-500 hover:text-rose-600 rounded-lg transition cursor-pointer"
                                 title="Delete"
@@ -1795,14 +1781,14 @@ const AdminDashboard = () => {
                           </td>
                           <td className="p-4 text-right pr-6">
                             <div className="flex justify-end items-center space-x-1">
-                              <button 
+                              <button
                                 onClick={() => handleOpenEdit('hotels', h)}
                                 className="p-2 hover:bg-slate-100 text-slate-700 hover:text-black rounded-lg transition cursor-pointer"
                                 title="Edit"
                               >
                                 <Edit className="w-4 h-4" />
                               </button>
-                              <button 
+                              <button
                                 onClick={() => handleDelete('hotels', h.id)}
                                 className="p-2 hover:bg-slate-100 text-slate-500 hover:text-rose-600 rounded-lg transition cursor-pointer"
                                 title="Delete"
@@ -1826,7 +1812,7 @@ const AdminDashboard = () => {
       <AnimatePresence>
         {showModal && (
           <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/40 backdrop-blur-md flex justify-center items-start py-12 px-4">
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.96, opacity: 0, y: 15 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.96, opacity: 0, y: 15 }}
@@ -1842,7 +1828,7 @@ const AdminDashboard = () => {
                   </h3>
                   <p className="text-xs text-slate-500 mt-0.5">Fill in the fields below. Required values must be completed.</p>
                 </div>
-                <button 
+                <button
                   onClick={() => setShowModal(false)}
                   className="p-1.5 hover:bg-slate-200 text-slate-405 hover:text-slate-900 rounded-lg cursor-pointer transition-colors"
                 >
@@ -1852,7 +1838,7 @@ const AdminDashboard = () => {
 
               {/* Modal Form */}
               <form onSubmit={handleSave} className="p-6 space-y-6">
-                
+
                 {/* DESTINATION FORM FIELDS */}
                 {editType === 'destinations' && (
                   <div className="space-y-6">
@@ -1863,11 +1849,10 @@ const AdminDashboard = () => {
                           key={tab}
                           type="button"
                           onClick={() => setModalTab(tab)}
-                          className={`pb-2 text-xs font-bold uppercase tracking-wider transition-colors border-b-2 cursor-pointer ${
-                            modalTab === tab 
-                              ? 'border-slate-900 text-slate-900' 
+                          className={`pb-2 text-xs font-bold uppercase tracking-wider transition-colors border-b-2 cursor-pointer ${modalTab === tab
+                              ? 'border-slate-900 text-slate-900'
                               : 'border-transparent text-slate-400 hover:text-slate-900'
-                          }`}
+                            }`}
                         >
                           {tab}
                         </button>
@@ -1878,62 +1863,62 @@ const AdminDashboard = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div className="col-span-1 md:col-span-2">
                           <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Destination Name</label>
-                          <input 
-                            type="text" 
-                            required 
-                            value={destForm.name || ''} 
-                            onChange={e => setDestForm({...destForm, name: e.target.value})}
-                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                          <input
+                            type="text"
+                            required
+                            value={destForm.name || ''}
+                            onChange={e => setDestForm({ ...destForm, name: e.target.value })}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
                           />
                         </div>
                         <div>
                           <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Valleys / Location</label>
-                          <input 
-                            type="text" 
-                            required 
-                            value={destForm.location || ''} 
-                            onChange={e => setDestForm({...destForm, location: e.target.value})}
-                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                          <input
+                            type="text"
+                            required
+                            value={destForm.location || ''}
+                            onChange={e => setDestForm({ ...destForm, location: e.target.value })}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
                           />
                         </div>
                         <div>
                           <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Starting Price (e.g. $120)</label>
-                          <input 
-                            type="text" 
-                            required 
-                            value={destForm.price || ''} 
-                            onChange={e => setDestForm({...destForm, price: e.target.value})}
-                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                          <input
+                            type="text"
+                            required
+                            value={destForm.price || ''}
+                            onChange={e => setDestForm({ ...destForm, price: e.target.value })}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
                           />
                         </div>
-                        <ImageUploadField 
+                        <ImageUploadField
                           label="Destination Photo"
                           value={destForm.image || ''}
-                          onChange={val => setDestForm({...destForm, image: val})}
+                          onChange={val => setDestForm({ ...destForm, image: val })}
                           onUpload={file => handleFileUpload(file, 'destinations')}
                         />
                         <div>
                           <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Rating (1.0 to 5.0)</label>
-                          <input 
-                            type="number" 
-                            step="0.1" 
-                            max="5" 
-                            min="1" 
-                            required 
-                            value={destForm.rating || ''} 
-                            onChange={e => setDestForm({...destForm, rating: parseFloat(e.target.value)})}
-                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                          <input
+                            type="number"
+                            step="0.1"
+                            max="5"
+                            min="1"
+                            required
+                            value={destForm.rating || ''}
+                            onChange={e => setDestForm({ ...destForm, rating: parseFloat(e.target.value) })}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
                           />
                         </div>
 
                         <div className="col-span-1 md:col-span-2">
                           <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Description</label>
-                          <textarea 
-                            required 
-                            rows={3} 
-                            value={destForm.descriptionText || destForm.description || ''} 
-                            onChange={e => setDestForm({...destForm, descriptionText: e.target.value})}
-                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                          <textarea
+                            required
+                            rows={3}
+                            value={destForm.descriptionText || destForm.description || ''}
+                            onChange={e => setDestForm({ ...destForm, descriptionText: e.target.value })}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
                           />
                         </div>
                       </div>
@@ -1959,42 +1944,42 @@ const AdminDashboard = () => {
                             <div className="grid grid-cols-6 gap-3">
                               <div className="col-span-1">
                                 <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Day</label>
-                                <input 
-                                  type="text" 
-                                  value={it.day || ''} 
+                                <input
+                                  type="text"
+                                  value={it.day || ''}
                                   onChange={e => {
                                     const newIt = [...(destForm.itinerary || [])];
                                     newIt[idx] = { ...newIt[idx], day: e.target.value };
                                     setDestForm({ ...destForm, itinerary: newIt });
                                   }}
-                                  className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                                  className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
                                 />
                               </div>
                               <div className="col-span-5">
                                 <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Title</label>
-                                <input 
-                                  type="text" 
-                                  value={it.title || ''} 
+                                <input
+                                  type="text"
+                                  value={it.title || ''}
                                   onChange={e => {
                                     const newIt = [...(destForm.itinerary || [])];
                                     newIt[idx] = { ...newIt[idx], title: e.target.value };
                                     setDestForm({ ...destForm, itinerary: newIt });
                                   }}
-                                  className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                                  className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
                                 />
                               </div>
                             </div>
                             <div>
                               <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Details</label>
-                              <textarea 
+                              <textarea
                                 rows={2}
-                                value={it.detail || ''} 
+                                value={it.detail || ''}
                                 onChange={e => {
-                                    const newIt = [...(destForm.itinerary || [])];
-                                    newIt[idx] = { ...newIt[idx], detail: e.target.value };
-                                    setDestForm({ ...destForm, itinerary: newIt });
+                                  const newIt = [...(destForm.itinerary || [])];
+                                  newIt[idx] = { ...newIt[idx], detail: e.target.value };
+                                  setDestForm({ ...destForm, itinerary: newIt });
                                 }}
-                                className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                                className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
                               />
                             </div>
                           </div>
@@ -2055,29 +2040,29 @@ const AdminDashboard = () => {
                               </div>
                               <div className="col-span-2">
                                 <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Label</label>
-                                <input 
-                                  type="text" 
-                                  value={am.label || ''} 
+                                <input
+                                  type="text"
+                                  value={am.label || ''}
                                   onChange={e => {
                                     const newAm = [...(destForm.amenities || [])];
                                     newAm[idx] = { ...newAm[idx], label: e.target.value };
                                     setDestForm({ ...destForm, amenities: newAm });
                                   }}
-                                  className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                                  className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
                                 />
                               </div>
                             </div>
                             <div>
                               <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Description</label>
-                              <input 
-                                type="text" 
-                                value={am.desc || ''} 
+                              <input
+                                type="text"
+                                value={am.desc || ''}
                                 onChange={e => {
                                   const newAm = [...(destForm.amenities || [])];
                                   newAm[idx] = { ...newAm[idx], desc: e.target.value };
                                   setDestForm({ ...destForm, amenities: newAm });
                                 }}
-                                className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                                className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
                               />
                             </div>
                           </div>
@@ -2118,57 +2103,57 @@ const AdminDashboard = () => {
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                               <div>
                                 <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Reviewer Name</label>
-                                <input 
-                                  type="text" 
-                                  value={rv.name || ''} 
+                                <input
+                                  type="text"
+                                  value={rv.name || ''}
                                   onChange={e => {
                                     const newRv = [...(destForm.reviews || [])];
                                     newRv[idx] = { ...newRv[idx], name: e.target.value };
                                     setDestForm({ ...destForm, reviews: newRv });
                                   }}
-                                  className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                                  className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
                                 />
                               </div>
                               <div>
                                 <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Date</label>
-                                <input 
-                                  type="text" 
-                                  value={rv.date || ''} 
+                                <input
+                                  type="text"
+                                  value={rv.date || ''}
                                   onChange={e => {
                                     const newRv = [...(destForm.reviews || [])];
                                     newRv[idx] = { ...newRv[idx], date: e.target.value };
                                     setDestForm({ ...destForm, reviews: newRv });
                                   }}
-                                  className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900 font-mono" 
+                                  className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900 font-mono"
                                 />
                               </div>
                               <div>
                                 <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Rating (1 to 5)</label>
-                                <input 
-                                  type="number" 
-                                  min="1" 
+                                <input
+                                  type="number"
+                                  min="1"
                                   max="5"
-                                  value={rv.rating || 5} 
+                                  value={rv.rating || 5}
                                   onChange={e => {
                                     const newRv = [...(destForm.reviews || [])];
                                     newRv[idx] = { ...newRv[idx], rating: parseInt(e.target.value) || 5 };
                                     setDestForm({ ...destForm, reviews: newRv });
                                   }}
-                                  className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900 font-mono" 
+                                  className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900 font-mono"
                                 />
                               </div>
                             </div>
                             <div>
                               <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Comment Text</label>
-                              <textarea 
+                              <textarea
                                 rows={2}
-                                value={rv.text || ''} 
+                                value={rv.text || ''}
                                 onChange={e => {
                                   const newRv = [...(destForm.reviews || [])];
                                   newRv[idx] = { ...newRv[idx], text: e.target.value };
                                   setDestForm({ ...destForm, reviews: newRv });
                                 }}
-                                className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                                className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
                               />
                             </div>
                           </div>
@@ -2201,11 +2186,10 @@ const AdminDashboard = () => {
                           key={tab}
                           type="button"
                           onClick={() => setModalTab(tab as any)}
-                          className={`pb-2 text-xs font-bold uppercase tracking-wider transition-colors border-b-2 cursor-pointer ${
-                            modalTab === tab 
-                              ? 'border-slate-900 text-slate-900' 
+                          className={`pb-2 text-xs font-bold uppercase tracking-wider transition-colors border-b-2 cursor-pointer ${modalTab === tab
+                              ? 'border-slate-900 text-slate-900'
                               : 'border-transparent text-slate-400 hover:text-slate-900'
-                          }`}
+                            }`}
                         >
                           {tab}
                         </button>
@@ -2217,78 +2201,78 @@ const AdminDashboard = () => {
                         {editId === null && (
                           <div className="col-span-1 md:col-span-2">
                             <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Unique Tour Code (slug, e.g. custom-expedition)</label>
-                            <input 
-                              type="text" 
-                              required 
+                            <input
+                              type="text"
+                              required
                               placeholder="e.g. eco-bhutan-trek"
-                              value={tourForm.id || ''} 
-                              onChange={e => setTourForm({...tourForm, id: e.target.value})}
-                              className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200 font-mono" 
+                              value={tourForm.id || ''}
+                              onChange={e => setTourForm({ ...tourForm, id: e.target.value })}
+                              className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200 font-mono"
                             />
                           </div>
                         )}
                         <div className="col-span-1 md:col-span-2">
                           <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Tour Title</label>
-                          <input 
-                            type="text" 
-                            required 
-                            value={tourForm.title || ''} 
-                            onChange={e => setTourForm({...tourForm, title: e.target.value})}
-                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                          <input
+                            type="text"
+                            required
+                            value={tourForm.title || ''}
+                            onChange={e => setTourForm({ ...tourForm, title: e.target.value })}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
                           />
                         </div>
                         <div>
                           <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Duration text (e.g. 5 Days)</label>
-                          <input 
-                            type="text" 
-                            required 
-                            value={tourForm.duration || ''} 
-                            onChange={e => setTourForm({...tourForm, duration: e.target.value})}
-                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                          <input
+                            type="text"
+                            required
+                            value={tourForm.duration || ''}
+                            onChange={e => setTourForm({ ...tourForm, duration: e.target.value })}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
                           />
                         </div>
                         <div>
                           <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Nights (Integer count)</label>
-                          <input 
-                            type="number" 
-                            required 
-                            value={tourForm.nights || 0} 
-                            onChange={e => setTourForm({...tourForm, nights: parseInt(e.target.value) || 0})}
-                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                          <input
+                            type="number"
+                            required
+                            value={tourForm.nights || 0}
+                            onChange={e => setTourForm({ ...tourForm, nights: parseInt(e.target.value) || 0 })}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
                           />
                         </div>
                         <div>
                           <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Price tag (e.g. $1,299)</label>
-                          <input 
-                            type="text" 
-                            required 
-                            value={tourForm.price || ''} 
-                            onChange={e => setTourForm({...tourForm, price: e.target.value})}
-                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                          <input
+                            type="text"
+                            required
+                            value={tourForm.price || ''}
+                            onChange={e => setTourForm({ ...tourForm, price: e.target.value })}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
                           />
                         </div>
                         <div>
                           <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Numerical price value (e.g. 1299)</label>
-                          <input 
-                            type="number" 
-                            required 
-                            value={tourForm.priceVal || 0} 
-                            onChange={e => setTourForm({...tourForm, priceVal: parseInt(e.target.value) || 0})}
-                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                          <input
+                            type="number"
+                            required
+                            value={tourForm.priceVal || 0}
+                            onChange={e => setTourForm({ ...tourForm, priceVal: parseInt(e.target.value) || 0 })}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
                           />
                         </div>
-                        <ImageUploadField 
+                        <ImageUploadField
                           label="Tour Photo"
                           value={tourForm.image || ''}
-                          onChange={val => setTourForm({...tourForm, image: val})}
+                          onChange={val => setTourForm({ ...tourForm, image: val })}
                           onUpload={file => handleFileUpload(file, 'tours')}
                         />
                         <div>
                           <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Category</label>
-                          <select 
-                            value={tourForm.category || 'Cultural'} 
-                            onChange={e => setTourForm({...tourForm, category: e.target.value})}
-                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 cursor-pointer" 
+                          <select
+                            value={tourForm.category || 'Cultural'}
+                            onChange={e => setTourForm({ ...tourForm, category: e.target.value })}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 cursor-pointer"
                           >
                             <option value="Cultural">Cultural</option>
                             <option value="Adventure">Adventure</option>
@@ -2298,10 +2282,10 @@ const AdminDashboard = () => {
                         </div>
                         <div>
                           <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Difficulty</label>
-                          <select 
-                            value={tourForm.difficulty || 'Easy'} 
-                            onChange={e => setTourForm({...tourForm, difficulty: e.target.value})}
-                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 cursor-pointer" 
+                          <select
+                            value={tourForm.difficulty || 'Easy'}
+                            onChange={e => setTourForm({ ...tourForm, difficulty: e.target.value })}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 cursor-pointer"
                           >
                             <option value="Easy">Easy</option>
                             <option value="Moderate">Moderate</option>
@@ -2310,32 +2294,32 @@ const AdminDashboard = () => {
                         </div>
                         <div className="col-span-1 md:col-span-2">
                           <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Description Summary</label>
-                          <textarea 
-                            required 
-                            rows={2} 
-                            value={tourForm.descText || tourForm.desc || ''} 
-                            onChange={e => setTourForm({...tourForm, descText: e.target.value})}
-                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                          <textarea
+                            required
+                            rows={2}
+                            value={tourForm.descText || tourForm.desc || ''}
+                            onChange={e => setTourForm({ ...tourForm, descText: e.target.value })}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
                           />
                         </div>
                         <div className="col-span-1 md:col-span-2">
                           <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Inclusions (one per line)</label>
-                          <textarea 
-                            rows={3} 
+                          <textarea
+                            rows={3}
                             placeholder="TCB Certified guide&#10;Meals&#10;Transfers"
-                            value={tourForm.inclusions?.join('\n') || ''} 
-                            onChange={e => setTourForm({...tourForm, inclusions: e.target.value.split('\n').filter(Boolean)})}
-                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200 font-mono" 
+                            value={tourForm.inclusions?.join('\n') || ''}
+                            onChange={e => setTourForm({ ...tourForm, inclusions: e.target.value.split('\n').filter(Boolean) })}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200 font-mono"
                           />
                         </div>
                         <div className="col-span-1 md:col-span-2">
                           <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Exclusions (one per line)</label>
-                          <textarea 
-                            rows={3} 
+                          <textarea
+                            rows={3}
                             placeholder="Flights&#10;Insurance&#10;Personal tips"
-                            value={tourForm.exclusions?.join('\n') || ''} 
-                            onChange={e => setTourForm({...tourForm, exclusions: e.target.value.split('\n').filter(Boolean)})}
-                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200 font-mono" 
+                            value={tourForm.exclusions?.join('\n') || ''}
+                            onChange={e => setTourForm({ ...tourForm, exclusions: e.target.value.split('\n').filter(Boolean) })}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200 font-mono"
                           />
                         </div>
                       </div>
@@ -2361,42 +2345,42 @@ const AdminDashboard = () => {
                             <div className="grid grid-cols-6 gap-3">
                               <div className="col-span-1">
                                 <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Day</label>
-                                <input 
-                                  type="number" 
-                                  value={it.day || ''} 
+                                <input
+                                  type="number"
+                                  value={it.day || ''}
                                   onChange={e => {
                                     const newIt = [...(tourForm.itinerary || [])];
                                     newIt[idx] = { ...newIt[idx], day: parseInt(e.target.value) || (idx + 1) };
                                     setTourForm({ ...tourForm, itinerary: newIt });
                                   }}
-                                  className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900 font-mono" 
+                                  className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900 font-mono"
                                 />
                               </div>
                               <div className="col-span-5">
                                 <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Title</label>
-                                <input 
-                                  type="text" 
-                                  value={it.title || ''} 
+                                <input
+                                  type="text"
+                                  value={it.title || ''}
                                   onChange={e => {
                                     const newIt = [...(tourForm.itinerary || [])];
                                     newIt[idx] = { ...newIt[idx], title: e.target.value };
                                     setTourForm({ ...tourForm, itinerary: newIt });
                                   }}
-                                  className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                                  className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
                                 />
                               </div>
                             </div>
                             <div>
                               <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Description</label>
-                              <textarea 
+                              <textarea
                                 rows={2}
-                                value={it.desc || ''} 
+                                value={it.desc || ''}
                                 onChange={e => {
-                                    const newIt = [...(tourForm.itinerary || [])];
-                                    newIt[idx] = { ...newIt[idx], desc: e.target.value };
-                                    setTourForm({ ...tourForm, itinerary: newIt });
+                                  const newIt = [...(tourForm.itinerary || [])];
+                                  newIt[idx] = { ...newIt[idx], desc: e.target.value };
+                                  setTourForm({ ...tourForm, itinerary: newIt });
                                 }}
-                                className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900" 
+                                className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
                               />
                             </div>
                           </div>
@@ -2423,29 +2407,29 @@ const AdminDashboard = () => {
                         <h4 className="text-sm font-bold text-slate-900 mb-3 uppercase tracking-wider">Practical Advice</h4>
                         <div>
                           <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Bhutan Entry Visa & Permit</label>
-                          <textarea 
-                            rows={3} 
-                            value={tourForm.visaAdvice || ''} 
-                            onChange={e => setTourForm({...tourForm, visaAdvice: e.target.value})}
-                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                          <textarea
+                            rows={3}
+                            value={tourForm.visaAdvice || ''}
+                            onChange={e => setTourForm({ ...tourForm, visaAdvice: e.target.value })}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
                           />
                         </div>
                         <div>
                           <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Altitude & Packing Information</label>
-                          <textarea 
-                            rows={3} 
-                            value={tourForm.altitudeAdvice || ''} 
-                            onChange={e => setTourForm({...tourForm, altitudeAdvice: e.target.value})}
-                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                          <textarea
+                            rows={3}
+                            value={tourForm.altitudeAdvice || ''}
+                            onChange={e => setTourForm({ ...tourForm, altitudeAdvice: e.target.value })}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
                           />
                         </div>
                         <div>
                           <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Currency & Connectivity</label>
-                          <textarea 
-                            rows={3} 
-                            value={tourForm.currencyAdvice || ''} 
-                            onChange={e => setTourForm({...tourForm, currencyAdvice: e.target.value})}
-                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                          <textarea
+                            rows={3}
+                            value={tourForm.currencyAdvice || ''}
+                            onChange={e => setTourForm({ ...tourForm, currencyAdvice: e.target.value })}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
                           />
                         </div>
                       </div>
@@ -2458,61 +2442,61 @@ const AdminDashboard = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="col-span-1 md:col-span-2">
                       <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Hotel Name</label>
-                      <input 
-                        type="text" 
-                        required 
-                        value={hotelForm.name || ''} 
-                        onChange={e => setHotelForm({...hotelForm, name: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                      <input
+                        type="text"
+                        required
+                        value={hotelForm.name || ''}
+                        onChange={e => setHotelForm({ ...hotelForm, name: e.target.value })}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
                       />
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Location Details</label>
-                      <input 
-                        type="text" 
-                        required 
-                        value={hotelForm.location || ''} 
-                        onChange={e => setHotelForm({...hotelForm, location: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                      <input
+                        type="text"
+                        required
+                        value={hotelForm.location || ''}
+                        onChange={e => setHotelForm({ ...hotelForm, location: e.target.value })}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
                       />
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Starting Rate per Night (e.g. $1,800)</label>
-                      <input 
-                        type="text" 
-                        required 
-                        value={hotelForm.price || ''} 
-                        onChange={e => setHotelForm({...hotelForm, price: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                      <input
+                        type="text"
+                        required
+                        value={hotelForm.price || ''}
+                        onChange={e => setHotelForm({ ...hotelForm, price: e.target.value })}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
                       />
                     </div>
-                        <ImageUploadField 
-                          label="Hotel Photo"
-                          value={hotelForm.image || ''}
-                          onChange={val => setHotelForm({...hotelForm, image: val})}
-                          onUpload={file => handleFileUpload(file, 'hotels')}
-                        />
+                    <ImageUploadField
+                      label="Hotel Photo"
+                      value={hotelForm.image || ''}
+                      onChange={val => setHotelForm({ ...hotelForm, image: val })}
+                      onUpload={file => handleFileUpload(file, 'hotels')}
+                    />
                     <div>
                       <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Rating (1.0 to 5.0)</label>
-                      <input 
-                        type="number" 
-                        step="0.1" 
-                        max="5" 
-                        min="1" 
-                        required 
-                        value={hotelForm.rating || ''} 
-                        onChange={e => setHotelForm({...hotelForm, rating: parseFloat(e.target.value)})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                      <input
+                        type="number"
+                        step="0.1"
+                        max="5"
+                        min="1"
+                        required
+                        value={hotelForm.rating || ''}
+                        onChange={e => setHotelForm({ ...hotelForm, rating: parseFloat(e.target.value) })}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
                       />
                     </div>
                     <div className="col-span-1 md:col-span-2">
                       <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Description</label>
-                      <textarea 
-                        required 
-                        rows={3} 
-                        value={hotelForm.description || ''} 
-                        onChange={e => setHotelForm({...hotelForm, description: e.target.value})}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200" 
+                      <textarea
+                        required
+                        rows={3}
+                        value={hotelForm.description || ''}
+                        onChange={e => setHotelForm({ ...hotelForm, description: e.target.value })}
+                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
                       />
                     </div>
                   </div>
@@ -2520,14 +2504,14 @@ const AdminDashboard = () => {
 
                 {/* Form Buttons */}
                 <div className="flex justify-end space-x-3 pt-4.5 border-t border-slate-205">
-                  <button 
+                  <button
                     type="button"
                     onClick={() => setShowModal(false)}
                     className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg transition-all text-sm font-semibold cursor-pointer active:scale-95"
                   >
                     Cancel
                   </button>
-                  <button 
+                  <button
                     type="submit"
                     className="flex items-center space-x-2 px-5 py-2.5 bg-slate-900 hover:bg-black text-white font-bold rounded-lg transition-all cursor-pointer active:scale-95"
                   >

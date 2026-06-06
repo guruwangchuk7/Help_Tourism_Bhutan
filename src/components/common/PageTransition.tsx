@@ -7,25 +7,22 @@ import { useLocation } from "react-router-dom"
 const pageVariants = {
     initial: {
         opacity: 0,
-        y: 10,
-        filter: "blur(3px)",
+        y: 8,
     },
     in: {
         opacity: 1,
         y: 0,
-        filter: "blur(0px)",
     },
     out: {
         opacity: 0,
-        y: -10,
-        filter: "blur(3px)",
+        y: -8,
     }
 }
 
 const pageTransition: Transition = {
     type: "tween",
-    ease: [0.22, 1, 0.36, 1], // Custom Bézier curve for an elegant, fluid motion
-    duration: 0.6
+    ease: "easeOut",
+    duration: 0.25 // Snappy transition to ensure no lag and instant responsiveness
 }
 
 type Props = {
@@ -36,6 +33,13 @@ const PageTransition = ({ children }: Props) => {
     const location = useLocation()
 
     useEffect(() => {
+        // Scroll to top instantly upon component mounting (after exit animation completes)
+        window.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: 'instant'
+        })
+
         let title = "Help Tourism Bhutan | Bhutan Tours & Luxury Travel Operator"
         let desc = "Help Tourism Bhutan is a premier licensed tour operator in Bhutan. Explore cultural dzongs, high-altitude treks, and custom luxury itineraries."
         

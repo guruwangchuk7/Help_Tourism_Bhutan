@@ -85,9 +85,9 @@ const Destinations = () => {
           <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 border-b border-primary/5 pb-8 gap-4">
             <div>
               <span className="text-accent font-bold uppercase tracking-[0.2em] text-[10px] mb-2 block">Catalog</span>
-              <h2 className="text-4xl font-heading font-bold text-primary tracking-tight">Available Paths</h2>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-heading font-bold text-primary tracking-tight">Available Paths</h2>
             </div>
-            <p className="text-gray-400 font-bold text-xs uppercase tracking-widest">{filteredDestinations.length} Results Found</p>
+            <p className="caption-small text-gray-400 font-bold text-[10px] uppercase tracking-widest">{filteredDestinations.length} results found</p>
           </div>
 
           {/* Interface Bar - Clean, Compact & Minimal */}

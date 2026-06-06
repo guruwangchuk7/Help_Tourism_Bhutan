@@ -94,13 +94,17 @@
 
 .scrollbar-hide,
 .no-scrollbar {
-  -ms-overflow-style: none !important;  /* IE and Edge */
-  scrollbar-width: none !important;  /* Firefox */
+  -ms-overflow-style: none !important;
+  /* IE and Edge */
+  scrollbar-width: none !important;
+  /* Firefox */
 }
 
 /* Global Responsive Adjustments */
 @layer base {
-  html, body {
+
+  html,
+  body {
     overflow-x: hidden;
     width: 100%;
     @apply scroll-smooth;
@@ -108,6 +112,7 @@
 }
 
 @layer components {
+
   /* Fluid Typography for large headings */
   .fluid-h1 {
     @apply text-4xl md:text-7xl lg:text-9xl font-heading leading-tight md:leading-none tracking-tight;
@@ -119,20 +124,25 @@
   .section-padding {
     @apply py-16 md:py-24;
   }
-  
+
   .glass-panel {
     @apply rounded-2xl p-6;
   }
 }
 
 @media (max-width: 768px) {
+
   /* Prevent large containers from feeling too tight */
   .container-padding {
     @apply px-4 sm:px-6;
   }
 
   /* Improve touch accessibility (minimum touch target 48px) */
-  button, a.btn-primary, a.btn-accent, a.btn-outline, a.btn-ghost {
+  button,
+  a.btn-primary,
+  a.btn-accent,
+  a.btn-outline,
+  a.btn-ghost {
     min-height: 48px !important;
     @apply flex items-center justify-center;
   }
@@ -142,102 +152,132 @@
     font-size: clamp(32px, 8vw, 40px);
     line-height: 1.2;
   }
+
   h2 {
     font-size: clamp(24px, 6vw, 30px);
     line-height: 1.25;
   }
+
   h3 {
     font-size: clamp(20px, 5vw, 24px);
     line-height: 1.3;
   }
+
   h4 {
     font-size: clamp(18px, 4.5vw, 20px);
     line-height: 1.4;
   }
 
   /* Ensure standard body text has a 16px minimum on mobile */
-  body, p, li {
+  body,
+  p,
+  li {
     font-size: 16px !important;
     line-height: 1.6 !important;
   }
 
   /* Captions & small text can scale down to 11px-12px range */
-  .text-\[9px\], .text-\[8px\], .caption-small {
+  .text-\[9px\],
+  .text-\[8px\],
+  .caption-small {
     font-size: 11px !important;
   }
 
   /* Forms & Inputs: enforce 16px minimum to prevent auto-zooming on focus */
-  input, select, textarea {
+  input,
+  select,
+  textarea {
     font-size: 16px !important;
     min-height: 48px !important;
   }
 
   /* Scale down large paddings */
-  .p-10, .p-16, .p-20, .p-12 {
+  .p-10,
+  .p-16,
+  .p-20,
+  .p-12 {
     padding: 1.5rem !important;
   }
-  
+
   .rounded-\[3rem\] {
     @apply rounded-[2rem];
   }
 
   /* Why Choose Us mobile minimization */
   .why-card {
-    padding: 1.25rem !important; /* 20px padding */
-    border-radius: 1.5rem !important; /* 24px rounded */
+    padding: 1.25rem !important;
+    /* 20px padding */
+    border-radius: 1.5rem !important;
+    /* 24px rounded */
   }
-  
+
   .why-card .w-16 {
-    width: 3rem !important; /* 48px icon container */
+    width: 3rem !important;
+    /* 48px icon container */
     height: 3rem !important;
     margin-bottom: 1rem !important;
   }
-  
+
   .why-card .w-6 {
-    width: 1.25rem !important; /* 20px icon */
+    width: 1.25rem !important;
+    /* 20px icon */
     height: 1.25rem !important;
   }
-  
+
   .why-card h4 {
-    font-size: 14px !important; /* small uppercase title */
+    font-size: 14px !important;
+    /* small uppercase title */
     margin-bottom: 0.5rem !important;
   }
-  
+
   .why-card p {
-    font-size: 12px !important; /* small minimal body text */
+    font-size: 12px !important;
+    /* small minimal body text */
     line-height: 1.5 !important;
   }
 
   /* Footer mobile minimization */
   footer {
-    padding-top: 3rem !important; /* 48px */
-    padding-bottom: 1.5rem !important; /* 24px */
+    padding-top: 3rem !important;
+    /* 48px */
+    padding-bottom: 1.5rem !important;
+    /* 24px */
   }
-  
-  footer, footer a, footer li, footer span, footer p {
-    font-size: 13px !important; /* compact link and text size */
+
+  footer,
+  footer a,
+  footer li,
+  footer span,
+  footer p {
+    font-size: 13px !important;
+    /* compact link and text size */
     line-height: 1.5 !important;
   }
-  
+
   footer h4 {
-    font-size: 11px !important; /* compact section headers */
+    font-size: 11px !important;
+    /* compact section headers */
     margin-bottom: 0.75rem !important;
     letter-spacing: 0.15em !important;
   }
 
   footer .text-xl {
-    font-size: 18px !important; /* compact logo title */
+    font-size: 18px !important;
+    /* compact logo title */
   }
-  
+
   footer .grid {
-    gap: 1.75rem !important; /* 28px gap */
-    padding-bottom: 2rem !important; /* 32px */
+    gap: 1.75rem !important;
+    /* 28px gap */
+    padding-bottom: 2rem !important;
+    /* 32px */
   }
-  
+
   footer .mb-6 {
-    margin-bottom: 0.75rem !important; /* reduce logo & links header margins */
+    margin-bottom: 0.75rem !important;
+    /* reduce logo & links header margins */
   }
-  
+
   footer .pt-12 {
     padding-top: 1.5rem !important;
   }
@@ -248,6 +288,7 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
