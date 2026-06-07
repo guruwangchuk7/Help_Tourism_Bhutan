@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { motion } from "framer-motion"
-import { Phone, Mail, MapPin, Instagram, Twitter, Facebook, Globe, ChevronDown, Check } from "lucide-react"
+import { Phone, Mail, MapPin, ChevronDown, Check } from "lucide-react"
 import PageTransition from "../components/common/PageTransition"
 
 import { Skeleton, FormSkeleton } from "../components/common/Skeleton"
@@ -188,12 +188,12 @@ ${message}`
                   {
                     icon: Phone,
                     title: data.callTitle,
-                    lines: [data.callLine1, data.callLine2]
+                    lines: [data.callLine1, data.callLine2].filter((val, idx, arr) => val && arr.indexOf(val) === idx)
                   },
                   {
                     icon: Mail,
                     title: data.emailTitle,
-                    lines: [data.emailLine1, data.emailLine2]
+                    lines: [data.emailLine1, data.emailLine2].filter((val, idx, arr) => val && arr.indexOf(val) === idx)
                   }
                 ].map((item, idx) => (
                   <motion.div
@@ -217,18 +217,7 @@ ${message}`
                 ))}
               </div>
 
-              <div className="pt-6 border-t border-primary/10 flex space-x-3">
-                {[
-                  { Icon: Instagram, label: "Instagram" },
-                  { Icon: Twitter, label: "Twitter" },
-                  { Icon: Facebook, label: "Facebook" },
-                  { Icon: Globe, label: "Globe" }
-                ].map((item, idx) => (
-                  <button key={idx} aria-label={item.label} className="w-10 h-10 rounded-xl bg-white border border-primary/5 flex items-center justify-center text-primary/60 hover:bg-accent hover:text-white hover:border-accent shadow-minimal hover:shadow-premium transition-all duration-300">
-                    <item.Icon className="w-4 h-4" />
-                  </button>
-                ))}
-              </div>
+
             </motion.div>
 
             {/* Contact Form (7 cols) */}
