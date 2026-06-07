@@ -1,43 +1,35 @@
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { Heart, ArrowRight, CloudRain, Sun, Snowflake } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import PageTransition from "../components/common/PageTransition"
 
-import { CardSkeleton } from "../components/common/Skeleton"
-
-const iconMap: { [key: string]: any } = {
-  Sun,
-  CloudRain,
-  Heart,
-  Snowflake
-}
-
-type TourEdition = {
-  id: number
-  tour_id: string
+type Tour = {
+  id: string
   title: string
-  period: string
+  duration: string
   price: string
   image: string
-  icon: string
+  desc: string
+  difficulty: string
+  category: string
 }
 
 const Tours = () => {
   const navigate = useNavigate()
-  const [editions, setEditions] = useState<TourEdition[]>([])
-  const [loading, setLoading] = useState(true)
+  const [tours, setTours] = useState<Tour[]>([])
+  const [toursLoading, setToursLoading] = useState(true)
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000'}/api/tours/editions`)
+    // Fetch all standard tours
+    fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000'}/api/tours`)
       .then(res => res.json())
       .then(data => {
-        setEditions(data)
-        setLoading(false)
+        setTours(data)
+        setToursLoading(false)
       })
       .catch(err => {
         console.error(err)
-        setLoading(false)
+        setToursLoading(false)
       })
   }, [])
 
@@ -51,7 +43,7 @@ const Tours = () => {
             <img
               src="/paro-taksang.jpg"
               className="w-full h-full object-cover"
-              alt="Bhutan Signature Tours"
+              alt="Bhutan Bespoke Tours"
             />
             <div className="absolute inset-0 bg-black/45 z-10" />
           </div>
@@ -64,7 +56,7 @@ const Tours = () => {
               transition={{ duration: 1, ease: "easeOut" }}
               className="text-white text-5xl md:text-7xl lg:text-8xl font-heading mb-6 leading-[1.1] font-medium"
             >
-              Signature <span className="text-accent italic font-normal">Expeditions</span>
+              Bespoke <span className="text-accent italic font-normal">Journeys</span>
             </motion.h1>
 
             <motion.p
@@ -73,64 +65,73 @@ const Tours = () => {
               transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
               className="text-white/80 text-[10px] md:text-sm font-light max-w-2xl mx-auto leading-relaxed tracking-[0.15em] uppercase"
             >
-              Limited-entry tours designed around festivals, royal traditions, and seasonal peaks
+              All Tour Packages
             </motion.p>
           </div>
         </section>
 
-        {/* Seasonal Tours Grid */}
+        {/* All Itineraries Section */}
         <div className="max-w-7xl mx-auto px-6 py-20 pb-32">
-          {loading ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <CardSkeleton key={i} />
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8 }}
+            className="mb-16 text-center md:text-left"
+          >
+            <span className="text-accent font-semibold tracking-[0.3em] uppercase text-[10px] mb-4 block">Bespoke Journeys</span>
+            <h2 className="text-3xl md:text-5xl lg:text-6xl font-heading text-primary tracking-tight font-medium">All Tour Packages</h2>
+            <p className="text-secondary mt-4 font-light text-base md:text-lg tracking-wide leading-relaxed max-w-2xl">
+              Discover our comprehensive selection of cultural festival tours, high altitude treks, and wellness escapes.
+            </p>
+          </motion.div>
+
+          {toursLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="bg-white rounded-[2.5rem] p-6 h-96 animate-pulse border border-primary/5" />
               ))}
             </div>
           ) : (
-            <motion.div 
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.8 }}
-              className="grid grid-cols-1 lg:grid-cols-2 gap-16"
-            >
-              {editions.map((tour, idx) => {
-                const IconComponent = iconMap[tour.icon] || Sun;
-                return (
-                  <motion.div
-                    key={idx}
-                    whileHover={{ y: -10 }}
-                    onClick={() => navigate(`/tours/${tour.tour_id}`)}
-                    className="bg-white rounded-[3rem] overflow-hidden shadow-minimal hover:shadow-premium group border border-primary/5 p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center transition-all duration-500 cursor-pointer"
-                  >
-                <div className="w-full md:w-56 h-56 rounded-[2rem] overflow-hidden shrink-0 shadow-glass border border-primary/5">
-                  <img src={tour.image} className="w-full h-full object-cover group-hover:scale-105 transition-all duration-1000" alt="" />
-                </div>
-                <div className="flex-1 w-full">
-                  <div className="inline-flex items-center space-x-2 bg-primary/5 text-primary px-4 py-2 rounded-full mb-6">
-                    <IconComponent className="w-4 h-4" />
-                    <span className="text-[9px] font-semibold uppercase tracking-[0.2em] font-body">{tour.period}</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+              {tours.map((tour, idx) => (
+                <motion.div
+                  key={tour.id}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-100px" }}
+                  transition={{ duration: 0.8, delay: (idx % 3) * 0.1 }}
+                  whileHover={{ y: -8 }}
+                  onClick={() => navigate(`/tours/${tour.id}`)}
+                  className="bg-white rounded-[2.5rem] overflow-hidden shadow-minimal hover:shadow-premium group border border-primary/5 p-5 flex flex-col transition-all duration-300 cursor-pointer"
+                >
+                  <div className="relative aspect-[4/3] rounded-3xl overflow-hidden shrink-0">
+                    <img src={tour.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={tour.title} />
+                    <span className="absolute top-4 left-4 bg-primary text-white text-[9px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full">
+                      {tour.duration}
+                    </span>
                   </div>
-                  <h3 className="text-2xl sm:text-3xl font-heading font-medium text-primary leading-tight mb-4 tracking-wide">{tour.title}</h3>
-                  <p className="text-secondary font-light mb-8 leading-relaxed text-sm tracking-wide">Experience Bhutan in its peak glory with exclusive access to local festivals.</p>
+                  <div className="flex flex-col flex-1 pt-6 px-2">
+                    <span className="text-[9px] font-semibold text-accent uppercase tracking-widest block mb-2">{tour.category} • {tour.difficulty}</span>
+                    <h3 className="text-xl font-heading font-medium text-primary leading-tight mb-3 group-hover:text-accent transition-colors">{tour.title}</h3>
+                    <p className="text-secondary font-light text-sm mb-6 leading-relaxed flex-1 line-clamp-3">{tour.desc}</p>
 
-                  <div className="flex items-center justify-between pt-6 border-t border-primary/5">
-                    <div className="flex flex-col">
-                      <span className="text-[9px] font-semibold text-accent uppercase tracking-[0.2em] mb-0.5">Includes $100/night SDF + Visa</span>
-                      <span className="text-2xl font-heading font-semibold text-primary">{tour.price}</span>
+                    <div className="flex items-center justify-between pt-5 border-t border-primary/5">
+                      <div className="flex flex-col">
+                        <span className="text-[9px] font-semibold text-secondary/60 uppercase tracking-wider mb-0.5">Price starting</span>
+                        <span className="text-lg font-heading font-semibold text-primary">{tour.price}</span>
+                      </div>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); navigate(`/tours/${tour.id}`); }}
+                        className="btn-accent !px-5 !py-2.5 !text-[10px] !rounded-full font-bold uppercase tracking-wider cursor-pointer"
+                      >
+                        Explore Tour
+                      </button>
                     </div>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); navigate(`/tours/${tour.tour_id}`); }}
-                      className="w-12 h-12 bg-bg-alt text-primary rounded-full flex items-center justify-center group-hover:bg-accent group-hover:text-white transition-all duration-500 shadow-minimal group-hover:shadow-lg cursor-pointer"
-                    >
-                      <ArrowRight className="w-5 h-5" />
-                    </button>
                   </div>
-                </div>
-              </motion.div>
-            )
-          })}
-          </motion.div>
+                </motion.div>
+              ))}
+            </div>
           )}
         </div>
       </div>
