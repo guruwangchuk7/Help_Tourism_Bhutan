@@ -21,7 +21,7 @@ const Layout = () => {
       
       {/* Floating WhatsApp Button */}
       <a
-        href="https://wa.me/97517517119?text=Hello,%20I'd%20like%20help%20planning%20my%20Bhutan%20trip."
+        href="https://wa.me/97517934593?text=Hello,%20I'd%20like%20help%20planning%20my%20Bhutan%20trip."
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom))] right-6 z-50 flex items-center gap-2 bg-[#25D366] text-white px-5 py-3 rounded-full shadow-lg hover:bg-[#20ba5a] hover:scale-105 transition-all duration-300 font-semibold text-sm group"

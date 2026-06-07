@@ -56,7 +56,7 @@ Message:
 ${message}
 
 Thank you!`
-    const mailtoUrl = `mailto:explore@helptourismbhutan.bt?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    const mailtoUrl = `mailto:helptourbhutancontact@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
     window.open(mailtoUrl, '_blank')
     alert('Opening Gmail composer with your inquiry...')
   }
@@ -76,7 +76,7 @@ Thank you!`
 
 *Message:*
 ${message}`
-    const waUrl = `https://wa.me/97517517119?text=${encodeURIComponent(body)}`
+    const waUrl = `https://wa.me/97517934593?text=${encodeURIComponent(body)}`
     window.open(waUrl, '_blank')
     alert('Opening WhatsApp support with your inquiry...')
   }

@@ -27,9 +27,9 @@ const Footer = () => {
       })
   }, [])
 
-  const phone = data?.footerPhone || '+975 2 334567'
-  const email = data?.footerEmail || 'explore@helptourismbhutan.bt'
-  const whatsapp = data?.footerWhatsapp || '+975 17517119 (WhatsApp)'
+  const phone = data?.footerPhone || '+975 17934593'
+  const email = data?.footerEmail || 'helptourbhutancontact@gmail.com'
+  const whatsapp = data?.footerWhatsapp || '+975 17934593 (WhatsApp)'
   const location = data?.footerLocation || 'Thimphu, Bhutan'
   const instagram = data?.footerInstagram || 'Instagram'
   const facebook = data?.footerFacebook || 'Facebook'

@@ -62,7 +62,7 @@ const Booking = () => {
 
 Please assist me with finalizing this booking and completing the payment via bank wire/invoice.`
 
-        return `https://wa.me/97517517119?text=${encodeURIComponent(baseText)}`
+        return `https://wa.me/97517934593?text=${encodeURIComponent(baseText)}`
     }
 
     const getEmailUrl = () => {
@@ -83,7 +83,7 @@ Please contact me to finalize the booking and coordinate payment.
 
 Thank you!`
 
-        return `mailto:explore@helptourismbhutan.bt?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(baseText)}`
+        return `mailto:helptourbhutancontact@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(baseText)}`
     }
 
 
@@ -353,9 +353,9 @@ Thank you!`
                                                         We support international bank wire transfers, offline deposits, and customized corporate billing protocols. Reach out to our Thimphu base for support:
                                                     </p>
                                                     <div className="pt-2 text-xs font-medium space-y-2 text-primary">
-                                                        <p>📞 Phone: <span className="font-semibold text-accent">+975 2 334567</span></p>
-                                                        <p>💬 WhatsApp: <span className="font-semibold text-accent">+975 17517119</span></p>
-                                                        <p>✉️ Email: <a href="mailto:explore@helptourismbhutan.bt" className="font-semibold text-accent underline">explore@helptourismbhutan.bt</a></p>
+                                                        <p>📞 Phone: <span className="font-semibold text-accent">+975 17934593</span></p>
+                                                        <p>💬 WhatsApp: <span className="font-semibold text-accent">+975 17934593</span></p>
+                                                        <p>✉️ Email: <a href="mailto:helptourbhutancontact@gmail.com" className="font-semibold text-accent underline">helptourbhutancontact@gmail.com</a></p>
                                                     </div>
                                                 </div>
                                             )}

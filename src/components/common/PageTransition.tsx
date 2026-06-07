@@ -152,7 +152,7 @@ const PageTransition = ({ children, title: customTitle, description: customDesc,
             "image": "https://www.helptourbhutan.com/paro-taksang.jpg",
             "@id": "https://www.helptourbhutan.com/#agency",
             "url": "https://www.helptourbhutan.com",
-            "telephone": "+975-2-334567",
+            "telephone": "+975 17934593",
             "priceRange": "$$$$",
             "address": {
                 "@type": "PostalAddress",
