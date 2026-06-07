@@ -797,10 +797,23 @@ const defaultAboutData = {
   pillar4Desc: "We are carbon-negative and plastic-free on all our treks."
 };
 
-app.get('/api/about', (req, res) => {
+app.get('/api/about', async (req, res) => {
   const cacheKey = 'about:data';
   const cached = getCache(cacheKey);
   if (cached) return res.json(cached);
+
+  if (dbConnected) {
+    try {
+      const data = await supabaseFetch('/settings?key=eq.about&select=value');
+      if (data && data.length > 0) {
+        const value = data[0].value;
+        setCache(cacheKey, value);
+        return res.json(value);
+      }
+    } catch (err: any) {
+      console.error("Supabase fetch error for about, falling back to local file:", err.message);
+    }
+  }
 
   try {
     if (fs.existsSync(ABOUT_FILE)) {
@@ -815,7 +828,21 @@ app.get('/api/about', (req, res) => {
   res.json(defaultAboutData);
 });
 
-app.put('/api/about', authenticateAdmin, (req, res) => {
+app.put('/api/about', authenticateAdmin, async (req, res) => {
+  if (dbConnected) {
+    try {
+      await supabaseFetch('/settings', {
+        method: 'POST',
+        headers: { 'Prefer': 'resolution=merge-duplicates' },
+        body: JSON.stringify({ key: 'about', value: req.body })
+      });
+      clearCache('about:');
+      return res.json(req.body);
+    } catch (err: any) {
+      console.error("Supabase save error for about, falling back to local file:", err.message);
+    }
+  }
+
   try {
     fs.writeFileSync(ABOUT_FILE, JSON.stringify(req.body, null, 2), 'utf8');
     clearCache('about:');
@@ -853,10 +880,23 @@ const defaultContactData = {
 };
 
 
-app.get('/api/contact', (req, res) => {
+app.get('/api/contact', async (req, res) => {
   const cacheKey = 'contact:data';
   const cached = getCache(cacheKey);
   if (cached) return res.json(cached);
+
+  if (dbConnected) {
+    try {
+      const data = await supabaseFetch('/settings?key=eq.contact&select=value');
+      if (data && data.length > 0) {
+        const value = data[0].value;
+        setCache(cacheKey, value);
+        return res.json(value);
+      }
+    } catch (err: any) {
+      console.error("Supabase fetch error for contact, falling back to local file:", err.message);
+    }
+  }
 
   try {
     if (fs.existsSync(CONTACT_FILE)) {
@@ -871,7 +911,21 @@ app.get('/api/contact', (req, res) => {
   res.json(defaultContactData);
 });
 
-app.put('/api/contact', authenticateAdmin, (req, res) => {
+app.put('/api/contact', authenticateAdmin, async (req, res) => {
+  if (dbConnected) {
+    try {
+      await supabaseFetch('/settings', {
+        method: 'POST',
+        headers: { 'Prefer': 'resolution=merge-duplicates' },
+        body: JSON.stringify({ key: 'contact', value: req.body })
+      });
+      clearCache('contact:');
+      return res.json(req.body);
+    } catch (err: any) {
+      console.error("Supabase save error for contact, falling back to local file:", err.message);
+    }
+  }
+
   try {
     fs.writeFileSync(CONTACT_FILE, JSON.stringify(req.body, null, 2), 'utf8');
     clearCache('contact:');
@@ -910,10 +964,23 @@ const defaultTestimonials = [
   }
 ];
 
-app.get('/api/testimonials', (req, res) => {
+app.get('/api/testimonials', async (req, res) => {
   const cacheKey = 'testimonials:list';
   const cached = getCache(cacheKey);
   if (cached) return res.json(cached);
+
+  if (dbConnected) {
+    try {
+      const data = await supabaseFetch('/settings?key=eq.testimonials&select=value');
+      if (data && data.length > 0) {
+        const value = data[0].value;
+        setCache(cacheKey, value);
+        return res.json(value);
+      }
+    } catch (err: any) {
+      console.error("Supabase fetch error for testimonials, falling back to local file:", err.message);
+    }
+  }
 
   try {
     if (fs.existsSync(TESTIMONIALS_FILE)) {
@@ -928,7 +995,21 @@ app.get('/api/testimonials', (req, res) => {
   res.json(defaultTestimonials);
 });
 
-app.put('/api/testimonials', authenticateAdmin, (req, res) => {
+app.put('/api/testimonials', authenticateAdmin, async (req, res) => {
+  if (dbConnected) {
+    try {
+      await supabaseFetch('/settings', {
+        method: 'POST',
+        headers: { 'Prefer': 'resolution=merge-duplicates' },
+        body: JSON.stringify({ key: 'testimonials', value: req.body })
+      });
+      clearCache('testimonials:');
+      return res.json(req.body);
+    } catch (err: any) {
+      console.error("Supabase save error for testimonials, falling back to local file:", err.message);
+    }
+  }
+
   try {
     fs.writeFileSync(TESTIMONIALS_FILE, JSON.stringify(req.body, null, 2), 'utf8');
     clearCache('testimonials:');
