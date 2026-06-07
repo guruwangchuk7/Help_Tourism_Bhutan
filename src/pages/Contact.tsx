@@ -54,6 +54,48 @@ const Contact = () => {
   const [message, setMessage] = useState("")
   const [dropdownOpen, setDropdownOpen] = useState(false)
 
+  const contactSchema = useMemo(() => {
+    return [
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://www.helptourbhutan.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Contact",
+            "item": "https://www.helptourbhutan.com/contact"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ContactPage",
+        "name": "Contact Help Tourism Bhutan",
+        "description": "Get in touch with our local travel architects in Thimphu to start planning your custom Bhutan itinerary.",
+        "mainEntity": {
+          "@type": "TravelAgency",
+          "name": "Help Tourism Bhutan",
+          "url": "https://www.helptourbhutan.com/",
+          "telephone": "+975-17934593",
+          "email": "helptourbhutancontact@gmail.com",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Changlam Square, 2nd Floor",
+            "addressLocality": "Thimphu",
+            "addressCountry": "BT"
+          }
+        }
+      }
+    ]
+  }, [])
+
   const handleGmailSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!fullName.trim() || !email.trim() || !message.trim()) {
@@ -141,47 +183,7 @@ ${message}`
     )
   }
 
-  const contactSchema = useMemo(() => {
-    return [
-      {
-        "@context": "https://schema.org",
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-          {
-            "@type": "ListItem",
-            "position": 1,
-            "name": "Home",
-            "item": "https://www.helptourbhutan.com/"
-          },
-          {
-            "@type": "ListItem",
-            "position": 2,
-            "name": "Contact",
-            "item": "https://www.helptourbhutan.com/contact"
-          }
-        ]
-      },
-      {
-        "@context": "https://schema.org",
-        "@type": "ContactPage",
-        "name": "Contact Help Tourism Bhutan",
-        "description": "Get in touch with our local travel architects in Thimphu to start planning your custom Bhutan itinerary.",
-        "mainEntity": {
-          "@type": "TravelAgency",
-          "name": "Help Tourism Bhutan",
-          "url": "https://www.helptourbhutan.com/",
-          "telephone": "+975-17934593",
-          "email": "helptourbhutancontact@gmail.com",
-          "address": {
-            "@type": "PostalAddress",
-            "streetAddress": "Changlam Square, 2nd Floor",
-            "addressLocality": "Thimphu",
-            "addressCountry": "BT"
-          }
-        }
-      }
-    ]
-  }, [])
+
 
   return (
     <PageTransition>
