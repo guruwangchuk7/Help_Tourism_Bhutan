@@ -166,6 +166,212 @@ INSERT INTO tours (id, title, duration, nights, price, price_val, image, descrip
     {"day": 5, "title": "Bespoke Tiger''s Nest Hike", "desc": "Hike up Tiger''s Nest at sunrise with a private champagne picnic lunch. Traditional hot stone bath in the evening."},
     {"day": 6, "title": "Departure", "desc": "Private VIP airport lounge access and departure."}
   ]'::jsonb
+),
+(
+  'explore-central-bhutan',
+  'Explore Central Bhutan',
+  '8 Days',
+  7,
+  '$1,599',
+  1599,
+  '/src/assets/photos/central-buhtna.jpg',
+  'Bhutan, a peaceful Himalayan kingdom, is a perfect place to relax, recharge, and reconnect with yourself. Tucked among its mountains, quiet retreats offer meditation, yoga, and holistic wellness for true inner peace.',
+  'Spiritual',
+  'Moderate',
+  '["TCB Certified English-speaking tour guide", "Standard 3-Star accommodations", "Private transfers & driver", "All meals & entry visa fee", "All monument entrance fees"]'::jsonb,
+  '["International flights to/from Paro", "Travel insurance", "Tips for guide and driver", "Alcoholic beverages & personal items"]'::jsonb,
+  '[
+    {"day": 1, "title": "Arrival in Paro", "desc": "Arrive at Paro International Airport. Meet your guide and transfer to Thimphu. Visit the Buddha Dordenma statue and the Memorial Chorten."},
+    {"day": 2, "title": "Paro to Phobjikha", "desc": "Drive through scenic passes to the glacial Phobjikha Valley."},
+    {"day": 3, "title": "Phobjikha to Trongsa", "desc": "Travel to Trongsa and visit the historic Trongsa Dzong."},
+    {"day": 4, "title": "Trongsa to Bumthang", "desc": "Drive to Bumthang, the spiritual heartland of Bhutan."},
+    {"day": 5, "title": "Bumthang to Punakha", "desc": "Travel back to the subtropical Punakha Valley."},
+    {"day": 6, "title": "Punakha to Thimphu", "desc": "Drive to the capital city Thimphu and explore local attractions."},
+    {"day": 7, "title": "Paro", "desc": "Return to Paro. Visit Ta Dzong and explore the local market."},
+    {"day": 8, "title": "Departure", "desc": "Transfer to Paro Airport for your onward international flight."}
+  ]'::jsonb
+),
+(
+  'bhutan-culture-tour',
+  'Bhutan Culture Tour',
+  '5 Days',
+  4,
+  '$1,199',
+  1199,
+  '/src/assets/photos/Dzongs--1.jpg',
+  'Explore Bhutan’s rich culture and heritage—an experience that stays with you. Bhutan’s landscape is filled with beautiful dzongs, monasteries, and traditional homes, decorated with colorful paintings and detailed carvings.',
+  'Cultural',
+  'Easy',
+  '["TCB Certified English-speaking tour guide", "Standard 3-Star accommodations", "Private transfers & driver", "All meals & entry visa fee", "All monument entrance fees"]'::jsonb,
+  '["International flights to/from Paro", "Travel insurance", "Tips for guide and driver", "Alcoholic beverages & personal items"]'::jsonb,
+  '[
+    {"day": 1, "title": "Arrival in Paro", "desc": "Arrive at Paro International Airport. Meet your guide and transfer to Thimphu."},
+    {"day": 2, "title": "Thimphu to Punakha", "desc": "Drive to Punakha via Dochula Pass (3,100m)."},
+    {"day": 3, "title": "Punakha to Paro", "desc": "Visit Punakha Dzong, then transfer back to Paro."},
+    {"day": 4, "title": "Paro", "desc": "Hike up to Tiger''s Nest Monastery."},
+    {"day": 5, "title": "Departure", "desc": "Transfer to Paro Airport for departure."}
+  ]'::jsonb
+),
+(
+  'paro-tshechu-festival',
+  'Paro Tshechu Festival',
+  '7 Days',
+  6,
+  '$1,599',
+  1599,
+  '/src/assets/photos/paro-tsechu-tour1521440368_850_400.jpg',
+  'Bhutan invites you to experience a culture that stays with you long after you leave. Its stunning dzongs, monasteries, and traditional homes reflect deep craftsmanship and serve as both spiritual and community centers.',
+  'Cultural',
+  'Easy',
+  '["TCB Certified English-speaking tour guide", "Standard 3-Star accommodations", "Private transfers & driver", "All meals & entry visa fee", "All monument entrance fees"]'::jsonb,
+  '["International flights to/from Paro", "Travel insurance", "Tips for guide and driver", "Alcoholic beverages & personal items"]'::jsonb,
+  '[
+    {"day": 1, "title": "Arrival in Paro", "desc": "Arrive at Paro International Airport. Meet your guide and transfer to your hotel."},
+    {"day": 2, "title": "Paro Tshechu Festival", "desc": "Attend the vibrant Paro Tshechu festival with mask dances and cultural activities."},
+    {"day": 3, "title": "Paro to Thimphu", "desc": "Drive to Thimphu and explore Buddha Point, Tashichho Dzong."},
+    {"day": 4, "title": "Thimphu to Punakha", "desc": "Cross Dochula Pass and travel to Punakha."},
+    {"day": 5, "title": "Punakha to Paro", "desc": "Visit Chimi Lhakhang and return to Paro Valley."},
+    {"day": 6, "title": "Tiger''s Nest Hike", "desc": "Hike up to the legendary Tiger''s Nest Monastery."},
+    {"day": 7, "title": "Departure", "desc": "Transfer to Paro Airport for departure."}
+  ]'::jsonb
+),
+(
+  'nomad-festival-guide',
+  'Nomad Festival Guide',
+  '7 Days',
+  6,
+  '$1,699',
+  1699,
+  '/src/assets/photos/nomad1024x512-min.jpg',
+  'Bhutan invites you to experience a culture that stays with you long after you leave. Its landscape is dotted with beautiful dzongs, monasteries, and traditional homes each reflecting the country’s rich craftsmanship and deep spiritual roots.',
+  'Cultural',
+  'Moderate',
+  '["TCB Certified English-speaking tour guide", "Standard 3-Star accommodations", "Private transfers & driver", "All meals & entry visa fee", "All monument entrance fees"]'::jsonb,
+  '["International flights to/from Paro", "Travel insurance", "Tips for guide and driver", "Alcoholic beverages & personal items"]'::jsonb,
+  '[
+    {"day": 1, "title": "Arrival in Paro", "desc": "Arrive at Paro International Airport. Meet your guide and transfer to Thimphu."},
+    {"day": 2, "title": "Thimphu to Bumthang", "desc": "Travel to Bumthang, the spiritual heartland of Bhutan."},
+    {"day": 3, "title": "Bumthang Nomad Festival", "desc": "Experience the colorful Nomad Festival showcasing local customs and livestock."},
+    {"day": 4, "title": "Bumthang Sightseeing", "desc": "Visit Jakar Dzong, Kurjey Lhakhang, and Tamshing Lhakhang."},
+    {"day": 5, "title": "Bumthang to Trongsa", "desc": "Drive to Trongsa and visit Trongsa Dzong."},
+    {"day": 6, "title": "Trongsa to Paro", "desc": "Return to Paro Valley via scenic highways."},
+    {"day": 7, "title": "Departure", "desc": "Transfer to Paro Airport for departure."}
+  ]'::jsonb
+),
+(
+  'gomphu-kora-festival',
+  'Gomphu Kora Festival',
+  '8 Days',
+  7,
+  '$1,899',
+  1899,
+  '/src/assets/photos/3649visit bhutan Gom Kora Tshechu (1).jpg',
+  'An invitation to explore the intricacy of Bhutanese culture and heritage that is sure to leave an indelible mark on your heart. Enjoy ancient fortresses, religious activities, and vibrant traditions.',
+  'Cultural',
+  'Moderate',
+  '["TCB Certified English-speaking tour guide", "Standard 3-Star accommodations", "Private transfers & driver", "All meals & entry visa fee", "All monument entrance fees"]'::jsonb,
+  '["International flights to/from Paro", "Travel insurance", "Tips for guide and driver", "Alcoholic beverages & personal items"]'::jsonb,
+  '[
+    {"day": 1, "title": "Arrival in Paro", "desc": "Arrive at Paro International Airport. Meet your guide and transfer to your hotel."},
+    {"day": 2, "title": "Thimphu to Bumthang", "desc": "Travel to Bumthang, the spiritual heartland of Bhutan."},
+    {"day": 3, "title": "Bumthang to Trashigang", "desc": "Drive to Trashigang in eastern Bhutan."},
+    {"day": 4, "title": "Trashigang to Gomphu Kora", "desc": "Attend the famous Gomphu Kora festival (40 minutes'' drive from Trashigang)."},
+    {"day": 5, "title": "Trashigang to Gomphu Kora", "desc": "Further immersion into the festival rituals and dances."},
+    {"day": 6, "title": "Trashigang to Trongsa", "desc": "Drive back to Trongsa Valley."},
+    {"day": 7, "title": "Trongsa to Paro", "desc": "Return to Paro Valley."},
+    {"day": 8, "title": "Departure", "desc": "Transfer to Paro Airport for departure."}
+  ]'::jsonb
+),
+(
+  'rhododendron-festival',
+  'Rhododendron Festival',
+  '5 Days',
+  4,
+  '$1,299',
+  1299,
+  '/src/assets/photos/rhododendronfest1500x650.jpg',
+  'Bhutan: A Floral Symphony. Within the borders of Bhutan, there are over 46 varieties of rhododendron. Attend the festival and explore the beautiful nature trails.',
+  'Adventure',
+  'Easy',
+  '["TCB Certified English-speaking tour guide", "Standard 3-Star accommodations", "Private transfers & driver", "All meals & entry visa fee", "All monument entrance fees"]'::jsonb,
+  '["International flights to/from Paro", "Travel insurance", "Tips for guide and driver", "Alcoholic beverages & personal items"]'::jsonb,
+  '[
+    {"day": 1, "title": "Arrival in Paro", "desc": "Arrive at Paro International Airport. Meet your guide and transfer to Thimphu."},
+    {"day": 2, "title": "Thimphu-Lam Pelri Botanical Park", "desc": "Attend the Rhododendron Festival at Lam Pelri Botanical Park."},
+    {"day": 3, "title": "Punakha and Wangdue", "desc": "Drive to Punakha and explore the Punakha Dzong and suspension bridge."},
+    {"day": 4, "title": "Punakha to Paro", "desc": "Return to Paro and visit Ta Dzong."},
+    {"day": 5, "title": "Departure", "desc": "Transfer to Paro Airport for departure."}
+  ]'::jsonb
+),
+(
+  'black-necked-crane-bird-festival',
+  'Black Necked Crane - Bird Festival',
+  '7 Days',
+  6,
+  '$1,599',
+  1599,
+  '/src/assets/photos/Black Necked Crane - Bird Festival.jpg',
+  'Celebrate the arrival of the rare Black-Necked Cranes in Phobjikha Valley. Immerse yourself in the festival, traditional masked dances, and local community gatherings.',
+  'Adventure',
+  'Easy',
+  '["TCB Certified English-speaking tour guide", "Standard 3-Star accommodations", "Private transfers & driver", "All meals & entry visa fee", "All monument entrance fees"]'::jsonb,
+  '["International flights to/from Paro", "Travel insurance", "Tips for guide and driver", "Alcoholic beverages & personal items"]'::jsonb,
+  '[
+    {"day": 1, "title": "Arrival in Paro", "desc": "Arrive at Paro International Airport. Meet your guide and transfer to your hotel."},
+    {"day": 2, "title": "Thimphu to Phobjikha", "desc": "Drive to Phobjikha Valley via Dochula Pass."},
+    {"day": 3, "title": "Punakha to Zhemgang", "desc": "Travel to Zhemgang, a birdwatcher''s paradise."},
+    {"day": 4, "title": "Tingtibi, Zhemgang", "desc": "Attend the Bird Festival in Tingtibi and explore nearby trails."},
+    {"day": 5, "title": "Tingtibi to Trongsa", "desc": "Travel to Trongsa and visit the museum."},
+    {"day": 6, "title": "Trongsa to Paro", "desc": "Drive back to Paro Valley."},
+    {"day": 7, "title": "Departure", "desc": "Transfer to Paro Airport for departure."}
+  ]'::jsonb
+),
+(
+  'trans-bhutan-trail-an-experience',
+  'Trans Bhutan Trail An Experience',
+  '4 Days',
+  3,
+  '$999',
+  999,
+  '/src/assets/photos/Trans Bhutan Trail An Experience.jpeg',
+  'Embark on a wellness and spiritual journey along the historic Trans Bhutan Trail. Connect with nature and cultivate mindfulness in Bhutan''s breathtaking landscapes.',
+  'Adventure',
+  'Moderate',
+  '["TCB Certified English-speaking tour guide", "Standard 3-Star accommodations", "Private transfers & driver", "All meals & entry visa fee", "All monument entrance fees"]'::jsonb,
+  '["International flights to/from Paro", "Travel insurance", "Tips for guide and driver", "Alcoholic beverages & personal items"]'::jsonb,
+  '[
+    {"day": 1, "title": "Arrival in Paro", "desc": "Arrive at Paro International Airport. Meet your guide and transfer to your hotel."},
+    {"day": 2, "title": "Paro to Haa", "desc": "Drive to the beautiful Haa Valley."},
+    {"day": 3, "title": "Trans Bhutan Trail hike to Paro", "desc": "Hike along the historic Trans Bhutan Trail back to Paro."},
+    {"day": 4, "title": "Departure", "desc": "Transfer to Paro Airport for departure."}
+  ]'::jsonb
+),
+(
+  'explore-eastern-bhutan',
+  'Explore Eastern Bhutan',
+  '11 Days',
+  10,
+  '$2,699',
+  2699,
+  '/src/assets/photos/Explore Eastern Bhutan.webp',
+  'Delve into a journey of self-discovery and inner peace. Travel through less-visited Eastern Bhutanese valleys, discovering pristine scenery, weaving centers, and nomadic cultures.',
+  'Adventure',
+  'Moderate',
+  '["TCB Certified English-speaking tour guide", "Standard 3-Star accommodations", "Private transfers & driver", "All meals & entry visa fee", "All monument entrance fees"]'::jsonb,
+  '["International flights to/from Paro", "Travel insurance", "Tips for guide and driver", "Alcoholic beverages & personal items"]'::jsonb,
+  '[
+    {"day": 1, "title": "Arrival in Paro", "desc": "Arrive at Paro International Airport. Meet your guide and transfer to your hotel."},
+    {"day": 2, "title": "Paro to Trongsa", "desc": "Drive to Trongsa, crossing passes."},
+    {"day": 3, "title": "Trongsa to Bumthang", "desc": "Travel to Bumthang, the spiritual heartland."},
+    {"day": 4, "title": "Bumthang to Mongar", "desc": "Journey to Mongar in eastern Bhutan."},
+    {"day": 5, "title": "Mongar to Trashiyangtse", "desc": "Explore Trashiyangtse, famous for woodcarving."},
+    {"day": 6, "title": "Trashigang to Merak", "desc": "Visit the semi-nomadic Brokpa village of Merak."},
+    {"day": 7, "title": "Trashigang to Bumthang", "desc": "Begin the journey back westwards."},
+    {"day": 8, "title": "Bumthang to Phobjikha", "desc": "Travel to the Phobjikha Valley."},
+    {"day": 9, "title": "Phobjikha to Paro", "desc": "Return to Paro Valley."},
+    {"day": 10, "title": "Paro Valley", "desc": "Hike to Tiger''s Nest Monastery."},
+    {"day": 11, "title": "Departure", "desc": "Transfer to Paro Airport for departure."}
+  ]'::jsonb
 )
 ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, duration = EXCLUDED.duration, nights = EXCLUDED.nights, price = EXCLUDED.price, price_val = EXCLUDED.price_val, image = EXCLUDED.image, description = EXCLUDED.description, category = EXCLUDED.category, difficulty = EXCLUDED.difficulty, inclusions = EXCLUDED.inclusions, exclusions = EXCLUDED.exclusions, itinerary = EXCLUDED.itinerary;
 
