@@ -24,6 +24,23 @@ type ContactData = {
   emailLine2: string
 }
 
+const defaultContactData: ContactData = {
+  heroTitle: "Contact Thimphu",
+  heroSubtitle: "Our local travel architects are stationed directly in the capital, ready to craft your bespoke Bhutanese journey.",
+  channelTitle: "Direct Channels",
+  channelSubtitle: "How to Reach Us",
+  channelDesc: "Whether you prefer a traditional wire transfer, a digital dialogue, or a direct call to our Himalayan base, we are here to assist.",
+  baseTitle: "The Base",
+  baseLine1: "Changlam Square, 2nd Floor",
+  baseLine2: "Thimphu, Kingdom of Bhutan",
+  callTitle: "Digital Call",
+  callLine1: "+975 17934593",
+  callLine2: "+975 17934593 (WhatsApp)",
+  emailTitle: "Electronic Mail",
+  emailLine1: "helptourbhutancontact@gmail.com",
+  emailLine2: "helptourbhutancontact@gmail.com"
+}
+
 const Contact = () => {
   const [searchParams] = useSearchParams()
   const initialType = searchParams.get('type') === 'flight' ? 'Flight Booking Inquiry' : 'General Inquiry'
@@ -90,7 +107,8 @@ ${message}`
         setLoading(false)
       })
       .catch(err => {
-        console.error(err)
+        console.warn("Failed to fetch contact data, using local fallback:", err)
+        setData(defaultContactData)
         setLoading(false)
       })
   }, [])

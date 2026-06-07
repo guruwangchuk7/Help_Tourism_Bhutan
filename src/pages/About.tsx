@@ -26,6 +26,26 @@ type AboutData = {
   pillar4Desc: string
 }
 
+const defaultAboutData: AboutData = {
+  philosophyText: "At Help Tourism Bhutan, we believe travel shouldn't just change your location—it should change your perspective. We focus on \"Deep Travel\"—engaging with local communities, respecting sacred traditions, and ensuring every journey contributes to Bhutan's sustainable growth.",
+  stat1Label: "Founded",
+  stat1Val: "2010",
+  stat2Label: "Guides",
+  stat2Val: "50+ Local",
+  stat3Label: "Regions",
+  stat3Val: "All 20 Dzongkhags",
+  stat4Label: "Happiness",
+  stat4Val: "100% GNH",
+  pillar1Title: "Community First",
+  pillar1Desc: "We ensure tourism dollars reach the remote families we visit.",
+  pillar2Title: "Unmatched Expertise",
+  pillar2Desc: "Our guides are certified historians and cultural experts.",
+  pillar3Title: "Deep Vetting",
+  pillar3Desc: "Every hotel and lodge is personally tested for soul and quality.",
+  pillar4Title: "Ethical Impact",
+  pillar4Desc: "We are carbon-negative and plastic-free on all our treks."
+}
+
 const About = () => {
   const [data, setData] = useState<AboutData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -38,7 +58,8 @@ const About = () => {
         setLoading(false)
       })
       .catch(err => {
-        console.error(err)
+        console.warn("Failed to fetch about data, using local fallback:", err)
+        setData(defaultAboutData)
         setLoading(false)
       })
   }, [])
