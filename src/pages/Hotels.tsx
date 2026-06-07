@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { Star, MapPin, ArrowRight } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import PageTransition from '../components/common/PageTransition'
+import SEO from '../components/common/SEO'
 
 import { CardSkeleton } from '../components/common/Skeleton'
 
@@ -35,9 +36,50 @@ const Hotels = () => {
       })
   }, [])
 
+  const hotelsSchema = useMemo(() => {
+    return [
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://www.helptourbhutan.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Hotels",
+            "item": "https://www.helptourbhutan.com/hotels"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": "Luxury Hotels & boutique lodges in Bhutan",
+        "numberOfItems": luxuryHotels.length,
+        "itemListElement": luxuryHotels.map((hotel, idx) => ({
+          "@type": "ListItem",
+          "position": idx + 1,
+          "name": hotel.name,
+          "url": `https://www.helptourbhutan.com/booking`
+        }))
+      }
+    ]
+  }, [luxuryHotels])
+
   return (
     <PageTransition>
       <div className="bg-bg-light min-h-[100dvh] overflow-x-hidden">
+        <SEO
+          title="Hotels & Luxury Resorts in Bhutan | Places to Stay"
+          description="Find the best hotels in Bhutan. Browse boutique stays, budget-friendly 3-star accommodations, and five-star luxury resorts in Paro, Thimphu, and Punakha."
+          keywords="Hotels in Bhutan, luxury Bhutan accommodations, 3-star hotels Bhutan, 5-star resorts Bhutan, Bhutan accommodation, luxury resorts Paro"
+          schema={hotelsSchema}
+        />
         {/* Full Image Hero Banner */}
         <section className="relative min-h-[90dvh] flex flex-col items-center justify-center overflow-visible">
           {/* Background Image with Overlay */}

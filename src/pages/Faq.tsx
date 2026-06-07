@@ -1,7 +1,8 @@
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { HelpCircle, ChevronDown } from "lucide-react"
 import PageTransition from "../components/common/PageTransition"
+import SEO from "../components/common/SEO"
 
 type FaqItem = {
   question: string
@@ -80,9 +81,51 @@ const Faq = () => {
   const [activeTab, setActiveTab] = useState<number>(0)
   const [expandedIndex, setExpandedIndex] = useState<number | null>(0)
 
+  const faqSchema = useMemo(() => {
+    const questions = faqData.flatMap(cat => cat.items).map(item => ({
+      "@type": "Question",
+      "name": item.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": item.answer
+      }
+    }))
+    return [
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://www.helptourbhutan.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "FAQ",
+            "item": "https://www.helptourbhutan.com/faq"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": questions
+      }
+    ]
+  }, [])
+
   return (
     <PageTransition>
       <div className="pt-24 bg-bg-light min-h-[100dvh]">
+        <SEO
+          title="Frequently Asked Questions | Bhutan Travel Guide & FAQ"
+          description="Find answers to common questions about traveling to Bhutan: visa applications, Sustainable Development Fee (SDF) cost, currency, what to pack, and tour bookings."
+          keywords="Bhutan travel FAQ, Bhutan travel guide, Bhutan tourist visa requirements, best time to visit Bhutan, is Bhutan safe, what to pack for Bhutan"
+          schema={faqSchema}
+        />
         {/* Header Section */}
         <section className="py-20 px-6 text-center max-w-3xl mx-auto">
           <div className="inline-flex items-center gap-2 text-accent font-semibold tracking-[0.3em] uppercase text-[10px] mb-4">

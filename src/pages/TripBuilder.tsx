@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { ArrowLeft, ArrowRight, Sparkles, Compass, Calendar, Home as HomeIcon, CheckCircle, MapPin, Mountain, Sun, Gift, Star } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import PageTransition from "../components/common/PageTransition"
+import SEO from "../components/common/SEO"
 
 const TripBuilder = () => {
   const navigate = useNavigate()
@@ -52,9 +53,38 @@ const TripBuilder = () => {
     { id: 4, label: "Submit", icon: Sparkles }
   ]
 
+  const tripBuilderSchema = useMemo(() => {
+    return [
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://www.helptourbhutan.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Plan",
+            "item": "https://www.helptourbhutan.com/plan"
+          }
+        ]
+      }
+    ]
+  }, [])
+
   return (
     <PageTransition>
       <div className="pt-32 pb-32 bg-bg-light min-h-[100dvh] border-t border-primary/5">
+        <SEO
+          title="Plan Your Custom Bhutan Itinerary | Custom Trip Builder"
+          description="Design your personalized Bhutan holiday package. Select your destinations, duration, hotel comfort level, and travel preferences to get an instant cost estimation."
+          keywords="Bhutan customized tours, Bhutan trip planner, Bhutan travel itinerary planner, custom Bhutan holiday, plan custom tour to Bhutan"
+          schema={tripBuilderSchema}
+        />
         <div className="max-w-5xl mx-auto px-6">
           
           {/* Header Title */}

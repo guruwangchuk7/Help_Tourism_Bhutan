@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { motion } from "framer-motion"
 import { Users, History, Award, Heart, ShieldCheck } from "lucide-react"
 import PageTransition from "../components/common/PageTransition"
+import SEO from "../components/common/SEO"
 
 import { PageSkeleton } from "../components/common/Skeleton"
 
@@ -46,9 +47,50 @@ const About = () => {
     return <PageSkeleton cardCount={4} />
   }
 
+  const aboutSchema = useMemo(() => {
+    return [
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://www.helptourbhutan.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "About Us",
+            "item": "https://www.helptourbhutan.com/about"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "AboutPage",
+        "name": "About Help Tourism Bhutan",
+        "description": "Learn about our agency's legacy, commitment to sustainable tourism, carbon-negative guidelines, local expert guides, and high-value travel principles in Bhutan.",
+        "mainEntity": {
+          "@type": "TravelAgency",
+          "name": "Help Tourism Bhutan",
+          "url": "https://www.helptourbhutan.com/"
+        }
+      }
+    ]
+  }, [])
+
   return (
     <PageTransition>
       <div className="bg-bg-light min-h-[100dvh]">
+        <SEO
+          title="About Us | Local Expert Tour Operator in Bhutan"
+          description="Meet Help Tourism Bhutan, a premier local travel agency and tour operator. Discover our commitment to sustainable tourism, carbon-negative travels, and custom luxury itineraries."
+          keywords="About Bhutan travel agency, local tour operator Bhutan, sustainable tourism Bhutan, expert Bhutan guides, team Help Tourism Bhutan"
+          ogImage="/monk.jpg"
+          schema={aboutSchema}
+        />
         {/* Full Image Hero Banner */}
         <section className="relative min-h-[90dvh] flex flex-col items-center justify-center overflow-visible">
           {/* Background Image with Overlay */}

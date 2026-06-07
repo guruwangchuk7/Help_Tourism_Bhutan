@@ -1,7 +1,9 @@
+import { useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { Compass } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import PageTransition from '../components/common/PageTransition'
+import SEO from '../components/common/SEO'
 
 const flightHubs = [
   { from: "Bangkok (BKK)", to: "Paro (PBH)", frequency: "Daily Flights", duration: "3h 15m", carrier: "Drukair / Bhutan Airlines" },
@@ -13,9 +15,51 @@ const flightHubs = [
 const Flights = () => {
   const navigate = useNavigate()
 
+  const flightsSchema = useMemo(() => {
+    return [
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://www.helptourbhutan.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Flights",
+            "item": "https://www.helptourbhutan.com/flights"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": "Flights to Paro International Airport (PBH) Bhutan",
+        "numberOfItems": flightHubs.length,
+        "itemListElement": flightHubs.map((hub, idx) => ({
+          "@type": "ListItem",
+          "position": idx + 1,
+          "name": `Flight from ${hub.from} to ${hub.to} via ${hub.carrier}`,
+          "url": `https://www.helptourbhutan.com/flights`
+        }))
+      }
+    ]
+  }, [])
+
   return (
     <PageTransition>
       <div className="bg-bg-light min-h-[100dvh] overflow-x-hidden">
+        <SEO
+          title="Flights to Bhutan | Paro International Airport Booking Guide"
+          description="A complete guide on how to book flights to Bhutan. Check flight schedules, luggage rules, direct routes, and ticketing details for Drukair and Bhutan Airlines."
+          keywords="Flights to Bhutan, Paro airport flights, Drukair flights, Bhutan Airlines tickets, how to fly to Bhutan, fly to Bhutan, Bhutan flight schedules"
+          ogImage="/dochula-pass.jpg"
+          schema={flightsSchema}
+        />
         {/* Full Image Hero Banner */}
         <section className="relative min-h-[90dvh] flex flex-col items-center justify-center overflow-visible">
           {/* Background Image with Overlay */}

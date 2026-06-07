@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useParams, useNavigate, Link } from "react-router-dom"
 import { motion } from "framer-motion"
 import { ArrowLeft, Clock, ShieldCheck, ChevronDown, Check, X } from "lucide-react"
 import PageTransition from "../components/common/PageTransition"
+import SEO from "../components/common/SEO"
 
 import { DetailSkeleton } from "../components/common/Skeleton"
 
@@ -101,13 +102,68 @@ const TourDetail = () => {
     // Fail silently
   }
 
+  const seoSchema = useMemo(() => {
+    if (!tour) return null
+    return [
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://www.helptourbhutan.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Tours",
+            "item": "https://www.helptourbhutan.com/tours"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": tour.title,
+            "item": `https://www.helptourbhutan.com/tours/${tour.id}`
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Trip",
+        "name": tour.title,
+        "description": displayDesc,
+        "image": `https://www.helptourbhutan.com${tour.image}`,
+        "touristType": "Leisure, Cultural, Adventure",
+        "offers": {
+          "@type": "Offer",
+          "price": tour.priceVal,
+          "priceCurrency": "USD",
+          "eligibleQuantity": {
+            "@type": "QuantitativeValue",
+            "value": 1
+          }
+        },
+        "itinerary": tour.itinerary.map(item => ({
+          "@type": "ItemList",
+          "name": `Day ${item.day}: ${item.title}`,
+          "description": item.desc
+        }))
+      }
+    ]
+  }, [tour, displayDesc])
+
   return (
-    <PageTransition
-      title={`${tour.title} | Help Tourism Bhutan`}
-      description={displayDesc.length > 155 ? `${displayDesc.slice(0, 152)}...` : displayDesc}
-      ogImage={tour.image}
-    >
+    <PageTransition>
       <div className="bg-bg-light min-h-[100dvh] pb-32">
+        <SEO
+          title={`${tour.title} - Custom Bhutan Guided Tour | Help Tourism`}
+          description={`Book the custom ${tour.title} with Help Tourism Bhutan. Category: ${tour.category}, Difficulty: ${tour.difficulty}. Includes certified guides, meals, hotels, visa handling, and custom routes.`}
+          keywords={`${tour.title} bhutan, Bhutan tour packages, Bhutan customized tours, Bhutan guided tours, Bhutan travel itinerary, Bhutan visa and tour package`}
+          ogImage={tour.image}
+          schema={seoSchema || undefined}
+        />
         {/* Full Image Hero Banner */}
         <section className="relative min-h-[90dvh] flex flex-col items-center justify-center overflow-visible">
           {/* Background Image with Overlay */}

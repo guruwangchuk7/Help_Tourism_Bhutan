@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { motion } from "framer-motion"
 import { Phone, Mail, MapPin, ChevronDown, Check } from "lucide-react"
 import PageTransition from "../components/common/PageTransition"
+import SEO from "../components/common/SEO"
 
 import { Skeleton, FormSkeleton } from "../components/common/Skeleton"
 
@@ -122,9 +123,58 @@ ${message}`
     )
   }
 
+  const contactSchema = useMemo(() => {
+    return [
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://www.helptourbhutan.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Contact",
+            "item": "https://www.helptourbhutan.com/contact"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ContactPage",
+        "name": "Contact Help Tourism Bhutan",
+        "description": "Get in touch with our local travel architects in Thimphu to start planning your custom Bhutan itinerary.",
+        "mainEntity": {
+          "@type": "TravelAgency",
+          "name": "Help Tourism Bhutan",
+          "url": "https://www.helptourbhutan.com/",
+          "telephone": "+975-17934593",
+          "email": "helptourbhutancontact@gmail.com",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Changlam Square, 2nd Floor",
+            "addressLocality": "Thimphu",
+            "addressCountry": "BT"
+          }
+        }
+      }
+    ]
+  }, [])
+
   return (
     <PageTransition>
       <div className="bg-bg-light min-h-[100dvh] overflow-x-hidden">
+        <SEO
+          title="Contact Us | Help Tourism Bhutan Travel Agency"
+          description="Get in touch with our local travel experts in Thimphu. Contact us for custom tour bookings, flight reservations, and personalized itinerary planning."
+          keywords="Contact Bhutan tour operator, contact Bhutan travel agency, Bhutan trip consultation, customize Bhutan travel, Help Tourism Bhutan contact"
+          ogImage="/thimphu.jpg"
+          schema={contactSchema}
+        />
         {/* Full Image Hero Banner */}
         <section className="relative min-h-[90dvh] flex flex-col items-center justify-center overflow-visible">
           {/* Background Image with Overlay */}

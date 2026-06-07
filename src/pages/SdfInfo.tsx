@@ -1,7 +1,8 @@
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import { ShieldCheck, ArrowRight, Heart, Award, Sparkles, DollarSign } from "lucide-react"
 import PageTransition from "../components/common/PageTransition"
+import SEO from "../components/common/SEO"
 
 const SdfInfo = () => {
   const navigate = useNavigate()
@@ -39,9 +40,68 @@ const SdfInfo = () => {
       ? "$15 per night (for the first 15,000 visitors/year)"
       : "$100 (Adults) / $50 (Ages 6-11) per night"
 
+  const sdfSchema = useMemo(() => {
+    return [
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://www.helptourbhutan.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "SDF Info",
+            "item": "https://www.helptourbhutan.com/sdf"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is the Sustainable Development Fee (SDF) in Bhutan?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "The Sustainable Development Fee (SDF) is a mandatory daily levy paid to the Royal Government of Bhutan to fund free healthcare, education, environmental conservation, and cultural heritage preservation."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What are the current SDF rates for travelers visiting Bhutan?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "The current standard rate is $100 USD per adult per night, and $50 USD per child per night (ages 6 to 11). Children under 6 years are exempt from paying the SDF fee."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Do Indian citizens have to pay the daily SDF fee?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, Indian citizens pay a reduced rate of INR 1,200 (approx. $15 USD) per adult per night. Children aged 6-11 pay INR 600 per night."
+            }
+          }
+        ]
+      }
+    ]
+  }, [])
+
   return (
     <PageTransition>
       <div className="pt-24 bg-bg-light min-h-[100dvh]">
+        <SEO
+          title="Bhutan SDF Fee & Visa Guide 2026 | Sustainable Tourism Tax"
+          description="Learn about the Bhutan Sustainable Development Fee (SDF) guidelines, travel requirements, pricing for kids and Indian nationals, and use our interactive SDF calculator."
+          keywords="Bhutan sustainable tourism, Eco tourism Bhutan, Sustainable Development Fee Bhutan, Bhutan visa and tour package, Bhutan travel requirements, how to pay Bhutan SDF"
+          schema={sdfSchema}
+        />
         {/* Cinematic Hero */}
         <section className="relative h-[45dvh] flex items-center justify-center overflow-hidden">
           <img

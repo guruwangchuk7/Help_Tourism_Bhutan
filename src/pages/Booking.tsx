@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { User, ArrowRight, ArrowLeft, ShieldCheck, Zap, Mail, Check } from "lucide-react"
 import { useNavigate, useLocation } from "react-router-dom"
 import PageTransition from "../components/common/PageTransition"
+import SEO from "../components/common/SEO"
 
 const Booking = () => {
     const navigate = useNavigate()
@@ -143,10 +144,39 @@ Thank you!`
         }
     }
 
-    return (
-        <PageTransition>
-            <div className="pt-32 pb-32 bg-bg-light min-h-[100dvh] border-t border-primary/5">
-                <div className="max-w-6xl mx-auto px-6">
+  const bookingSchema = useMemo(() => {
+    return [
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://www.helptourbhutan.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Booking",
+            "item": "https://www.helptourbhutan.com/booking"
+          }
+        ]
+      }
+    ]
+  }, [])
+
+  return (
+    <PageTransition>
+      <div className="pt-32 pb-32 bg-bg-light min-h-[100dvh] border-t border-primary/5">
+        <SEO
+          title="Book Your Bhutan Tour & Custom Packages | Help Tourism"
+          description="Secure your spot on our next Bhutan guided tour. Use our secure booking form to reserve private packages, cultural festivals, or custom trekking tours."
+          keywords="Book Bhutan tour package, Bhutan private tours reservation, customize Bhutan private tours, Bhutan holiday packages"
+          schema={bookingSchema}
+        />
+        <div className="max-w-6xl mx-auto px-6">
                     {/* Redesigned Minimalist Stepper */}
                     <div className="mb-20 md:mb-28 max-w-3xl mx-auto relative px-8 md:px-12 z-10">
                         {/* Thin Connective Line */}

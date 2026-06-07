@@ -4,6 +4,7 @@ import { Search, SlidersHorizontal, FilterX } from 'lucide-react'
 import DestinationCard from '../components/destinations/DestinationCard'
 import PageTransition from '../components/common/PageTransition'
 import { CardSkeleton } from '../components/common/Skeleton'
+import SEO from '../components/common/SEO'
 
 type Destination = {
   id: number
@@ -46,9 +47,50 @@ const Destinations = () => {
     })
   }, [destinations, searchQuery])
 
+  const seoSchema = useMemo(() => {
+    return [
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://www.helptourbhutan.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Destinations",
+            "item": "https://www.helptourbhutan.com/destinations"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": "Popular Bhutan Travel Destinations",
+        "numberOfItems": destinations.length,
+        "itemListElement": destinations.map((dest, idx) => ({
+          "@type": "ListItem",
+          "position": idx + 1,
+          "name": dest.name,
+          "url": `https://www.helptourbhutan.com/destinations/${dest.id}`
+        }))
+      }
+    ]
+  }, [destinations])
+
   return (
     <PageTransition>
       <div className="bg-bg-light min-h-[100dvh] overflow-x-hidden">
+        <SEO
+          title="Top Places to Visit in Bhutan | Travel Guide & Destinations"
+          description="Explore the best travel destinations in Bhutan. Read our guide to historic dzongs, Tiger's Nest, Dochula Pass, and major valleys like Paro, Thimphu, Punakha, and Bumthang."
+          keywords="Bhutan travel destinations, Bhutan tourism, best places to visit in Bhutan, Bhutan sightseeing guide, Paro tour package, Thimphu tour package, Punakha tour package, Bumthang tour package"
+          schema={seoSchema}
+        />
         {/* Full Image Hero Banner */}
         <section className="relative min-h-[90dvh] flex flex-col items-center justify-center overflow-visible">
           {/* Background Image with Overlay */}

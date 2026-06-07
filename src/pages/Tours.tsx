@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { motion } from "framer-motion"
 import { useNavigate } from "react-router-dom"
 import PageTransition from "../components/common/PageTransition"
+import SEO from "../components/common/SEO"
 
 type Tour = {
   id: string
@@ -33,9 +34,50 @@ const Tours = () => {
       })
   }, [])
 
+  const seoSchema = useMemo(() => {
+    return [
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://www.helptourbhutan.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Tours",
+            "item": "https://www.helptourbhutan.com/tours"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": "Bhutan Tour Packages & Expeditions",
+        "numberOfItems": tours.length,
+        "itemListElement": tours.map((tour, idx) => ({
+          "@type": "ListItem",
+          "position": idx + 1,
+          "name": tour.title,
+          "url": `https://www.helptourbhutan.com/tours/${tour.id}`
+        }))
+      }
+    ]
+  }, [tours])
+
   return (
     <PageTransition>
       <div className="bg-bg-light min-h-[100dvh] overflow-x-hidden">
+        <SEO
+          title="Curated Bhutan Tour Packages & Holiday Itineraries | Help Tourism"
+          description="Explore top Bhutan tour packages designed by local travel agents. From 4-day highlights to cultural journeys, adventure trekking tours, and luxury getaways."
+          keywords="Bhutan tour packages, Bhutan holiday packages, Bhutan private tours, Bhutan guided tours, Bhutan customized tours, best tour operator in Bhutan, affordable Bhutan tours"
+          schema={seoSchema}
+        />
         {/* Full Image Hero Banner */}
         <section className="relative min-h-[90dvh] flex flex-col items-center justify-center overflow-visible">
           {/* Background Image with Overlay */}

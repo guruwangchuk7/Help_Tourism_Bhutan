@@ -1,8 +1,9 @@
 import { useNavigate, useParams } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
 import { ArrowLeft, Users, MessageSquare, Heart, Share2, Star, ArrowRight, Wifi, Mountain, Bath, Car, Utensils, Sparkles, Minus, Plus } from "lucide-react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import PageTransition from "../components/common/PageTransition"
+import SEO from "../components/common/SEO"
 import { DetailSkeleton } from "../components/common/Skeleton"
 import avatarElena from "../assets/avatar-elena.png"
 import avatarMarcus from "../assets/avatar-marcus.png"
@@ -161,13 +162,64 @@ const DestinationDetail = () => {
     // Fail silently, use defaults
   }
 
+  const seoSchema = useMemo(() => {
+    if (!destination) return null
+    return [
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://www.helptourbhutan.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Destinations",
+            "item": "https://www.helptourbhutan.com/destinations"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": destination.name,
+            "item": `https://www.helptourbhutan.com/destinations/${destination.id}`
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "TouristAttraction",
+        "name": destination.name,
+        "description": displayDescription,
+        "image": `https://www.helptourbhutan.com${destination.image}`,
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": destination.location,
+          "addressCountry": "BT"
+        },
+        "touristType": "Leisure, Cultural, Adventure",
+        "amenityFeature": displayAmenities.map(a => ({
+          "@type": "LocationFeatureSpecification",
+          "name": a.label,
+          "value": true
+        }))
+      }
+    ]
+  }, [destination, displayDescription, displayAmenities])
+
   return (
-    <PageTransition
-      title={`${destination.name} - Travel Guide & Luxury Stays | Help Tourism Bhutan`}
-      description={displayDescription.length > 155 ? `${displayDescription.slice(0, 152)}...` : displayDescription}
-      ogImage={destination.image}
-    >
+    <PageTransition>
       <div className="bg-bg-light min-h-[100dvh]">
+        <SEO
+          title={`${destination.name} Travel Guide | Things to Do & Sightseeing`}
+          description={`Discover the magic of ${destination.name} in ${destination.location}. Learn about the best local attractions like ${destination.attractions.join(', ')}, find travel tips, and book custom guided tours.`}
+          keywords={`${destination.name} travel guide, ${destination.name} attractions, ${destination.location} tour package, Bhutan sightseeing, best things to do in ${destination.location}`}
+          ogImage={destination.image}
+          schema={seoSchema || undefined}
+        />
         {/* Immersive Header */}
         <div className="relative h-[80dvh] w-full overflow-hidden">
           <motion.img

@@ -5,6 +5,7 @@ import Testimonials from "../components/sections/Testimonials"
 import { ArrowRight, Compass, ShieldCheck, Heart, Headphones, Instagram } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import PageTransition from "../components/common/PageTransition"
+import SEO from "../components/common/SEO"
 
 const popularDestinations = [
   { id: 2, name: "Paro", image: "/paro-taksang.jpg", location: "Paro", price: "$150", rating: 4.9 },
@@ -65,12 +66,51 @@ const instagramPhotos = [
   "/airport.jpg"
 ]
 
+const homeSchema = [
+  {
+    "@context": "https://schema.org",
+    "@type": "TravelAgency",
+    "@id": "https://www.helptourbhutan.com/#travelagency",
+    "name": "Help Tourism Bhutan",
+    "url": "https://www.helptourbhutan.com/",
+    "logo": "https://www.helptourbhutan.com/favicon.svg",
+    "image": "https://www.helptourbhutan.com/paro-taksang.jpg",
+    "description": "Premium local tour operator and travel agency in Bhutan. Specializing in bespoke private tours, Himalayan trekking adventures, luxury vacations, and cultural festival packages.",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Chang Lam",
+      "addressLocality": "Thimphu",
+      "postalCode": "11001",
+      "addressCountry": "BT"
+    },
+    "telephone": "+975-2-321111",
+    "priceRange": "$$$",
+    "sameAs": [
+      "https://www.facebook.com/helptourismbhutan",
+      "https://www.instagram.com/helptourismbhutan"
+    ]
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": "https://www.helptourbhutan.com/#website",
+    "name": "Help Tourism Bhutan",
+    "url": "https://www.helptourbhutan.com/"
+  }
+]
+
 const Home = () => {
   const navigate = useNavigate()
 
   return (
     <PageTransition>
       <div className="bg-bg-light overflow-x-hidden">
+        <SEO
+          title="Best Bhutan Tour Operator & Travel Agency | Help Tourism Bhutan"
+          description="Plan your dream Himalayan holiday with Help Tourism Bhutan, the premier local travel agency in Bhutan. Book luxury private tours, custom cultural festival packages, and scenic trekking adventures."
+          keywords="Bhutan tour operator, Bhutan travel agency, Bhutan tour packages, Bhutan holiday packages, Bhutan private tours, Bhutan customized tours, Bhutan guided tours, best tour operator in Bhutan, best travel agency in Bhutan, Bhutan sustainable tourism"
+          schema={homeSchema}
+        />
         {/* Section 1: Hero Banner */}
         <Hero />
 
