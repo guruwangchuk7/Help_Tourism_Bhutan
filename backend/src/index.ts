@@ -802,17 +802,15 @@ app.get('/api/about', async (req, res) => {
   const cached = getCache(cacheKey);
   if (cached) return res.json(cached);
 
-  if (dbConnected) {
-    try {
-      const data = await supabaseFetch('/settings?key=eq.about&select=value');
-      if (data && data.length > 0) {
-        const value = data[0].value;
-        setCache(cacheKey, value);
-        return res.json(value);
-      }
-    } catch (err: any) {
-      console.error("Supabase fetch error for about, falling back to local file:", err.message);
+  try {
+    const data = await supabaseFetch('/settings?key=eq.about&select=value');
+    if (data && data.length > 0) {
+      const value = data[0].value;
+      setCache(cacheKey, value);
+      return res.json(value);
     }
+  } catch (err: any) {
+    console.error("Supabase fetch error for about, falling back to local file:", err.message);
   }
 
   try {
@@ -829,18 +827,16 @@ app.get('/api/about', async (req, res) => {
 });
 
 app.put('/api/about', authenticateAdmin, async (req, res) => {
-  if (dbConnected) {
-    try {
-      await supabaseFetch('/settings', {
-        method: 'POST',
-        headers: { 'Prefer': 'resolution=merge-duplicates' },
-        body: JSON.stringify({ key: 'about', value: req.body })
-      });
-      clearCache('about:');
-      return res.json(req.body);
-    } catch (err: any) {
-      console.error("Supabase save error for about, falling back to local file:", err.message);
-    }
+  try {
+    await supabaseFetch('/settings', {
+      method: 'POST',
+      headers: { 'Prefer': 'resolution=merge-duplicates' },
+      body: JSON.stringify({ key: 'about', value: req.body })
+    });
+    clearCache('about:');
+    return res.json(req.body);
+  } catch (err: any) {
+    console.error("Supabase save error for about, falling back to local file:", err.message);
   }
 
   try {
@@ -885,17 +881,15 @@ app.get('/api/contact', async (req, res) => {
   const cached = getCache(cacheKey);
   if (cached) return res.json(cached);
 
-  if (dbConnected) {
-    try {
-      const data = await supabaseFetch('/settings?key=eq.contact&select=value');
-      if (data && data.length > 0) {
-        const value = data[0].value;
-        setCache(cacheKey, value);
-        return res.json(value);
-      }
-    } catch (err: any) {
-      console.error("Supabase fetch error for contact, falling back to local file:", err.message);
+  try {
+    const data = await supabaseFetch('/settings?key=eq.contact&select=value');
+    if (data && data.length > 0) {
+      const value = data[0].value;
+      setCache(cacheKey, value);
+      return res.json(value);
     }
+  } catch (err: any) {
+    console.error("Supabase fetch error for contact, falling back to local file:", err.message);
   }
 
   try {
@@ -912,18 +906,16 @@ app.get('/api/contact', async (req, res) => {
 });
 
 app.put('/api/contact', authenticateAdmin, async (req, res) => {
-  if (dbConnected) {
-    try {
-      await supabaseFetch('/settings', {
-        method: 'POST',
-        headers: { 'Prefer': 'resolution=merge-duplicates' },
-        body: JSON.stringify({ key: 'contact', value: req.body })
-      });
-      clearCache('contact:');
-      return res.json(req.body);
-    } catch (err: any) {
-      console.error("Supabase save error for contact, falling back to local file:", err.message);
-    }
+  try {
+    await supabaseFetch('/settings', {
+      method: 'POST',
+      headers: { 'Prefer': 'resolution=merge-duplicates' },
+      body: JSON.stringify({ key: 'contact', value: req.body })
+    });
+    clearCache('contact:');
+    return res.json(req.body);
+  } catch (err: any) {
+    console.error("Supabase save error for contact, falling back to local file:", err.message);
   }
 
   try {
@@ -969,17 +961,15 @@ app.get('/api/testimonials', async (req, res) => {
   const cached = getCache(cacheKey);
   if (cached) return res.json(cached);
 
-  if (dbConnected) {
-    try {
-      const data = await supabaseFetch('/settings?key=eq.testimonials&select=value');
-      if (data && data.length > 0) {
-        const value = data[0].value;
-        setCache(cacheKey, value);
-        return res.json(value);
-      }
-    } catch (err: any) {
-      console.error("Supabase fetch error for testimonials, falling back to local file:", err.message);
+  try {
+    const data = await supabaseFetch('/settings?key=eq.testimonials&select=value');
+    if (data && data.length > 0) {
+      const value = data[0].value;
+      setCache(cacheKey, value);
+      return res.json(value);
     }
+  } catch (err: any) {
+    console.error("Supabase fetch error for testimonials, falling back to local file:", err.message);
   }
 
   try {
@@ -996,18 +986,16 @@ app.get('/api/testimonials', async (req, res) => {
 });
 
 app.put('/api/testimonials', authenticateAdmin, async (req, res) => {
-  if (dbConnected) {
-    try {
-      await supabaseFetch('/settings', {
-        method: 'POST',
-        headers: { 'Prefer': 'resolution=merge-duplicates' },
-        body: JSON.stringify({ key: 'testimonials', value: req.body })
-      });
-      clearCache('testimonials:');
-      return res.json(req.body);
-    } catch (err: any) {
-      console.error("Supabase save error for testimonials, falling back to local file:", err.message);
-    }
+  try {
+    await supabaseFetch('/settings', {
+      method: 'POST',
+      headers: { 'Prefer': 'resolution=merge-duplicates' },
+      body: JSON.stringify({ key: 'testimonials', value: req.body })
+    });
+    clearCache('testimonials:');
+    return res.json(req.body);
+  } catch (err: any) {
+    console.error("Supabase save error for testimonials, falling back to local file:", err.message);
   }
 
   try {
@@ -1028,27 +1016,25 @@ app.get('/api/tourists', async (req, res) => {
   const cached = getCache(cacheKey);
   if (cached) return res.json(cached);
 
-  if (dbConnected) {
-    try {
-      const data = await supabaseFetch('/tourists?select=*&order=id.asc');
-      const formatted = data.map((t: any) => ({
-        id: t.id,
-        name: t.name,
-        nationality: t.nationality,
-        passportNumber: t.passport_number || t.passportNumber,
-        email: t.email,
-        phone: t.phone,
-        tourName: t.tour_name || t.tourName,
-        checkInDate: t.check_in_date || t.checkInDate,
-        checkOutDate: t.check_out_date || t.checkOutDate,
-        sdfStatus: t.sdf_status || t.sdfStatus,
-        specialRequests: t.special_requests || t.specialRequests
-      }));
-      setCache(cacheKey, formatted);
-      return res.json(formatted);
-    } catch (err: any) {
-      console.error("Supabase fetch error for tourists, falling back to local file:", err.message);
-    }
+  try {
+    const data = await supabaseFetch('/tourists?select=*&order=id.asc');
+    const formatted = data.map((t: any) => ({
+      id: t.id,
+      name: t.name,
+      nationality: t.nationality,
+      passportNumber: t.passport_number || t.passportNumber,
+      email: t.email,
+      phone: t.phone,
+      tourName: t.tour_name || t.tourName,
+      checkInDate: t.check_in_date || t.checkInDate,
+      checkOutDate: t.check_out_date || t.checkOutDate,
+      sdfStatus: t.sdf_status || t.sdfStatus,
+      specialRequests: t.special_requests || t.specialRequests
+    }));
+    setCache(cacheKey, formatted);
+    return res.json(formatted);
+  } catch (err: any) {
+    console.error("Supabase fetch error for tourists, falling back to local file:", err.message);
   }
 
   try {
@@ -1079,33 +1065,31 @@ app.post('/api/tourists', authenticateAdmin, async (req, res) => {
     special_requests: body.specialRequests
   };
 
-  if (dbConnected) {
-    try {
-      const inserted = await supabaseFetch('/tourists', {
-        method: 'POST',
-        headers: { 'Prefer': 'return=representation' },
-        body: JSON.stringify(dbPayload)
+  try {
+    const inserted = await supabaseFetch('/tourists', {
+      method: 'POST',
+      headers: { 'Prefer': 'return=representation' },
+      body: JSON.stringify(dbPayload)
+    });
+    clearCache('tourists:');
+    if (inserted && inserted.length > 0) {
+      const t = inserted[0];
+      return res.json({
+        id: t.id,
+        name: t.name,
+        nationality: t.nationality,
+        passportNumber: t.passport_number || t.passportNumber,
+        email: t.email,
+        phone: t.phone,
+        tourName: t.tour_name || t.tourName,
+        checkInDate: t.check_in_date || t.checkInDate,
+        checkOutDate: t.check_out_date || t.checkOutDate,
+        sdfStatus: t.sdf_status || t.sdfStatus,
+        specialRequests: t.special_requests || t.specialRequests
       });
-      clearCache('tourists:');
-      if (inserted && inserted.length > 0) {
-        const t = inserted[0];
-        return res.json({
-          id: t.id,
-          name: t.name,
-          nationality: t.nationality,
-          passportNumber: t.passport_number || t.passportNumber,
-          email: t.email,
-          phone: t.phone,
-          tourName: t.tour_name || t.tourName,
-          checkInDate: t.check_in_date || t.checkInDate,
-          checkOutDate: t.check_out_date || t.checkOutDate,
-          sdfStatus: t.sdf_status || t.sdfStatus,
-          specialRequests: t.special_requests || t.specialRequests
-        });
-      }
-    } catch (err: any) {
-      console.error("Supabase insert error for tourists, falling back to local file:", err.message);
     }
+  } catch (err: any) {
+    console.error("Supabase insert error for tourists, falling back to local file:", err.message);
   }
 
   try {
@@ -1144,33 +1128,31 @@ app.put('/api/tourists/:id', authenticateAdmin, async (req, res) => {
     special_requests: body.specialRequests
   };
 
-  if (dbConnected) {
-    try {
-      const updated = await supabaseFetch(`/tourists?id=eq.${id}`, {
-        method: 'PATCH',
-        headers: { 'Prefer': 'return=representation' },
-        body: JSON.stringify(dbPayload)
+  try {
+    const updated = await supabaseFetch(`/tourists?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: { 'Prefer': 'return=representation' },
+      body: JSON.stringify(dbPayload)
+    });
+    clearCache('tourists:');
+    if (updated && updated.length > 0) {
+      const t = updated[0];
+      return res.json({
+        id: t.id,
+        name: t.name,
+        nationality: t.nationality,
+        passportNumber: t.passport_number || t.passportNumber,
+        email: t.email,
+        phone: t.phone,
+        tourName: t.tour_name || t.tourName,
+        checkInDate: t.check_in_date || t.checkInDate,
+        checkOutDate: t.check_out_date || t.checkOutDate,
+        sdfStatus: t.sdf_status || t.sdfStatus,
+        specialRequests: t.special_requests || t.specialRequests
       });
-      clearCache('tourists:');
-      if (updated && updated.length > 0) {
-        const t = updated[0];
-        return res.json({
-          id: t.id,
-          name: t.name,
-          nationality: t.nationality,
-          passportNumber: t.passport_number || t.passportNumber,
-          email: t.email,
-          phone: t.phone,
-          tourName: t.tour_name || t.tourName,
-          checkInDate: t.check_in_date || t.checkInDate,
-          checkOutDate: t.check_out_date || t.checkOutDate,
-          sdfStatus: t.sdf_status || t.sdfStatus,
-          specialRequests: t.special_requests || t.specialRequests
-        });
-      }
-    } catch (err: any) {
-      console.error("Supabase update error for tourists, falling back to local file:", err.message);
     }
+  } catch (err: any) {
+    console.error("Supabase update error for tourists, falling back to local file:", err.message);
   }
 
   try {
@@ -1197,16 +1179,14 @@ app.put('/api/tourists/:id', authenticateAdmin, async (req, res) => {
 app.delete('/api/tourists/:id', authenticateAdmin, async (req, res) => {
   const id = Number(req.params.id);
 
-  if (dbConnected) {
-    try {
-      await supabaseFetch(`/tourists?id=eq.${id}`, {
-        method: 'DELETE'
-      });
-      clearCache('tourists:');
-      return res.json({ success: true });
-    } catch (err: any) {
-      console.error("Supabase delete error for tourists, falling back to local file:", err.message);
-    }
+  try {
+    await supabaseFetch(`/tourists?id=eq.${id}`, {
+      method: 'DELETE'
+    });
+    clearCache('tourists:');
+    return res.json({ success: true });
+  } catch (err: any) {
+    console.error("Supabase delete error for tourists, falling back to local file:", err.message);
   }
 
   try {
