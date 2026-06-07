@@ -1021,34 +1021,7 @@ app.put('/api/testimonials', authenticateAdmin, async (req, res) => {
 });
 
 const TOURISTS_FILE = path.join(__dirname, '../tourists.json');
-const defaultTourists = [
-  {
-    id: 1,
-    name: "John Doe",
-    nationality: "American",
-    passportNumber: "A1234567",
-    email: "john@doe.com",
-    phone: "+1-202-555-0143",
-    tourName: "4 Days Bhutan Highlights",
-    checkInDate: "2026-10-12",
-    checkOutDate: "2026-10-15",
-    sdfStatus: "Paid",
-    specialRequests: "Vegetarian meals"
-  },
-  {
-    id: 2,
-    name: "Sarah Jenkins",
-    nationality: "British",
-    passportNumber: "B9876543",
-    email: "sarah@jenkins.co.uk",
-    phone: "+44-20-7946-0958",
-    tourName: "Luxury Bhutan Escape",
-    checkInDate: "2026-11-05",
-    checkOutDate: "2026-11-10",
-    sdfStatus: "Paid",
-    specialRequests: "Traditional hot stone bath preferences"
-  }
-];
+const defaultTourists: any[] = [];
 
 app.get('/api/tourists', async (req, res) => {
   const cacheKey = 'tourists:list';
