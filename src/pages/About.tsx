@@ -50,24 +50,6 @@ const About = () => {
   const [data, setData] = useState<AboutData | null>(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000'}/api/about`)
-      .then(res => res.json())
-      .then(d => {
-        setData(d)
-        setLoading(false)
-      })
-      .catch(err => {
-        console.warn("Failed to fetch about data, using local fallback:", err)
-        setData(defaultAboutData)
-        setLoading(false)
-      })
-  }, [])
-
-  if (loading || !data) {
-    return <PageSkeleton cardCount={4} />
-  }
-
   const aboutSchema = useMemo(() => {
     return [
       {
@@ -101,6 +83,24 @@ const About = () => {
       }
     ]
   }, [])
+
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000'}/api/about`)
+      .then(res => res.json())
+      .then(d => {
+        setData(d)
+        setLoading(false)
+      })
+      .catch(err => {
+        console.warn("Failed to fetch about data, using local fallback:", err)
+        setData(defaultAboutData)
+        setLoading(false)
+      })
+  }, [])
+
+  if (loading || !data) {
+    return <PageSkeleton cardCount={4} />
+  }
 
   return (
     <PageTransition>

@@ -49,6 +49,68 @@ const DestinationDetail = () => {
   const [endDate, setEndDate] = useState(getTomorrowString())
   const [adults, setAdults] = useState(2)
 
+  const seoSchema = useMemo(() => {
+    if (!destination) return null
+    let displayDescription = destination.description
+    let displayAmenitiesNames = [
+      "Heritage Sanctuary", "High-Speed Wi-Fi", "Panoramic Terraces", "Organic Spa & Baths", "Bespoke Transfers", "Artisanal Kitchen"
+    ]
+    try {
+      if (destination.description.trim().startsWith('{')) {
+        const parsed = JSON.parse(destination.description)
+        if (parsed.text) displayDescription = parsed.text
+        if (parsed.amenities && Array.isArray(parsed.amenities)) {
+          displayAmenitiesNames = parsed.amenities.map((a: any) => a.label || "Amenity")
+        }
+      }
+    } catch (e) {}
+
+    return [
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://www.helptourbhutan.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Destinations",
+            "item": "https://www.helptourbhutan.com/destinations"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": destination.name,
+            "item": `https://www.helptourbhutan.com/destinations/${destination.id}`
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "TouristAttraction",
+        "name": destination.name,
+        "description": displayDescription,
+        "image": `https://www.helptourbhutan.com${destination.image}`,
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": destination.location,
+          "addressCountry": "BT"
+        },
+        "touristType": "Leisure, Cultural, Adventure",
+        "amenityFeature": displayAmenitiesNames.map(name => ({
+          "@type": "LocationFeatureSpecification",
+          "name": name,
+          "value": true
+        }))
+      }
+    ]
+  }, [destination])
+
   useEffect(() => {
     setLoading(true)
     setError(false)
@@ -161,54 +223,6 @@ const DestinationDetail = () => {
   } catch (e) {
     // Fail silently, use defaults
   }
-
-  const seoSchema = useMemo(() => {
-    if (!destination) return null
-    return [
-      {
-        "@context": "https://schema.org",
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-          {
-            "@type": "ListItem",
-            "position": 1,
-            "name": "Home",
-            "item": "https://www.helptourbhutan.com/"
-          },
-          {
-            "@type": "ListItem",
-            "position": 2,
-            "name": "Destinations",
-            "item": "https://www.helptourbhutan.com/destinations"
-          },
-          {
-            "@type": "ListItem",
-            "position": 3,
-            "name": destination.name,
-            "item": `https://www.helptourbhutan.com/destinations/${destination.id}`
-          }
-        ]
-      },
-      {
-        "@context": "https://schema.org",
-        "@type": "TouristAttraction",
-        "name": destination.name,
-        "description": displayDescription,
-        "image": `https://www.helptourbhutan.com${destination.image}`,
-        "address": {
-          "@type": "PostalAddress",
-          "addressLocality": destination.location,
-          "addressCountry": "BT"
-        },
-        "touristType": "Leisure, Cultural, Adventure",
-        "amenityFeature": displayAmenities.map(a => ({
-          "@type": "LocationFeatureSpecification",
-          "name": a.label,
-          "value": true
-        }))
-      }
-    ]
-  }, [destination, displayDescription, displayAmenities])
 
   return (
     <PageTransition>

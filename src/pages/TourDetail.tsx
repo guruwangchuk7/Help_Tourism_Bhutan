@@ -33,6 +33,66 @@ const TourDetail = () => {
   const [activeTab, setActiveTab] = useState<"itinerary" | "inclusions" | "essential">("itinerary")
   const [expandedDay, setExpandedDay] = useState<number | null>(1)
 
+  const seoSchema = useMemo(() => {
+    if (!tour) return null
+    let displayDesc = tour.desc
+    try {
+      if (tour.desc.trim().startsWith('{')) {
+        const parsed = JSON.parse(tour.desc)
+        if (parsed.text) displayDesc = parsed.text
+      }
+    } catch (e) {}
+
+    return [
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://www.helptourbhutan.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Tours",
+            "item": "https://www.helptourbhutan.com/tours"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": tour.title,
+            "item": `https://www.helptourbhutan.com/tours/${tour.id}`
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Trip",
+        "name": tour.title,
+        "description": displayDesc,
+        "image": `https://www.helptourbhutan.com${tour.image}`,
+        "touristType": "Leisure, Cultural, Adventure",
+        "offers": {
+          "@type": "Offer",
+          "price": tour.priceVal,
+          "priceCurrency": "USD",
+          "eligibleQuantity": {
+            "@type": "QuantitativeValue",
+            "value": 1
+          }
+        },
+        "itinerary": tour.itinerary.map(item => ({
+          "@type": "ItemList",
+          "name": `Day ${item.day}: ${item.title}`,
+          "description": item.desc
+        }))
+      }
+    ]
+  }, [tour])
+
   useEffect(() => {
     setLoading(true)
     setError(false)
@@ -102,57 +162,7 @@ const TourDetail = () => {
     // Fail silently
   }
 
-  const seoSchema = useMemo(() => {
-    if (!tour) return null
-    return [
-      {
-        "@context": "https://schema.org",
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-          {
-            "@type": "ListItem",
-            "position": 1,
-            "name": "Home",
-            "item": "https://www.helptourbhutan.com/"
-          },
-          {
-            "@type": "ListItem",
-            "position": 2,
-            "name": "Tours",
-            "item": "https://www.helptourbhutan.com/tours"
-          },
-          {
-            "@type": "ListItem",
-            "position": 3,
-            "name": tour.title,
-            "item": `https://www.helptourbhutan.com/tours/${tour.id}`
-          }
-        ]
-      },
-      {
-        "@context": "https://schema.org",
-        "@type": "Trip",
-        "name": tour.title,
-        "description": displayDesc,
-        "image": `https://www.helptourbhutan.com${tour.image}`,
-        "touristType": "Leisure, Cultural, Adventure",
-        "offers": {
-          "@type": "Offer",
-          "price": tour.priceVal,
-          "priceCurrency": "USD",
-          "eligibleQuantity": {
-            "@type": "QuantitativeValue",
-            "value": 1
-          }
-        },
-        "itinerary": tour.itinerary.map(item => ({
-          "@type": "ItemList",
-          "name": `Day ${item.day}: ${item.title}`,
-          "description": item.desc
-        }))
-      }
-    ]
-  }, [tour, displayDesc])
+
 
   return (
     <PageTransition>
