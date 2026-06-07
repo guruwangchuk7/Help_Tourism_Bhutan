@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   MapPin, Compass, Hotel, Plus, Edit, Trash2, Save, X,
   ArrowLeft, Star, Search, SlidersHorizontal, ChevronRight,
-  HelpCircle, Upload, Phone, Users
+  HelpCircle, Upload, Phone, Users, KeyRound, ShieldCheck,
+  Eye, EyeOff, LogOut
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { TableSkeleton } from '../components/common/Skeleton'
@@ -96,6 +97,11 @@ const AdminDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   const [adminKey, setAdminKey] = useState<string | null>(localStorage.getItem('ADMIN_API_KEY'))
+  const [isVerified, setIsVerified] = useState(false)
+  const [isVerifying, setIsVerifying] = useState(true)
+  const [loginKeyInput, setLoginKeyInput] = useState('')
+  const [showKey, setShowKey] = useState(false)
+  const [loginError, setLoginError] = useState<string | null>(null)
 
   // Fetch all data
   const fetchData = async () => {
@@ -140,18 +146,81 @@ const AdminDashboard = () => {
   }
 
   useEffect(() => {
-    let key = localStorage.getItem('ADMIN_API_KEY')
-    if (!key) {
-      key = window.prompt('Please enter the Admin API Key to access the dashboard:')
-      if (key) {
-        localStorage.setItem('ADMIN_API_KEY', key)
-        setAdminKey(key)
-      } else {
-        showToast('Access Denied: Admin API Key is required.', 'error')
+    const verifyKey = async () => {
+      const storedKey = localStorage.getItem('ADMIN_API_KEY')
+      if (!storedKey) {
+        setIsVerified(false)
+        setIsVerifying(false)
+        return
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/api/verify`, {
+          headers: {
+            'Authorization': `Bearer ${storedKey}`
+          }
+        })
+        if (res.ok) {
+          setAdminKey(storedKey)
+          setIsVerified(true)
+          await fetchData()
+        } else {
+          localStorage.removeItem('ADMIN_API_KEY')
+          setAdminKey(null)
+          setIsVerified(false)
+        }
+      } catch (err) {
+        console.error(err)
+        setIsVerified(false)
+      } finally {
+        setIsVerifying(false)
       }
     }
-    fetchData()
+
+    verifyKey()
   }, [adminKey])
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!loginKeyInput.trim()) {
+      setLoginError('API Key is required')
+      return
+    }
+
+    setIsVerifying(true)
+    setLoginError(null)
+
+    try {
+      const res = await fetch(`${API_BASE}/api/verify`, {
+        headers: {
+          'Authorization': `Bearer ${loginKeyInput.trim()}`
+        }
+      })
+      if (res.ok) {
+        localStorage.setItem('ADMIN_API_KEY', loginKeyInput.trim())
+        setAdminKey(loginKeyInput.trim())
+        setIsVerified(true)
+        showToast('Logged in successfully!', 'success')
+      } else {
+        const errData = await res.json().catch(() => ({}))
+        setLoginError(errData.error || 'Invalid API Key. Access Denied.')
+        showToast('Login failed. Invalid API Key.', 'error')
+      }
+    } catch (err) {
+      console.error(err)
+      setLoginError('Failed to connect to the verification server.')
+    } finally {
+      setIsVerifying(false)
+    }
+  }
+
+  const handleLogout = () => {
+    localStorage.removeItem('ADMIN_API_KEY')
+    setAdminKey(null)
+    setIsVerified(false)
+    setLoginKeyInput('')
+    showToast('Logged out successfully.', 'success')
+  }
 
   const showToast = (text: string, type: 'success' | 'error') => {
     setMessage({ text, type })
@@ -173,6 +242,7 @@ const AdminDashboard = () => {
         if (res.status === 401 || res.status === 403) {
           localStorage.removeItem('ADMIN_API_KEY')
           setAdminKey(null)
+          setIsVerified(false)
         }
         throw new Error('Delete failed')
       }
@@ -362,6 +432,7 @@ const AdminDashboard = () => {
         if (res.status === 401 || res.status === 403) {
           localStorage.removeItem('ADMIN_API_KEY')
           setAdminKey(null)
+          setIsVerified(false)
         }
         const errData = await res.json()
         throw new Error(errData.error || 'Failed to save item')
@@ -396,6 +467,7 @@ const AdminDashboard = () => {
           if (res.status === 401 || res.status === 403) {
             localStorage.removeItem('ADMIN_API_KEY')
             setAdminKey(null)
+            setIsVerified(false)
           }
           throw new Error('Upload failed')
         }
@@ -441,6 +513,7 @@ const AdminDashboard = () => {
         if (res.status === 401 || res.status === 403) {
           localStorage.removeItem('ADMIN_API_KEY')
           setAdminKey(null)
+          setIsVerified(false)
         }
         throw new Error('Failed to save testimonials')
       }
@@ -469,6 +542,7 @@ const AdminDashboard = () => {
         if (res.status === 401 || res.status === 403) {
           localStorage.removeItem('ADMIN_API_KEY')
           setAdminKey(null)
+          setIsVerified(false)
         }
         throw new Error('Failed to save about details')
       }
@@ -497,6 +571,7 @@ const AdminDashboard = () => {
         if (res.status === 401 || res.status === 403) {
           localStorage.removeItem('ADMIN_API_KEY')
           setAdminKey(null)
+          setIsVerified(false)
         }
         throw new Error('Failed to save contact details')
       }
@@ -531,6 +606,7 @@ const AdminDashboard = () => {
         if (res.status === 401 || res.status === 403) {
           localStorage.removeItem('ADMIN_API_KEY')
           setAdminKey(null)
+          setIsVerified(false)
         }
         const errData = await res.json()
         throw new Error(errData.error || 'Failed to save tourist details')
@@ -705,6 +781,88 @@ const AdminDashboard = () => {
   const totalHotelsCount = hotels.length
 
 
+  if (isVerifying && !isVerified) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center font-sans">
+        <div className="text-center space-y-4">
+          <div className="w-12 h-12 border-4 border-slate-900 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-sm font-semibold text-slate-505">Verifying Admin Session...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!isVerified) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] text-slate-800 font-sans flex items-center justify-center p-4">
+        <div className="w-full max-w-md bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden">
+          <div className="p-8 space-y-6">
+            {/* Header */}
+            <div className="text-center space-y-2">
+              <div className="inline-flex p-3 bg-slate-50 rounded-2xl border border-slate-100 mb-2">
+                <ShieldCheck className="w-8 h-8 text-slate-950" />
+              </div>
+              <h2 className="text-2xl font-bold tracking-tight text-slate-950">Bhutan CMS Portal</h2>
+              <p className="text-xs text-slate-505 font-medium">Please enter your Admin API Key to access the dashboard</p>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Admin API Key</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                    <KeyRound className="w-4 h-4 text-slate-400" />
+                  </div>
+                  <input
+                    type={showKey ? "text" : "password"}
+                    placeholder="Enter Admin API Key..."
+                    value={loginKeyInput}
+                    onChange={(e) => setLoginKeyInput(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-10 py-3 text-sm text-slate-850 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowKey(!showKey)}
+                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-950 transition-colors"
+                  >
+                    {showKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {loginError && (
+                <div className="bg-rose-50 border border-rose-100 rounded-xl p-3 text-xs text-rose-800 font-semibold flex items-center space-x-2 animate-pulse">
+                  <div className="w-1.5 h-1.5 bg-rose-500 rounded-full shrink-0" />
+                  <span>{loginError}</span>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={isVerifying}
+                className="w-full flex items-center justify-center space-x-2 bg-slate-900 hover:bg-black disabled:bg-slate-400 text-white font-bold py-3 px-4 rounded-xl transition-all duration-200 shadow-md active:scale-[0.98] cursor-pointer"
+              >
+                <span>{isVerifying ? 'Authenticating...' : 'Sign In to CMS'}</span>
+              </button>
+            </form>
+          </div>
+
+          {/* Footer */}
+          <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-center">
+            <Link
+              to="/"
+              className="flex items-center space-x-2 text-slate-600 hover:text-slate-950 transition text-xs font-semibold"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Back to Website</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-800 font-sans flex flex-col md:flex-row [&_h1]:font-sans [&_h2]:font-sans [&_h3]:font-sans [&_h4]:font-sans [&_h5]:font-sans [&_h6]:font-sans">
       {/* Mobile Top Header */}
@@ -870,7 +1028,14 @@ const AdminDashboard = () => {
         </div>
 
         {/* Sidebar Footer */}
-        <div className="p-4 border-t border-slate-100">
+        <div className="p-4 border-t border-slate-100 space-y-2">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center space-x-2 bg-rose-50 hover:bg-rose-100 text-rose-700 hover:text-rose-900 transition px-4 py-2.5 rounded-lg text-sm font-semibold border border-rose-100 cursor-pointer"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>Sign Out</span>
+          </button>
           <Link
             to="/"
             className="w-full flex items-center justify-center space-x-2 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 transition px-4 py-2.5 rounded-lg text-sm font-semibold border border-slate-200"
