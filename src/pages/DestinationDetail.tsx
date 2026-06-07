@@ -91,7 +91,7 @@ const DestinationDetail = () => {
   if (loading) return <DetailSkeleton />
   if (error || !destination) {
     return (
-      <PageTransition>
+      <PageTransition title="Destination Not Found | Help Tourism Bhutan" description="The requested Bhutan travel destination could not be found.">
         <div className="min-h-[100dvh] bg-bg-light flex flex-col items-center justify-center pt-32 pb-20 px-6 text-center">
           <div className="max-w-md bg-white border border-primary/5 rounded-[2.5rem] p-8 sm:p-12 shadow-premium space-y-6">
             <span className="text-accent font-semibold tracking-[0.3em] uppercase text-[10px] block">Error 404</span>
@@ -162,7 +162,11 @@ const DestinationDetail = () => {
   }
 
   return (
-    <PageTransition>
+    <PageTransition
+      title={`${destination.name} - Travel Guide & Luxury Stays | Help Tourism Bhutan`}
+      description={displayDescription.length > 155 ? `${displayDescription.slice(0, 152)}...` : displayDescription}
+      ogImage={destination.image}
+    >
       <div className="bg-bg-light min-h-[100dvh]">
         {/* Immersive Header */}
         <div className="relative h-[80dvh] w-full overflow-hidden">

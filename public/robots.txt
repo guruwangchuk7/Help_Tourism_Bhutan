@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /_/*
+
+Sitemap: https://www.helptourbhutan.com/sitemap.xml
