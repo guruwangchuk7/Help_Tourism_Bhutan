@@ -969,43 +969,48 @@ app.post('/api/tours', authenticateAdmin, async (req, res) => {
 
 // UPDATE Tour
 app.put('/api/tours/:id', authenticateAdmin, async (req, res) => {
-  const id = req.params.id;
-  const { title, duration, nights, price, priceVal, image, desc, category, difficulty, inclusions, exclusions, itinerary } = req.body;
-  const payload = {
-    title,
-    duration,
-    nights: parseInt(nights) || 0,
-    price,
-    price_val: parseInt(priceVal) || 0,
-    image,
-    description: desc,
-    category,
-    difficulty,
-    inclusions: Array.isArray(inclusions) ? inclusions : [],
-    exclusions: Array.isArray(exclusions) ? exclusions : [],
-    itinerary: Array.isArray(itinerary) ? itinerary : []
-  };
+  try {
+    const id = req.params.id;
+    const { title, duration, nights, price, priceVal, image, desc, category, difficulty, inclusions, exclusions, itinerary } = req.body;
+    const payload = {
+      title,
+      duration,
+      nights: parseInt(nights) || 0,
+      price,
+      price_val: parseInt(priceVal) || 0,
+      image,
+      description: desc,
+      category,
+      difficulty,
+      inclusions: Array.isArray(inclusions) ? inclusions : [],
+      exclusions: Array.isArray(exclusions) ? exclusions : [],
+      itinerary: Array.isArray(itinerary) ? itinerary : []
+    };
 
-  if (dbConnected) {
-    try {
-      await supabaseFetch(`/tours?id=eq.${id}`, {
-        method: 'PATCH',
-        body: JSON.stringify(payload)
-      });
-      clearCache('tours');
-      return res.json({ id, ...payload, priceVal: payload.price_val, desc: payload.description });
-    } catch (err: any) {
-      console.error(`Update tour ${id} failed on Supabase, falling back to memory:`, err.message);
+    if (dbConnected) {
+      try {
+        await supabaseFetch(`/tours?id=eq.${id}`, {
+          method: 'PATCH',
+          body: JSON.stringify(payload)
+        });
+        clearCache('tours');
+        return res.json({ id, ...payload, priceVal: payload.price_val, desc: payload.description });
+      } catch (err: any) {
+        console.error(`Update tour ${id} failed on Supabase, falling back to memory:`, err.message);
+      }
     }
-  }
 
-  // Fallback to in-memory
-  const idx = memoryTours.findIndex(t => t.id === id);
-  if (idx !== -1) {
-    memoryTours[idx] = { id, ...payload, priceVal: payload.price_val, desc: payload.description } as any;
+    // Fallback to in-memory
+    const idx = memoryTours.findIndex(t => t.id === id);
+    if (idx !== -1) {
+      memoryTours[idx] = { id, ...payload, priceVal: payload.price_val, desc: payload.description } as any;
+    }
+    clearCache('tours');
+    res.json({ id, ...payload, priceVal: payload.price_val, desc: payload.description });
+  } catch (err: any) {
+    console.error("Update tour failed:", err.message);
+    res.status(500).json({ error: err.message });
   }
-  clearCache('tours');
-  res.json({ id, ...payload, priceVal: payload.price_val, desc: payload.description });
 });
 
 // DELETE Tour
