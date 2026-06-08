@@ -682,6 +682,10 @@ const mockHotels = [
   { id: 4, name: "Zhiwa Ling Heritage", location: "Paro", image: "/monk.jpg", rating: 4.7, price: "$450", description: "Stunning locally-owned luxury hotel crafted in classic Bhutanese heritage." }
 ];
 
+let memoryDestinations = [...mockDestinations];
+let memoryTours = [...mockTours];
+let memoryHotels = [...mockHotels];
+
 // Helper to check DB health
 let dbConnected = false;
 const checkDb = async () => {
@@ -715,7 +719,7 @@ app.get('/api/destinations', async (req, res) => {
       console.error("Supabase fetch error for destinations:", err.message);
     }
   }
-  res.json(mockDestinations);
+  res.json(memoryDestinations);
 });
 
 app.get('/api/destinations/:id', async (req, res) => {
@@ -744,7 +748,7 @@ app.get('/api/destinations/:id', async (req, res) => {
     }
   }
   
-  const dest = mockDestinations.find(d => d.id === id);
+  const dest = memoryDestinations.find(d => d.id === id);
   if (dest) {
     const attractions = mockAttractions.filter(a => a.destination_id === id).map(a => a.name);
     const result = { ...dest, attractions };
@@ -773,7 +777,7 @@ app.get('/api/tours', async (req, res) => {
       console.error("Supabase fetch error for tours:", err.message);
     }
   }
-  res.json(mockTours);
+  res.json(memoryTours);
 });
 
 app.get('/api/tours/editions', async (req, res) => {
@@ -839,195 +843,271 @@ app.get('/api/hotels', async (req, res) => {
       console.error("Supabase fetch error for hotels:", err.message);
     }
   }
-  res.json(mockHotels);
+  res.json(memoryHotels);
 });
 
 // CREATE Destination
 app.post('/api/destinations', authenticateAdmin, async (req, res) => {
-  try {
-    let { id, name, image, description, price, rating, location, altitude, ideal_stay, peak_period, language } = req.body;
-    if (!id) {
-      const existing = await supabaseFetch('/destinations?select=id&order=id.desc&limit=1');
-      id = existing && existing.length > 0 ? existing[0].id + 1 : 1;
+  let { id, name, image, description, price, rating, location, altitude, ideal_stay, peak_period, language } = req.body;
+  const payload = { id: id ? parseInt(id) : undefined, name, image, description, price, rating: parseFloat(rating) || 4.8, location, altitude, ideal_stay, peak_period, language };
+  
+  if (dbConnected) {
+    try {
+      if (!payload.id) {
+        const existing = await supabaseFetch('/destinations?select=id&order=id.desc&limit=1');
+        payload.id = existing && existing.length > 0 ? existing[0].id + 1 : 1;
+      }
+      await supabaseFetch('/destinations', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+      clearCache('destinations');
+      return res.status(201).json(payload);
+    } catch (err: any) {
+      console.error("Create destination failed on Supabase, falling back to memory:", err.message);
     }
-    const payload = { id, name, image, description, price, rating: parseFloat(rating) || 4.8, location, altitude, ideal_stay, peak_period, language };
-    await supabaseFetch('/destinations', {
-      method: 'POST',
-      body: JSON.stringify(payload)
-    });
-    clearCache('destinations');
-    res.status(201).json(payload);
-  } catch (err: any) {
-    console.error("Create destination failed:", err.message);
-    res.status(500).json({ error: err.message });
   }
+
+  if (!payload.id) {
+    payload.id = memoryDestinations.length > 0 ? Math.max(...memoryDestinations.map(d => d.id)) + 1 : 1;
+  }
+  memoryDestinations.push(payload as any);
+  clearCache('destinations');
+  res.status(201).json(payload);
 });
 
 // UPDATE Destination
 app.put('/api/destinations/:id', authenticateAdmin, async (req, res) => {
   const id = parseInt(req.params.id as string);
-  try {
-    const { name, image, description, price, rating, location, altitude, ideal_stay, peak_period, language } = req.body;
-    const payload = { name, image, description, price, rating: parseFloat(rating) || 4.8, location, altitude, ideal_stay, peak_period, language };
-    await supabaseFetch(`/destinations?id=eq.${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify(payload)
-    });
-    clearCache('destinations');
-    res.json({ id, ...payload });
-  } catch (err: any) {
-    console.error(`Update destination ${id} failed:`, err.message);
-    res.status(500).json({ error: err.message });
+  const { name, image, description, price, rating, location, altitude, ideal_stay, peak_period, language } = req.body;
+  const payload = { name, image, description, price, rating: parseFloat(rating) || 4.8, location, altitude, ideal_stay, peak_period, language };
+
+  if (dbConnected) {
+    try {
+      await supabaseFetch(`/destinations?id=eq.${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(payload)
+      });
+      clearCache('destinations');
+      return res.json({ id, ...payload });
+    } catch (err: any) {
+      console.error(`Update destination ${id} failed on Supabase, falling back to memory:`, err.message);
+    }
   }
+
+  const idx = memoryDestinations.findIndex(d => d.id === id);
+  if (idx !== -1) {
+    memoryDestinations[idx] = { id, ...payload } as any;
+  }
+  clearCache('destinations');
+  res.json({ id, ...payload });
 });
 
 // DELETE Destination
 app.delete('/api/destinations/:id', authenticateAdmin, async (req, res) => {
   const id = parseInt(req.params.id as string);
-  try {
-    await supabaseFetch(`/destinations?id=eq.${id}`, {
-      method: 'DELETE'
-    });
-    clearCache('destinations');
-    res.json({ message: "Destination deleted successfully", id });
-  } catch (err: any) {
-    console.error(`Delete destination ${id} failed:`, err.message);
-    res.status(500).json({ error: err.message });
+  if (dbConnected) {
+    try {
+      await supabaseFetch(`/destinations?id=eq.${id}`, {
+        method: 'DELETE'
+      });
+      clearCache('destinations');
+      return res.json({ message: "Destination deleted successfully", id });
+    } catch (err: any) {
+      console.error(`Delete destination ${id} failed on Supabase, falling back to memory:`, err.message);
+    }
   }
+
+  memoryDestinations = memoryDestinations.filter(d => d.id !== id);
+  clearCache('destinations');
+  res.json({ message: "Destination deleted successfully", id });
 });
 
 // CREATE Tour
 app.post('/api/tours', authenticateAdmin, async (req, res) => {
-  try {
-    let { id, title, duration, nights, price, priceVal, image, desc, category, difficulty, inclusions, exclusions, itinerary } = req.body;
-    if (!id && title) {
-      id = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    }
-    const payload = {
-      id,
-      title,
-      duration,
-      nights: parseInt(nights) || 0,
-      price,
-      price_val: parseInt(priceVal) || 0,
-      image,
-      description: desc,
-      category,
-      difficulty,
-      inclusions: Array.isArray(inclusions) ? inclusions : [],
-      exclusions: Array.isArray(exclusions) ? exclusions : [],
-      itinerary: Array.isArray(itinerary) ? itinerary : []
-    };
-    await supabaseFetch('/tours', {
-      method: 'POST',
-      body: JSON.stringify(payload)
-    });
-    clearCache('tours');
-    res.status(201).json({ ...payload, priceVal: payload.price_val, desc: payload.description });
-  } catch (err: any) {
-    console.error("Create tour failed:", err.message);
-    res.status(500).json({ error: err.message });
+  let { id, title, duration, nights, price, priceVal, image, desc, category, difficulty, inclusions, exclusions, itinerary } = req.body;
+  if (!id && title) {
+    id = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
   }
+  const payload = {
+    id,
+    title,
+    duration,
+    nights: parseInt(nights) || 0,
+    price,
+    price_val: parseInt(priceVal) || 0,
+    image,
+    description: desc,
+    category,
+    difficulty,
+    inclusions: Array.isArray(inclusions) ? inclusions : [],
+    exclusions: Array.isArray(exclusions) ? exclusions : [],
+    itinerary: Array.isArray(itinerary) ? itinerary : []
+  };
+
+  if (dbConnected) {
+    try {
+      await supabaseFetch('/tours', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+      clearCache('tours');
+      return res.status(201).json({ ...payload, priceVal: payload.price_val, desc: payload.description });
+    } catch (err: any) {
+      console.error("Create tour failed on Supabase, falling back to memory:", err.message);
+    }
+  }
+
+  // Fallback to in-memory
+  memoryTours.push({
+    ...payload,
+    priceVal: payload.price_val,
+    desc: payload.description
+  } as any);
+  clearCache('tours');
+  res.status(201).json({ ...payload, priceVal: payload.price_val, desc: payload.description });
 });
 
 // UPDATE Tour
 app.put('/api/tours/:id', authenticateAdmin, async (req, res) => {
   const id = req.params.id;
-  try {
-    const { title, duration, nights, price, priceVal, image, desc, category, difficulty, inclusions, exclusions, itinerary } = req.body;
-    const payload = {
-      title,
-      duration,
-      nights: parseInt(nights) || 0,
-      price,
-      price_val: parseInt(priceVal) || 0,
-      image,
-      description: desc,
-      category,
-      difficulty,
-      inclusions: Array.isArray(inclusions) ? inclusions : [],
-      exclusions: Array.isArray(exclusions) ? exclusions : [],
-      itinerary: Array.isArray(itinerary) ? itinerary : []
-    };
-    await supabaseFetch(`/tours?id=eq.${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify(payload)
-    });
-    clearCache('tours');
-    res.json({ id, ...payload, priceVal: payload.price_val, desc: payload.description });
-  } catch (err: any) {
-    console.error(`Update tour ${id} failed:`, err.message);
-    res.status(500).json({ error: err.message });
+  const { title, duration, nights, price, priceVal, image, desc, category, difficulty, inclusions, exclusions, itinerary } = req.body;
+  const payload = {
+    title,
+    duration,
+    nights: parseInt(nights) || 0,
+    price,
+    price_val: parseInt(priceVal) || 0,
+    image,
+    description: desc,
+    category,
+    difficulty,
+    inclusions: Array.isArray(inclusions) ? inclusions : [],
+    exclusions: Array.isArray(exclusions) ? exclusions : [],
+    itinerary: Array.isArray(itinerary) ? itinerary : []
+  };
+
+  if (dbConnected) {
+    try {
+      await supabaseFetch(`/tours?id=eq.${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(payload)
+      });
+      clearCache('tours');
+      return res.json({ id, ...payload, priceVal: payload.price_val, desc: payload.description });
+    } catch (err: any) {
+      console.error(`Update tour ${id} failed on Supabase, falling back to memory:`, err.message);
+    }
   }
+
+  // Fallback to in-memory
+  const idx = memoryTours.findIndex(t => t.id === id);
+  if (idx !== -1) {
+    memoryTours[idx] = { id, ...payload, priceVal: payload.price_val, desc: payload.description } as any;
+  }
+  clearCache('tours');
+  res.json({ id, ...payload, priceVal: payload.price_val, desc: payload.description });
 });
 
 // DELETE Tour
 app.delete('/api/tours/:id', authenticateAdmin, async (req, res) => {
   const id = req.params.id;
-  try {
-    await supabaseFetch(`/tours?id=eq.${id}`, {
-      method: 'DELETE'
-    });
-    clearCache('tours');
-    res.json({ message: "Tour deleted successfully", id });
-  } catch (err: any) {
-    console.error(`Delete tour ${id} failed:`, err.message);
-    res.status(500).json({ error: err.message });
+  if (dbConnected) {
+    try {
+      await supabaseFetch(`/tours?id=eq.${id}`, {
+        method: 'DELETE'
+      });
+      clearCache('tours');
+      return res.json({ message: "Tour deleted successfully", id });
+    } catch (err: any) {
+      console.error(`Delete tour ${id} failed on Supabase, falling back to memory:`, err.message);
+    }
   }
+
+  // Fallback to in-memory
+  memoryTours = memoryTours.filter(t => t.id !== id);
+  clearCache('tours');
+  res.json({ message: "Tour deleted successfully", id });
 });
 
 // CREATE Hotel
 app.post('/api/hotels', authenticateAdmin, async (req, res) => {
-  try {
-    let { id, name, location, image, rating, price, description } = req.body;
-    if (!id) {
-      const existing = await supabaseFetch('/hotels?select=id&order=id.desc&limit=1');
-      id = existing && existing.length > 0 ? existing[0].id + 1 : 1;
+  let { id, name, location, image, rating, price, description } = req.body;
+  const payload = { id: id ? parseInt(id) : undefined, name, location, image, rating: parseFloat(rating) || 5.0, price, description };
+
+  if (dbConnected) {
+    try {
+      if (!payload.id) {
+        const existing = await supabaseFetch('/hotels?select=id&order=id.desc&limit=1');
+        payload.id = existing && existing.length > 0 ? existing[0].id + 1 : 1;
+      }
+      await supabaseFetch('/hotels', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+      clearCache('hotels');
+      return res.status(201).json(payload);
+    } catch (err: any) {
+      console.error("Create hotel failed on Supabase, falling back to memory:", err.message);
     }
-    const payload = { id, name, location, image, rating: parseFloat(rating) || 5.0, price, description };
-    await supabaseFetch('/hotels', {
-      method: 'POST',
-      body: JSON.stringify(payload)
-    });
-    clearCache('hotels');
-    res.status(201).json(payload);
-  } catch (err: any) {
-    console.error("Create hotel failed:", err.message);
-    res.status(500).json({ error: err.message });
   }
+
+  // Fallback to in-memory
+  if (!payload.id) {
+    payload.id = memoryHotels.length > 0 ? Math.max(...memoryHotels.map(h => h.id)) + 1 : 1;
+  }
+  memoryHotels.push(payload as any);
+  clearCache('hotels');
+  res.status(201).json(payload);
 });
 
 // UPDATE Hotel
 app.put('/api/hotels/:id', authenticateAdmin, async (req, res) => {
   const id = parseInt(req.params.id as string);
-  try {
-    const { name, location, image, rating, price, description } = req.body;
-    const payload = { name, location, image, rating: parseFloat(rating) || 5.0, price, description };
-    await supabaseFetch(`/hotels?id=eq.${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify(payload)
-    });
-    clearCache('hotels');
-    res.json({ id, ...payload });
-  } catch (err: any) {
-    console.error(`Update hotel ${id} failed:`, err.message);
-    res.status(500).json({ error: err.message });
+  const { name, location, image, rating, price, description } = req.body;
+  const payload = { name, location, image, rating: parseFloat(rating) || 5.0, price, description };
+
+  if (dbConnected) {
+    try {
+      await supabaseFetch(`/hotels?id=eq.${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(payload)
+      });
+      clearCache('hotels');
+      return res.json({ id, ...payload });
+    } catch (err: any) {
+      console.error(`Update hotel ${id} failed on Supabase, falling back to memory:`, err.message);
+    }
   }
+
+  // Fallback to in-memory
+  const idx = memoryHotels.findIndex(h => h.id === id);
+  if (idx !== -1) {
+    memoryHotels[idx] = { id, ...payload } as any;
+  }
+  clearCache('hotels');
+  res.json({ id, ...payload });
 });
 
 // DELETE Hotel
 app.delete('/api/hotels/:id', authenticateAdmin, async (req, res) => {
   const id = parseInt(req.params.id as string);
-  try {
-    await supabaseFetch(`/hotels?id=eq.${id}`, {
-      method: 'DELETE'
-    });
-    clearCache('hotels');
-    res.json({ message: "Hotel deleted successfully", id });
-  } catch (err: any) {
-    console.error(`Delete hotel ${id} failed:`, err.message);
-    res.status(500).json({ error: err.message });
+  if (dbConnected) {
+    try {
+      await supabaseFetch(`/hotels?id=eq.${id}`, {
+        method: 'DELETE'
+      });
+      clearCache('hotels');
+      return res.json({ message: "Hotel deleted successfully", id });
+    } catch (err: any) {
+      console.error(`Delete hotel ${id} failed on Supabase, falling back to memory:`, err.message);
+    }
   }
+
+  // Fallback to in-memory
+  memoryHotels = memoryHotels.filter(h => h.id !== id);
+  clearCache('hotels');
+  res.json({ message: "Hotel deleted successfully", id });
 });
 
 // File upload endpoint with authentication and strict file typing/sizing verification
@@ -1111,20 +1191,24 @@ const defaultAboutData = {
   pillar4Desc: "We are carbon-negative and plastic-free on all our treks."
 };
 
+let memoryAbout = { ...defaultAboutData };
+
 app.get('/api/about', async (req, res) => {
   const cacheKey = 'about:data';
   const cached = getCache(cacheKey);
   if (cached) return res.json(cached);
 
-  try {
-    const data = await supabaseFetch('/settings?key=eq.about&select=value');
-    if (data && data.length > 0) {
-      const value = data[0].value;
-      setCache(cacheKey, value);
-      return res.json(value);
+  if (dbConnected) {
+    try {
+      const data = await supabaseFetch('/settings?key=eq.about&select=value');
+      if (data && data.length > 0) {
+        const value = data[0].value;
+        setCache(cacheKey, value);
+        return res.json(value);
+      }
+    } catch (err: any) {
+      console.error("Supabase fetch error for about, falling back to local file:", err.message);
     }
-  } catch (err: any) {
-    console.error("Supabase fetch error for about, falling back to local file:", err.message);
   }
 
   try {
@@ -1137,29 +1221,34 @@ app.get('/api/about', async (req, res) => {
   } catch (e) {
     console.error("Failed to read about.json:", e);
   }
-  res.json(defaultAboutData);
+  res.json(memoryAbout);
 });
 
 app.put('/api/about', authenticateAdmin, async (req, res) => {
-  try {
-    await supabaseFetch('/settings', {
-      method: 'POST',
-      headers: { 'Prefer': 'resolution=merge-duplicates' },
-      body: JSON.stringify({ key: 'about', value: req.body })
-    });
-    clearCache('about:');
-    return res.json(req.body);
-  } catch (err: any) {
-    console.error("Supabase save error for about, falling back to local file:", err.message);
+  if (dbConnected) {
+    try {
+      await supabaseFetch('/settings', {
+        method: 'POST',
+        headers: { 'Prefer': 'resolution=merge-duplicates' },
+        body: JSON.stringify({ key: 'about', value: req.body })
+      });
+      clearCache('about:');
+      return res.json(req.body);
+    } catch (err: any) {
+      console.error("Supabase save error for about, falling back to local file:", err.message);
+    }
   }
 
   try {
     fs.writeFileSync(ABOUT_FILE, JSON.stringify(req.body, null, 2), 'utf8');
+    memoryAbout = req.body;
     clearCache('about:');
     res.json(req.body);
   } catch (err: any) {
-    console.error("Failed to save about.json:", err.message);
-    res.status(500).json({ error: err.message });
+    console.warn("Failed to write about.json, saving in-memory instead:", err.message);
+    memoryAbout = req.body;
+    clearCache('about:');
+    res.json(req.body);
   }
 });
 
@@ -1189,21 +1278,24 @@ const defaultContactData = {
   footerTiktok: "TikTok"
 };
 
+let memoryContact = { ...defaultContactData };
 
 app.get('/api/contact', async (req, res) => {
   const cacheKey = 'contact:data';
   const cached = getCache(cacheKey);
   if (cached) return res.json(cached);
 
-  try {
-    const data = await supabaseFetch('/settings?key=eq.contact&select=value');
-    if (data && data.length > 0) {
-      const value = data[0].value;
-      setCache(cacheKey, value);
-      return res.json(value);
+  if (dbConnected) {
+    try {
+      const data = await supabaseFetch('/settings?key=eq.contact&select=value');
+      if (data && data.length > 0) {
+        const value = data[0].value;
+        setCache(cacheKey, value);
+        return res.json(value);
+      }
+    } catch (err: any) {
+      console.error("Supabase fetch error for contact, falling back to local file:", err.message);
     }
-  } catch (err: any) {
-    console.error("Supabase fetch error for contact, falling back to local file:", err.message);
   }
 
   try {
@@ -1216,29 +1308,34 @@ app.get('/api/contact', async (req, res) => {
   } catch (e) {
     console.error("Failed to read contact.json:", e);
   }
-  res.json(defaultContactData);
+  res.json(memoryContact);
 });
 
 app.put('/api/contact', authenticateAdmin, async (req, res) => {
-  try {
-    await supabaseFetch('/settings', {
-      method: 'POST',
-      headers: { 'Prefer': 'resolution=merge-duplicates' },
-      body: JSON.stringify({ key: 'contact', value: req.body })
-    });
-    clearCache('contact:');
-    return res.json(req.body);
-  } catch (err: any) {
-    console.error("Supabase save error for contact, falling back to local file:", err.message);
+  if (dbConnected) {
+    try {
+      await supabaseFetch('/settings', {
+        method: 'POST',
+        headers: { 'Prefer': 'resolution=merge-duplicates' },
+        body: JSON.stringify({ key: 'contact', value: req.body })
+      });
+      clearCache('contact:');
+      return res.json(req.body);
+    } catch (err: any) {
+      console.error("Supabase save error for contact, falling back to local file:", err.message);
+    }
   }
 
   try {
     fs.writeFileSync(CONTACT_FILE, JSON.stringify(req.body, null, 2), 'utf8');
+    memoryContact = req.body;
     clearCache('contact:');
     res.json(req.body);
   } catch (err: any) {
-    console.error("Failed to save contact.json:", err.message);
-    res.status(500).json({ error: err.message });
+    console.warn("Failed to write contact.json, saving in-memory instead:", err.message);
+    memoryContact = req.body;
+    clearCache('contact:');
+    res.json(req.body);
   }
 });
 
@@ -1270,20 +1367,24 @@ const defaultTestimonials = [
   }
 ];
 
+let memoryTestimonials = [...defaultTestimonials];
+
 app.get('/api/testimonials', async (req, res) => {
   const cacheKey = 'testimonials:list';
   const cached = getCache(cacheKey);
   if (cached) return res.json(cached);
 
-  try {
-    const data = await supabaseFetch('/settings?key=eq.testimonials&select=value');
-    if (data && data.length > 0) {
-      const value = data[0].value;
-      setCache(cacheKey, value);
-      return res.json(value);
+  if (dbConnected) {
+    try {
+      const data = await supabaseFetch('/settings?key=eq.testimonials&select=value');
+      if (data && data.length > 0) {
+        const value = data[0].value;
+        setCache(cacheKey, value);
+        return res.json(value);
+      }
+    } catch (err: any) {
+      console.error("Supabase fetch error for testimonials, falling back to local file:", err.message);
     }
-  } catch (err: any) {
-    console.error("Supabase fetch error for testimonials, falling back to local file:", err.message);
   }
 
   try {
@@ -1296,59 +1397,67 @@ app.get('/api/testimonials', async (req, res) => {
   } catch (e) {
     console.error("Failed to read testimonials.json:", e);
   }
-  res.json(defaultTestimonials);
+  res.json(memoryTestimonials);
 });
 
 app.put('/api/testimonials', authenticateAdmin, async (req, res) => {
-  try {
-    await supabaseFetch('/settings', {
-      method: 'POST',
-      headers: { 'Prefer': 'resolution=merge-duplicates' },
-      body: JSON.stringify({ key: 'testimonials', value: req.body })
-    });
-    clearCache('testimonials:');
-    return res.json(req.body);
-  } catch (err: any) {
-    console.error("Supabase save error for testimonials, falling back to local file:", err.message);
+  if (dbConnected) {
+    try {
+      await supabaseFetch('/settings', {
+        method: 'POST',
+        headers: { 'Prefer': 'resolution=merge-duplicates' },
+        body: JSON.stringify({ key: 'testimonials', value: req.body })
+      });
+      clearCache('testimonials:');
+      return res.json(req.body);
+    } catch (err: any) {
+      console.error("Supabase save error for testimonials, falling back to local file:", err.message);
+    }
   }
 
   try {
     fs.writeFileSync(TESTIMONIALS_FILE, JSON.stringify(req.body, null, 2), 'utf8');
+    memoryTestimonials = req.body;
     clearCache('testimonials:');
     res.json(req.body);
   } catch (err: any) {
-    console.error("Failed to save testimonials.json:", err.message);
-    res.status(500).json({ error: err.message });
+    console.warn("Failed to write testimonials.json, saving in-memory instead:", err.message);
+    memoryTestimonials = req.body;
+    clearCache('testimonials:');
+    res.json(req.body);
   }
 });
 
 const TOURISTS_FILE = path.join(__dirname, '../tourists.json');
 const defaultTourists: any[] = [];
+let memoryTourists: any[] = [];
 
 app.get('/api/tourists', async (req, res) => {
   const cacheKey = 'tourists:list';
   const cached = getCache(cacheKey);
   if (cached) return res.json(cached);
 
-  try {
-    const data = await supabaseFetch('/tourists?select=*&order=id.asc');
-    const formatted = data.map((t: any) => ({
-      id: t.id,
-      name: t.name,
-      nationality: t.nationality,
-      passportNumber: t.passport_number || t.passportNumber,
-      email: t.email,
-      phone: t.phone,
-      tourName: t.tour_name || t.tourName,
-      checkInDate: t.check_in_date || t.checkInDate,
-      checkOutDate: t.check_out_date || t.checkOutDate,
-      sdfStatus: t.sdf_status || t.sdfStatus,
-      specialRequests: t.special_requests || t.specialRequests
-    }));
-    setCache(cacheKey, formatted);
-    return res.json(formatted);
-  } catch (err: any) {
-    console.error("Supabase fetch error for tourists, falling back to local file:", err.message);
+  if (dbConnected) {
+    try {
+      const data = await supabaseFetch('/tourists?select=*&order=id.asc');
+      const formatted = data.map((t: any) => ({
+        id: t.id,
+        name: t.name,
+        nationality: t.nationality,
+        passportNumber: t.passport_number || t.passportNumber,
+        email: t.email,
+        phone: t.phone,
+        tourName: t.tour_name || t.tourName,
+        checkInDate: t.check_in_date || t.checkInDate,
+        checkOutDate: t.check_out_date || t.checkOutDate,
+        sdfStatus: t.sdf_status || t.sdfStatus,
+        specialRequests: t.special_requests || t.specialRequests
+      }));
+      setCache(cacheKey, formatted);
+      return res.json(formatted);
+    } catch (err: any) {
+      console.error("Supabase fetch error for tourists, falling back to local file:", err.message);
+    }
   }
 
   try {
@@ -1361,7 +1470,7 @@ app.get('/api/tourists', async (req, res) => {
   } catch (e) {
     console.error("Failed to read tourists.json:", e);
   }
-  res.json(defaultTourists);
+  res.json(memoryTourists);
 });
 
 app.post('/api/tourists', authenticateAdmin, async (req, res) => {
@@ -1379,51 +1488,49 @@ app.post('/api/tourists', authenticateAdmin, async (req, res) => {
     special_requests: body.specialRequests
   };
 
-  try {
-    const inserted = await supabaseFetch('/tourists', {
-      method: 'POST',
-      headers: { 'Prefer': 'return=representation' },
-      body: JSON.stringify(dbPayload)
-    });
-    clearCache('tourists:');
-    if (inserted && inserted.length > 0) {
-      const t = inserted[0];
-      return res.json({
-        id: t.id,
-        name: t.name,
-        nationality: t.nationality,
-        passportNumber: t.passport_number || t.passportNumber,
-        email: t.email,
-        phone: t.phone,
-        tourName: t.tour_name || t.tourName,
-        checkInDate: t.check_in_date || t.checkInDate,
-        checkOutDate: t.check_out_date || t.checkOutDate,
-        sdfStatus: t.sdf_status || t.sdfStatus,
-        specialRequests: t.special_requests || t.specialRequests
+  if (dbConnected) {
+    try {
+      const inserted = await supabaseFetch('/tourists', {
+        method: 'POST',
+        headers: { 'Prefer': 'return=representation' },
+        body: JSON.stringify(dbPayload)
       });
+      clearCache('tourists:');
+      if (inserted && inserted.length > 0) {
+        const t = inserted[0];
+        return res.json({
+          id: t.id,
+          name: t.name,
+          nationality: t.nationality,
+          passportNumber: t.passport_number || t.passportNumber,
+          email: t.email,
+          phone: t.phone,
+          tourName: t.tour_name || t.tourName,
+          checkInDate: t.check_in_date || t.checkInDate,
+          checkOutDate: t.check_out_date || t.checkOutDate,
+          sdfStatus: t.sdf_status || t.sdfStatus,
+          specialRequests: t.special_requests || t.specialRequests
+        });
+      }
+    } catch (err: any) {
+      console.error("Supabase insert error for tourists, falling back to memory:", err.message);
     }
-  } catch (err: any) {
-    console.error("Supabase insert error for tourists, falling back to local file:", err.message);
   }
 
+  // Fallback to in-memory
+  const newTourist = {
+    id: Date.now(),
+    ...body
+  };
+  memoryTourists.push(newTourist);
+  clearCache('tourists:');
+  
+  // Try to write to file if possible (local dev)
   try {
-    let tourists = defaultTourists;
-    if (fs.existsSync(TOURISTS_FILE)) {
-      const data = fs.readFileSync(TOURISTS_FILE, 'utf8');
-      tourists = JSON.parse(data);
-    }
-    const newTourist = {
-      id: Date.now(),
-      ...body
-    };
-    tourists.push(newTourist);
-    fs.writeFileSync(TOURISTS_FILE, JSON.stringify(tourists, null, 2), 'utf8');
-    clearCache('tourists:');
-    res.json(newTourist);
-  } catch (err: any) {
-    console.error("Failed to save tourist:", err.message);
-    res.status(500).json({ error: err.message });
-  }
+    fs.writeFileSync(TOURISTS_FILE, JSON.stringify(memoryTourists, null, 2), 'utf8');
+  } catch (err) {}
+
+  res.json(newTourist);
 });
 
 app.put('/api/tourists/:id', authenticateAdmin, async (req, res) => {
@@ -1442,81 +1549,77 @@ app.put('/api/tourists/:id', authenticateAdmin, async (req, res) => {
     special_requests: body.specialRequests
   };
 
-  try {
-    const updated = await supabaseFetch(`/tourists?id=eq.${id}`, {
-      method: 'PATCH',
-      headers: { 'Prefer': 'return=representation' },
-      body: JSON.stringify(dbPayload)
-    });
-    clearCache('tourists:');
-    if (updated && updated.length > 0) {
-      const t = updated[0];
-      return res.json({
-        id: t.id,
-        name: t.name,
-        nationality: t.nationality,
-        passportNumber: t.passport_number || t.passportNumber,
-        email: t.email,
-        phone: t.phone,
-        tourName: t.tour_name || t.tourName,
-        checkInDate: t.check_in_date || t.checkInDate,
-        checkOutDate: t.check_out_date || t.checkOutDate,
-        sdfStatus: t.sdf_status || t.sdfStatus,
-        specialRequests: t.special_requests || t.specialRequests
+  if (dbConnected) {
+    try {
+      const updated = await supabaseFetch(`/tourists?id=eq.${id}`, {
+        method: 'PATCH',
+        headers: { 'Prefer': 'return=representation' },
+        body: JSON.stringify(dbPayload)
       });
+      clearCache('tourists:');
+      if (updated && updated.length > 0) {
+        const t = updated[0];
+        return res.json({
+          id: t.id,
+          name: t.name,
+          nationality: t.nationality,
+          passportNumber: t.passport_number || t.passportNumber,
+          email: t.email,
+          phone: t.phone,
+          tourName: t.tour_name || t.tourName,
+          checkInDate: t.check_in_date || t.checkInDate,
+          checkOutDate: t.check_out_date || t.checkOutDate,
+          sdfStatus: t.sdf_status || t.sdfStatus,
+          specialRequests: t.special_requests || t.specialRequests
+        });
+      }
+    } catch (err: any) {
+      console.error("Supabase update error for tourists, falling back to memory:", err.message);
     }
-  } catch (err: any) {
-    console.error("Supabase update error for tourists, falling back to local file:", err.message);
   }
 
-  try {
-    let tourists = defaultTourists;
-    if (fs.existsSync(TOURISTS_FILE)) {
-      const data = fs.readFileSync(TOURISTS_FILE, 'utf8');
-      tourists = JSON.parse(data);
-    }
-    const index = tourists.findIndex(t => t.id === id);
-    if (index !== -1) {
-      tourists[index] = { ...tourists[index], ...body };
-      fs.writeFileSync(TOURISTS_FILE, JSON.stringify(tourists, null, 2), 'utf8');
-      clearCache('tourists:');
-      res.json(tourists[index]);
-    } else {
-      res.status(404).json({ error: "Tourist not found" });
-    }
-  } catch (err: any) {
-    console.error("Failed to update tourist:", err.message);
-    res.status(500).json({ error: err.message });
+  // Fallback to in-memory
+  const index = memoryTourists.findIndex(t => t.id === id);
+  if (index !== -1) {
+    memoryTourists[index] = { ...memoryTourists[index], ...body };
+    clearCache('tourists:');
+    
+    // Try to write to file if possible (local dev)
+    try {
+      fs.writeFileSync(TOURISTS_FILE, JSON.stringify(memoryTourists, null, 2), 'utf8');
+    } catch (err) {}
+    
+    res.json(memoryTourists[index]);
+  } else {
+    res.status(404).json({ error: "Tourist not found" });
   }
 });
 
 app.delete('/api/tourists/:id', authenticateAdmin, async (req, res) => {
   const id = Number(req.params.id);
 
-  try {
-    await supabaseFetch(`/tourists?id=eq.${id}`, {
-      method: 'DELETE'
-    });
-    clearCache('tourists:');
-    return res.json({ success: true });
-  } catch (err: any) {
-    console.error("Supabase delete error for tourists, falling back to local file:", err.message);
+  if (dbConnected) {
+    try {
+      await supabaseFetch(`/tourists?id=eq.${id}`, {
+        method: 'DELETE'
+      });
+      clearCache('tourists:');
+      return res.json({ success: true });
+    } catch (err: any) {
+      console.error("Supabase delete error for tourists, falling back to memory:", err.message);
+    }
   }
 
+  // Fallback to in-memory
+  memoryTourists = memoryTourists.filter(t => t.id !== id);
+  clearCache('tourists:');
+  
+  // Try to write to file if possible (local dev)
   try {
-    let tourists = defaultTourists;
-    if (fs.existsSync(TOURISTS_FILE)) {
-      const data = fs.readFileSync(TOURISTS_FILE, 'utf8');
-      tourists = JSON.parse(data);
-    }
-    const filtered = tourists.filter(t => t.id !== id);
-    fs.writeFileSync(TOURISTS_FILE, JSON.stringify(filtered, null, 2), 'utf8');
-    clearCache('tourists:');
-    res.json({ success: true });
-  } catch (err: any) {
-    console.error("Failed to delete tourist:", err.message);
-    res.status(500).json({ error: err.message });
-  }
+    fs.writeFileSync(TOURISTS_FILE, JSON.stringify(memoryTourists, null, 2), 'utf8');
+  } catch (err) {}
+
+  res.json({ success: true });
 });
 
 app.listen(PORT, () => {
