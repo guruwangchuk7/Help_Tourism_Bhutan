@@ -19,10 +19,15 @@ app.use((req, res, next) => {
     next();
 });
 // Security Hardening: Ensure strict CORS policy and deny wildcards in production
-const allowedOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173'];
+const allowedOrigins = [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'https://www.helptourbhutan.com',
+    'https://helptourbhutan.com'
+];
 app.use((0, cors_1.default)({
     origin: (origin, callback) => {
-        if (!origin || allowedOrigins.indexOf(origin) !== -1 || /^http:\/\/localhost:\d+$/.test(origin) || /^http:\/\/127\.0\.0\.1:\d+$/.test(origin) || origin.endsWith('.vercel.app')) {
+        if (!origin || allowedOrigins.indexOf(origin) !== -1 || /^http:\/\/localhost:\d+$/.test(origin) || /^http:\/\/127\.0\.0\.1:\d+$/.test(origin) || origin.endsWith('.vercel.app') || origin.endsWith('helptourbhutan.com')) {
             callback(null, true);
         }
         else {
