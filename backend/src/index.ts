@@ -9,6 +9,15 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Strip /_/backend prefix if present (for Vercel deployment compatibility)
+app.use((req, res, next) => {
+  if (req.url.startsWith('/_/backend')) {
+    req.url = req.url.replace('/_/backend', '');
+  }
+  next();
+});
+
+
 // Security Hardening: Ensure strict CORS policy and deny wildcards in production
 const allowedOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173'];
 app.use(cors({
@@ -1513,5 +1522,8 @@ app.delete('/api/tourists/:id', authenticateAdmin, async (req, res) => {
 app.listen(PORT, () => {
   console.log("Server running on port " + PORT);
 });
+
+export default app;
+
 
 
