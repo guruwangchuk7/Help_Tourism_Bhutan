@@ -1086,8 +1086,29 @@ app.delete('/api/hotels/:id', authenticateAdmin, async (req, res) => {
     clearCache('hotels');
     res.json({ message: "Hotel deleted successfully", id });
 });
+// Helper to upload files to Supabase Storage
+async function uploadToSupabaseStorage(filename, buffer, mimeType) {
+    const url = `${SUPABASE_URL}/storage/v1/object/cms-media/${filename}`;
+    const headers = {
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': mimeType
+    };
+    if (SUPABASE_KEY) {
+        headers['apikey'] = SUPABASE_KEY;
+    }
+    const response = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: buffer
+    });
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Supabase Storage upload failed: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+    return `${SUPABASE_URL}/storage/v1/object/public/cms-media/${filename}`;
+}
 // File upload endpoint with authentication and strict file typing/sizing verification
-app.post('/api/upload', authenticateAdmin, (req, res) => {
+app.post('/api/upload', authenticateAdmin, async (req, res) => {
     try {
         const { name, data } = req.body;
         if (!name || !data) {
@@ -1110,7 +1131,23 @@ app.post('/api/upload', authenticateAdmin, (req, res) => {
         if (buffer.length > 5 * 1024 * 1024) {
             return res.status(400).json({ error: "File exceeds maximum size limit of 5MB." });
         }
-        // Create public/uploads directory safely
+        // Sanitize filename to prevent Path Traversal
+        const safeName = path_1.default.basename(name).replace(/[^a-zA-Z0-9.-]/g, '_');
+        const filename = `${Date.now()}-${safeName}`;
+        // Try uploading to Supabase Storage first (for production)
+        if (dbConnected && SUPABASE_URL && SUPABASE_KEY) {
+            try {
+                const mimeMatch = data.match(/^data:(image\/\w+);base64,/);
+                const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+                const publicUrl = await uploadToSupabaseStorage(filename, buffer, mimeType);
+                console.log("Successfully uploaded file to Supabase Storage cms-media:", filename);
+                return res.json({ url: publicUrl });
+            }
+            catch (err) {
+                console.warn("Supabase Storage upload failed, falling back to local file:", err.message);
+            }
+        }
+        // Create public/uploads directory safely for local fallback
         let uploadDir = path_1.default.resolve(process.cwd(), '../public/uploads');
         const rootPublic = path_1.default.resolve(process.cwd(), '../public');
         if (!fs_1.default.existsSync(rootPublic)) {
@@ -1119,16 +1156,13 @@ app.post('/api/upload', authenticateAdmin, (req, res) => {
         if (!fs_1.default.existsSync(uploadDir)) {
             fs_1.default.mkdirSync(uploadDir, { recursive: true });
         }
-        // Sanitize filename to prevent Path Traversal
-        const safeName = path_1.default.basename(name).replace(/[^a-zA-Z0-9.-]/g, '_');
-        const filename = `${Date.now()}-${safeName}`;
         const filePath = path_1.default.join(uploadDir, filename);
         // Final security check: Ensure filePath is inside uploadDir
         if (!filePath.startsWith(uploadDir)) {
             return res.status(400).json({ error: "Invalid path traversal attempt." });
         }
         fs_1.default.writeFileSync(filePath, buffer);
-        console.log("Successfully uploaded file:", filename, "to", filePath);
+        console.log("Successfully uploaded file locally:", filename, "to", filePath);
         res.json({ url: `/uploads/${filename}` });
     }
     catch (err) {
