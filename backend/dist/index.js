@@ -1568,6 +1568,11 @@ app.delete('/api/tourists/:id', authenticateAdmin, async (req, res) => {
     catch (err) { }
     res.json({ success: true });
 });
+// Global Error Handler to return JSON instead of default HTML error pages
+app.use((err, req, res, next) => {
+    console.error("Unhandled Error:", err);
+    res.status(500).json({ error: err.message || "Internal Server Error" });
+});
 app.listen(PORT, () => {
     console.log("Server running on port " + PORT);
 });
