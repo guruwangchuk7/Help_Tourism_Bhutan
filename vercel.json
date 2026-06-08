@@ -1,17 +1,13 @@
 {
-  "version": 2,
-  "rewrites": [
-    {
-      "source": "/_/backend/api/(.*)",
-      "destination": "/api/index.ts"
+  "experimentalServices": {
+    "frontend": {
+      "routePrefix": "/",
+      "framework": "vite"
     },
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/index.ts"
-    },
-    {
-      "source": "/((?!api|_*).*)",
-      "destination": "/index.html"
+    "backend": {
+      "root": "backend",
+      "routePrefix": "/_/backend",
+      "entrypoint": "dist/index.js"
     }
-  ]
+  }
 }
