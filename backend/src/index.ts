@@ -65,8 +65,7 @@ const SUPABASE_KEY = process.env.SUPABASE_KEY;
 const ADMIN_API_KEY = process.env.ADMIN_API_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
-  console.error("FATAL ERROR: SUPABASE_URL and SUPABASE_KEY environment variables must be defined!");
-  process.exit(1);
+  console.warn("WARNING: SUPABASE_URL and SUPABASE_KEY environment variables are not defined. Operating in local memory fallback mode.");
 }
 
 if (!ADMIN_API_KEY) {
