@@ -1185,6 +1185,9 @@ app.post('/api/upload', authenticateAdmin, async (req, res) => {
         return res.json({ url: publicUrl });
       } catch (err: any) {
         console.warn("Supabase Storage upload failed, falling back to local file:", err.message);
+        if (process.env.NODE_ENV === 'production' || process.env.VERCEL || process.env.VERCEL_ENV) {
+          return res.status(500).json({ error: `Supabase Storage upload failed: ${err.message}` });
+        }
       }
     }
 
