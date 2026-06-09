@@ -454,45 +454,52 @@ const AdminDashboard = () => {
       const reader = new FileReader()
       reader.readAsDataURL(file)
       reader.onload = async () => {
-        const base64 = reader.result as string
-        const res = await fetch(`${API_BASE}/api/upload`, {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            ...getAuthHeader()
-          },
-          body: JSON.stringify({ name: file.name, data: base64 })
-        })
-        if (!res.ok) {
-          if (res.status === 401 || res.status === 403) {
-            localStorage.removeItem('ADMIN_API_KEY')
-            setAdminKey(null)
-            setIsVerified(false)
-          }
-          throw new Error('Upload failed')
-        }
-        const data = await res.json()
-
-        if (type === 'destinations') {
-          setDestForm(prev => ({ ...prev, image: data.url }))
-        } else if (type === 'tours') {
-          setTourForm(prev => ({ ...prev, image: data.url }))
-        } else if (type === 'hotels') {
-          setHotelForm(prev => ({ ...prev, image: data.url }))
-        } else if (type === 'testimonials' && typeof index === 'number') {
-          setTestimonialsForm(prev => {
-            const updated = [...prev]
-            updated[index] = { ...updated[index], avatar: data.url }
-            return updated
+        try {
+          const base64 = reader.result as string
+          const res = await fetch(`${API_BASE}/api/upload`, {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+              ...getAuthHeader()
+            },
+            body: JSON.stringify({ name: file.name, data: base64 })
           })
-        }
+          if (!res.ok) {
+            if (res.status === 401 || res.status === 403) {
+              localStorage.removeItem('ADMIN_API_KEY')
+              setAdminKey(null)
+              setIsVerified(false)
+            }
+            const errData = await res.json().catch(() => ({}))
+            throw new Error(errData.error || 'Upload failed')
+          }
+          const data = await res.json()
 
-        showToast('Image uploaded successfully!', 'success')
+          if (type === 'destinations') {
+            setDestForm(prev => ({ ...prev, image: data.url }))
+          } else if (type === 'tours') {
+            setTourForm(prev => ({ ...prev, image: data.url }))
+          } else if (type === 'hotels') {
+            setHotelForm(prev => ({ ...prev, image: data.url }))
+          } else if (type === 'testimonials' && typeof index === 'number') {
+            setTestimonialsForm(prev => {
+              const updated = [...prev]
+              updated[index] = { ...updated[index], avatar: data.url }
+              return updated
+            })
+          }
+
+          showToast('Image uploaded successfully!', 'success')
+        } catch (err: any) {
+          console.error(err)
+          showToast(`Error: ${err.message}`, 'error')
+        } finally {
+          setUploading(false)
+        }
       }
     } catch (err: any) {
       console.error(err)
-      showToast('Error uploading image.', 'error')
-    } finally {
+      showToast('Error reading file.', 'error')
       setUploading(false)
     }
   }

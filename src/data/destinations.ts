@@ -15,7 +15,7 @@ export const destinations: Destination[] = [
     name: "Punakha Dzong",
     image: "/punakha-dzong.jpg",
     description:
-      "Punakha Dzong is one of Bhutan's most majestic fortresses and the winter capital of the Drukpa Lineage. It offers stunning architecture, riverside views, and a rich historical experience.",
+      "Punakha Dzong, also known as Pungtang Dechen Phodrang ('Palace of Great Happiness'), is the second oldest and most majestic dzong in Bhutan. Built in 1637 at the scenic confluence of the Pho Chhu and Mo Chhu rivers, it serves as the winter home of the central clergy. It houses sacred relics and serves as a vital historical monument, famous for its intricate woodwork and defensive design. In spring, blooming lilac jacaranda trees frame its whitewashed walls, making it one of Bhutan's most photogenic and spiritual locations.",
     attractions: [
       "Punakha Suspension Bridge",
       "Chimi Lhakhang (Fertility Temple)",
@@ -30,7 +30,7 @@ export const destinations: Destination[] = [
     name: "Paro Taktsang",
     image: "/paro-taksang.jpg",
     description:
-      "Also known as Tiger’s Nest Monastery, Paro Taktsang clings to a cliff 900 meters above the Paro Valley. It is Bhutan's most iconic pilgrimage site with breathtaking views.",
+      "Paro Taktsang, famously known as the Tiger’s Nest, is a sacred Buddhist monastery perched precariously on a cliffside 900 meters above the Paro Valley. Established in 1692 around the cave where Guru Rinpoche is said to have meditated, this iconic landmark offers breathtaking views, ancient murals, and a profound spiritual atmosphere reached via a scenic, rewarding pine-forest hike.",
     attractions: [
       "Meditation caves",
       "Viewpoints of the valley",
@@ -45,7 +45,7 @@ export const destinations: Destination[] = [
     name: "Dochula Pass",
     image: "/dochula-pass.jpg",
     description:
-      "Dochula Pass features 108 memorial chortens set against panoramic Himalayan mountains. It's an excellent spot for photography and scenic drives.",
+      "Dochula Pass is a breathtaking mountain pass situated at 3,100 meters on the road from Thimphu to Punakha. It is renowned for its panoramic 360-degree views of the snow-capped Himalayan range and the 108 beautiful memorial chortens (shrines) built in honor of fallen soldiers, making it a peaceful, spiritually inspiring stop.",
     attractions: [
       "108 Druk Wangyal Chortens",
       "Coffee shops with mountain views",
@@ -59,7 +59,8 @@ export const destinations: Destination[] = [
     id: 4,
     name: "Thimphu Valley",
     image: "/thimphu.jpg",
-    description: "The capital city of Bhutan, Thimphu is a unique blend of modern development and ancient traditions, being the only capital in the world without traffic lights.",
+    description:
+      "Thimphu Valley houses the unique capital of Bhutan, blending modern expansion with deep-rooted cultural values. Surrounded by green hills, it features the grand Tashichho Dzong, the massive Buddha Dordenma overlooking the valley, and traditional museums, all without a single traffic light in the entire city.",
     attractions: ["Buddha Dordenma", "Memorial Chorten", "Tashichho Dzong"],
     price: "$110",
     rating: 4.6,
@@ -69,7 +70,8 @@ export const destinations: Destination[] = [
     id: 5,
     name: "Phobjikha Valley",
     image: "/monk.jpg",
-    description: "A vast U-shaped glacial valley, famous as the winter home of the rare black-necked cranes that migrate from the Tibetan Plateau.",
+    description:
+      "Phobjikha Valley is a stunning, wide glacial valley situated on the slopes of the Black Mountains. Renowned for its natural beauty and peaceful atmosphere, it is famous as the winter nesting ground of the rare, endangered black-necked cranes. The historic Gangtey Monastery overlooks this vast, scenic wetland.",
     attractions: ["Gangtey Monastery", "Crane Information Centre", "Nature Trails"],
     price: "$130",
     rating: 4.8,
@@ -79,7 +81,8 @@ export const destinations: Destination[] = [
     id: 6,
     name: "Bumthang Valley",
     image: "/airport.jpg",
-    description: "The spiritual heartland of Bhutan, Bumthang is home to some of the country's oldest and most sacred Buddhist temples and monasteries.",
+    description:
+      "Bumthang Valley is the spiritual heartland of Bhutan, consisting of four high-altitude valleys rich in ancient legend, sacred temples, and historic monasteries. As the birthplace of many Buddhist saints and home to Kurjey and Jambay Lhakhang, it offers deep historical walks, local cheese farms, and untouched alpine beauty.",
     attractions: ["Kurje Lhakhang", "Jambay Lhakhang", "Jakar Dzong"],
     price: "$140",
     rating: 4.9,
