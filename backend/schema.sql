@@ -403,3 +403,10 @@ CREATE TABLE IF NOT EXISTS public.tourists (
   special_requests text,
   CONSTRAINT tourists_pkey PRIMARY KEY (id)
 );
+
+CREATE TABLE IF NOT EXISTS public.settings (
+  key character varying NOT NULL,
+  value jsonb NOT NULL,
+  CONSTRAINT settings_pkey PRIMARY KEY (key)
+);
+
