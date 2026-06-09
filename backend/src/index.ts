@@ -97,7 +97,7 @@ app.get('/api/verify', authenticateAdmin, (req, res) => {
 
 // Caching Store & Helpers for high scalability
 const apiCache = new Map<string, { data: any; expiry: number }>();
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes TTL
+const CACHE_TTL = 30 * 1000; // 30 seconds TTL
 
 function getCache(key: string): any | null {
   const cached = apiCache.get(key);
@@ -868,7 +868,8 @@ app.post('/api/destinations', authenticateAdmin, async (req, res) => {
       clearCache('destinations');
       return res.status(201).json(payload);
     } catch (err: any) {
-      console.error("Create destination failed on Supabase, falling back to memory:", err.message);
+      console.error("Create destination failed on Supabase:", err.message);
+      return res.status(500).json({ error: `Database write failed: ${err.message}` });
     }
   }
 
@@ -895,7 +896,8 @@ app.put('/api/destinations/:id', authenticateAdmin, async (req, res) => {
       clearCache('destinations');
       return res.json({ id, ...payload });
     } catch (err: any) {
-      console.error(`Update destination ${id} failed on Supabase, falling back to memory:`, err.message);
+      console.error(`Update destination ${id} failed on Supabase:`, err.message);
+      return res.status(500).json({ error: `Database write failed: ${err.message}` });
     }
   }
 
@@ -918,7 +920,8 @@ app.delete('/api/destinations/:id', authenticateAdmin, async (req, res) => {
       clearCache('destinations');
       return res.json({ message: "Destination deleted successfully", id });
     } catch (err: any) {
-      console.error(`Delete destination ${id} failed on Supabase, falling back to memory:`, err.message);
+      console.error(`Delete destination ${id} failed on Supabase:`, err.message);
+      return res.status(500).json({ error: `Database write failed: ${err.message}` });
     }
   }
 
@@ -958,7 +961,8 @@ app.post('/api/tours', authenticateAdmin, async (req, res) => {
       clearCache('tours');
       return res.status(201).json({ ...payload, priceVal: payload.price_val, desc: payload.description });
     } catch (err: any) {
-      console.error("Create tour failed on Supabase, falling back to memory:", err.message);
+      console.error("Create tour failed on Supabase:", err.message);
+      return res.status(500).json({ error: `Database write failed: ${err.message}` });
     }
   }
 
@@ -1001,7 +1005,8 @@ app.put('/api/tours/:id', authenticateAdmin, async (req, res) => {
         clearCache('tours');
         return res.json({ id, ...payload, priceVal: payload.price_val, desc: payload.description });
       } catch (err: any) {
-        console.error(`Update tour ${id} failed on Supabase, falling back to memory:`, err.message);
+        console.error(`Update tour ${id} failed on Supabase:`, err.message);
+        return res.status(500).json({ error: `Database write failed: ${err.message}` });
       }
     }
 
@@ -1029,7 +1034,8 @@ app.delete('/api/tours/:id', authenticateAdmin, async (req, res) => {
       clearCache('tours');
       return res.json({ message: "Tour deleted successfully", id });
     } catch (err: any) {
-      console.error(`Delete tour ${id} failed on Supabase, falling back to memory:`, err.message);
+      console.error(`Delete tour ${id} failed on Supabase:`, err.message);
+      return res.status(500).json({ error: `Database write failed: ${err.message}` });
     }
   }
 
@@ -1057,7 +1063,8 @@ app.post('/api/hotels', authenticateAdmin, async (req, res) => {
       clearCache('hotels');
       return res.status(201).json(payload);
     } catch (err: any) {
-      console.error("Create hotel failed on Supabase, falling back to memory:", err.message);
+      console.error("Create hotel failed on Supabase:", err.message);
+      return res.status(500).json({ error: `Database write failed: ${err.message}` });
     }
   }
 
@@ -1085,7 +1092,8 @@ app.put('/api/hotels/:id', authenticateAdmin, async (req, res) => {
       clearCache('hotels');
       return res.json({ id, ...payload });
     } catch (err: any) {
-      console.error(`Update hotel ${id} failed on Supabase, falling back to memory:`, err.message);
+      console.error(`Update hotel ${id} failed on Supabase:`, err.message);
+      return res.status(500).json({ error: `Database write failed: ${err.message}` });
     }
   }
 
@@ -1109,7 +1117,8 @@ app.delete('/api/hotels/:id', authenticateAdmin, async (req, res) => {
       clearCache('hotels');
       return res.json({ message: "Hotel deleted successfully", id });
     } catch (err: any) {
-      console.error(`Delete hotel ${id} failed on Supabase, falling back to memory:`, err.message);
+      console.error(`Delete hotel ${id} failed on Supabase:`, err.message);
+      return res.status(500).json({ error: `Database write failed: ${err.message}` });
     }
   }
 
@@ -1284,7 +1293,8 @@ app.put('/api/about', authenticateAdmin, async (req, res) => {
       clearCache('about:');
       return res.json(req.body);
     } catch (err: any) {
-      console.error("Supabase save error for about, falling back to local file:", err.message);
+      console.error("Supabase save error for about:", err.message);
+      return res.status(500).json({ error: `Database write failed: ${err.message}` });
     }
   }
 
@@ -1371,7 +1381,8 @@ app.put('/api/contact', authenticateAdmin, async (req, res) => {
       clearCache('contact:');
       return res.json(req.body);
     } catch (err: any) {
-      console.error("Supabase save error for contact, falling back to local file:", err.message);
+      console.error("Supabase save error for contact:", err.message);
+      return res.status(500).json({ error: `Database write failed: ${err.message}` });
     }
   }
 
@@ -1460,7 +1471,8 @@ app.put('/api/testimonials', authenticateAdmin, async (req, res) => {
       clearCache('testimonials:');
       return res.json(req.body);
     } catch (err: any) {
-      console.error("Supabase save error for testimonials, falling back to local file:", err.message);
+      console.error("Supabase save error for testimonials:", err.message);
+      return res.status(500).json({ error: `Database write failed: ${err.message}` });
     }
   }
 
@@ -1562,7 +1574,8 @@ app.post('/api/tourists', authenticateAdmin, async (req, res) => {
         });
       }
     } catch (err: any) {
-      console.error("Supabase insert error for tourists, falling back to memory:", err.message);
+      console.error("Supabase insert error for tourists:", err.message);
+      return res.status(500).json({ error: `Database write failed: ${err.message}` });
     }
   }
 
@@ -1623,7 +1636,8 @@ app.put('/api/tourists/:id', authenticateAdmin, async (req, res) => {
         });
       }
     } catch (err: any) {
-      console.error("Supabase update error for tourists, falling back to memory:", err.message);
+      console.error("Supabase update error for tourists:", err.message);
+      return res.status(500).json({ error: `Database write failed: ${err.message}` });
     }
   }
 
@@ -1653,9 +1667,9 @@ app.delete('/api/tourists/:id', authenticateAdmin, async (req, res) => {
         method: 'DELETE'
       });
       clearCache('tourists:');
-      return res.json({ success: true });
     } catch (err: any) {
-      console.error("Supabase delete error for tourists, falling back to memory:", err.message);
+      console.error("Supabase delete error for tourists:", err.message);
+      return res.status(500).json({ error: `Database write failed: ${err.message}` });
     }
   }
 

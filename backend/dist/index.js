@@ -89,7 +89,7 @@ app.get('/api/verify', authenticateAdmin, (req, res) => {
 });
 // Caching Store & Helpers for high scalability
 const apiCache = new Map();
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes TTL
+const CACHE_TTL = 30 * 1000; // 30 seconds TTL
 function getCache(key) {
     const cached = apiCache.get(key);
     if (cached && cached.expiry > Date.now()) {
@@ -135,7 +135,7 @@ const mockDestinations = [
         id: 1,
         name: "Punakha Dzong",
         image: "/punakha-dzong.jpg",
-        description: "Punakha Dzong is one of Bhutan's most majestic fortresses and the winter capital of the Drukpa Lineage. It offers stunning architecture, riverside views, and a rich historical experience.",
+        description: "Punakha Dzong, also known as Pungtang Dechen Phodrang ('Palace of Great Happiness'), is the second oldest and most majestic dzong in Bhutan. Built in 1637 at the scenic confluence of the Pho Chhu and Mo Chhu rivers, it serves as the winter home of the central clergy. It houses sacred relics and serves as a vital historical monument, famous for its intricate woodwork and defensive design. In spring, blooming lilac jacaranda trees frame its whitewashed walls, making it one of Bhutan's most photogenic and spiritual locations.",
         price: "$120",
         rating: 4.8,
         location: "Punakha",
@@ -148,7 +148,7 @@ const mockDestinations = [
         id: 2,
         name: "Paro Taktsang",
         image: "/paro-taksang.jpg",
-        description: "Also known as Tiger’s Nest Monastery, Paro Taktsang clings to a cliff 900 meters above the Paro Valley. It is Bhutan's most iconic pilgrimage site with breathtaking views.",
+        description: "Paro Taktsang, famously known as the Tiger’s Nest, is a sacred Buddhist monastery perched precariously on a cliffside 900 meters above the Paro Valley. Established in 1692 around the cave where Guru Rinpoche is said to have meditated, this iconic landmark offers breathtaking views, ancient murals, and a profound spiritual atmosphere reached via a scenic, rewarding pine-forest hike.",
         price: "$150",
         rating: 4.9,
         location: "Paro",
@@ -161,7 +161,7 @@ const mockDestinations = [
         id: 3,
         name: "Dochula Pass",
         image: "/dochula-pass.jpg",
-        description: "Dochula Pass features 108 memorial chortens set against panoramic Himalayan mountains. It's an excellent spot for photography and scenic drives.",
+        description: "Dochula Pass is a breathtaking mountain pass situated at 3,100 meters on the road from Thimphu to Punakha. It is renowned for its panoramic 360-degree views of the snow-capped Himalayan range and the 108 beautiful memorial chortens (shrines) built in honor of fallen soldiers, making it a peaceful, spiritually inspiring stop.",
         price: "$95",
         rating: 4.7,
         location: "Thimphu",
@@ -174,7 +174,7 @@ const mockDestinations = [
         id: 4,
         name: "Thimphu Valley",
         image: "/thimphu.jpg",
-        description: "The capital city of Bhutan, Thimphu is a unique blend of modern development and ancient traditions, being the only capital in the world without traffic lights.",
+        description: "Thimphu Valley houses the unique capital of Bhutan, blending modern expansion with deep-rooted cultural values. Surrounded by green hills, it features the grand Tashichho Dzong, the massive Buddha Dordenma overlooking the valley, and traditional museums, all without a single traffic light in the entire city.",
         price: "$110",
         rating: 4.6,
         location: "Thimphu",
@@ -187,7 +187,7 @@ const mockDestinations = [
         id: 5,
         name: "Phobjikha Valley",
         image: "/monk.jpg",
-        description: "A vast U-shaped glacial valley, famous as the winter home of the rare black-necked cranes that migrate from the Tibetan Plateau.",
+        description: "Phobjikha Valley is a stunning, wide glacial valley situated on the slopes of the Black Mountains. Renowned for its natural beauty and peaceful atmosphere, it is famous as the winter nesting ground of the rare, endangered black-necked cranes. The historic Gangtey Monastery overlooks this vast, scenic wetland.",
         price: "$130",
         rating: 4.8,
         location: "Wangdue Phodrang",
@@ -200,7 +200,7 @@ const mockDestinations = [
         id: 6,
         name: "Bumthang Valley",
         image: "/airport.jpg",
-        description: "The spiritual heartland of Bhutan, Bumthang is home to some of the country's oldest and most sacred Buddhist temples and monasteries.",
+        description: "Bumthang Valley is the spiritual heartland of Bhutan, consisting of four high-altitude valleys rich in ancient legend, sacred temples, and historic monasteries. As the birthplace of many Buddhist saints and home to Kurjey and Jambay Lhakhang, it offers deep historical walks, local cheese farms, and untouched alpine beauty.",
         price: "$140",
         rating: 4.9,
         location: "Bumthang",
@@ -849,7 +849,8 @@ app.post('/api/destinations', authenticateAdmin, async (req, res) => {
             return res.status(201).json(payload);
         }
         catch (err) {
-            console.error("Create destination failed on Supabase, falling back to memory:", err.message);
+            console.error("Create destination failed on Supabase:", err.message);
+            return res.status(500).json({ error: `Database write failed: ${err.message}` });
         }
     }
     if (!payload.id) {
@@ -874,7 +875,8 @@ app.put('/api/destinations/:id', authenticateAdmin, async (req, res) => {
             return res.json({ id, ...payload });
         }
         catch (err) {
-            console.error(`Update destination ${id} failed on Supabase, falling back to memory:`, err.message);
+            console.error(`Update destination ${id} failed on Supabase:`, err.message);
+            return res.status(500).json({ error: `Database write failed: ${err.message}` });
         }
     }
     const idx = memoryDestinations.findIndex(d => d.id === id);
@@ -896,7 +898,8 @@ app.delete('/api/destinations/:id', authenticateAdmin, async (req, res) => {
             return res.json({ message: "Destination deleted successfully", id });
         }
         catch (err) {
-            console.error(`Delete destination ${id} failed on Supabase, falling back to memory:`, err.message);
+            console.error(`Delete destination ${id} failed on Supabase:`, err.message);
+            return res.status(500).json({ error: `Database write failed: ${err.message}` });
         }
     }
     memoryDestinations = memoryDestinations.filter(d => d.id !== id);
@@ -934,7 +937,8 @@ app.post('/api/tours', authenticateAdmin, async (req, res) => {
             return res.status(201).json({ ...payload, priceVal: payload.price_val, desc: payload.description });
         }
         catch (err) {
-            console.error("Create tour failed on Supabase, falling back to memory:", err.message);
+            console.error("Create tour failed on Supabase:", err.message);
+            return res.status(500).json({ error: `Database write failed: ${err.message}` });
         }
     }
     // Fallback to in-memory
@@ -975,7 +979,8 @@ app.put('/api/tours/:id', authenticateAdmin, async (req, res) => {
                 return res.json({ id, ...payload, priceVal: payload.price_val, desc: payload.description });
             }
             catch (err) {
-                console.error(`Update tour ${id} failed on Supabase, falling back to memory:`, err.message);
+                console.error(`Update tour ${id} failed on Supabase:`, err.message);
+                return res.status(500).json({ error: `Database write failed: ${err.message}` });
             }
         }
         // Fallback to in-memory
@@ -1003,7 +1008,8 @@ app.delete('/api/tours/:id', authenticateAdmin, async (req, res) => {
             return res.json({ message: "Tour deleted successfully", id });
         }
         catch (err) {
-            console.error(`Delete tour ${id} failed on Supabase, falling back to memory:`, err.message);
+            console.error(`Delete tour ${id} failed on Supabase:`, err.message);
+            return res.status(500).json({ error: `Database write failed: ${err.message}` });
         }
     }
     // Fallback to in-memory
@@ -1029,7 +1035,8 @@ app.post('/api/hotels', authenticateAdmin, async (req, res) => {
             return res.status(201).json(payload);
         }
         catch (err) {
-            console.error("Create hotel failed on Supabase, falling back to memory:", err.message);
+            console.error("Create hotel failed on Supabase:", err.message);
+            return res.status(500).json({ error: `Database write failed: ${err.message}` });
         }
     }
     // Fallback to in-memory
@@ -1055,7 +1062,8 @@ app.put('/api/hotels/:id', authenticateAdmin, async (req, res) => {
             return res.json({ id, ...payload });
         }
         catch (err) {
-            console.error(`Update hotel ${id} failed on Supabase, falling back to memory:`, err.message);
+            console.error(`Update hotel ${id} failed on Supabase:`, err.message);
+            return res.status(500).json({ error: `Database write failed: ${err.message}` });
         }
     }
     // Fallback to in-memory
@@ -1078,7 +1086,8 @@ app.delete('/api/hotels/:id', authenticateAdmin, async (req, res) => {
             return res.json({ message: "Hotel deleted successfully", id });
         }
         catch (err) {
-            console.error(`Delete hotel ${id} failed on Supabase, falling back to memory:`, err.message);
+            console.error(`Delete hotel ${id} failed on Supabase:`, err.message);
+            return res.status(500).json({ error: `Database write failed: ${err.message}` });
         }
     }
     // Fallback to in-memory
@@ -1145,6 +1154,9 @@ app.post('/api/upload', authenticateAdmin, async (req, res) => {
             }
             catch (err) {
                 console.warn("Supabase Storage upload failed, falling back to local file:", err.message);
+                if (process.env.NODE_ENV === 'production' || process.env.VERCEL || process.env.VERCEL_ENV) {
+                    return res.status(500).json({ error: `Supabase Storage upload failed: ${err.message}` });
+                }
             }
         }
         // Create public/uploads directory safely for local fallback
@@ -1234,7 +1246,8 @@ app.put('/api/about', authenticateAdmin, async (req, res) => {
             return res.json(req.body);
         }
         catch (err) {
-            console.error("Supabase save error for about, falling back to local file:", err.message);
+            console.error("Supabase save error for about:", err.message);
+            return res.status(500).json({ error: `Database write failed: ${err.message}` });
         }
     }
     try {
@@ -1319,7 +1332,8 @@ app.put('/api/contact', authenticateAdmin, async (req, res) => {
             return res.json(req.body);
         }
         catch (err) {
-            console.error("Supabase save error for contact, falling back to local file:", err.message);
+            console.error("Supabase save error for contact:", err.message);
+            return res.status(500).json({ error: `Database write failed: ${err.message}` });
         }
     }
     try {
@@ -1406,7 +1420,8 @@ app.put('/api/testimonials', authenticateAdmin, async (req, res) => {
             return res.json(req.body);
         }
         catch (err) {
-            console.error("Supabase save error for testimonials, falling back to local file:", err.message);
+            console.error("Supabase save error for testimonials:", err.message);
+            return res.status(500).json({ error: `Database write failed: ${err.message}` });
         }
     }
     try {
@@ -1506,7 +1521,8 @@ app.post('/api/tourists', authenticateAdmin, async (req, res) => {
             }
         }
         catch (err) {
-            console.error("Supabase insert error for tourists, falling back to memory:", err.message);
+            console.error("Supabase insert error for tourists:", err.message);
+            return res.status(500).json({ error: `Database write failed: ${err.message}` });
         }
     }
     // Fallback to in-memory
@@ -1564,7 +1580,8 @@ app.put('/api/tourists/:id', authenticateAdmin, async (req, res) => {
             }
         }
         catch (err) {
-            console.error("Supabase update error for tourists, falling back to memory:", err.message);
+            console.error("Supabase update error for tourists:", err.message);
+            return res.status(500).json({ error: `Database write failed: ${err.message}` });
         }
     }
     // Fallback to in-memory
@@ -1591,10 +1608,10 @@ app.delete('/api/tourists/:id', authenticateAdmin, async (req, res) => {
                 method: 'DELETE'
             });
             clearCache('tourists:');
-            return res.json({ success: true });
         }
         catch (err) {
-            console.error("Supabase delete error for tourists, falling back to memory:", err.message);
+            console.error("Supabase delete error for tourists:", err.message);
+            return res.status(500).json({ error: `Database write failed: ${err.message}` });
         }
     }
     // Fallback to in-memory
