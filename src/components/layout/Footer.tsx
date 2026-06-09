@@ -61,7 +61,8 @@ const Footer = () => {
                 { name: 'Flights', path: '/flights' },
                 { name: 'Bhutan SDF Fee', path: '/sdf' },
                 { name: 'About Us', path: '/about' },
-                { name: 'Contact', path: '/contact' }
+                { name: 'Contact', path: '/contact' },
+                { name: 'Admin Portal', path: '/admin' }
               ].map(link => (
                 <li key={link.name}>
                   <Link to={link.path} className="text-secondary hover:text-accent transition-all text-sm font-light flex items-center group">
