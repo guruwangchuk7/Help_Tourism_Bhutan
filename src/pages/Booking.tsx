@@ -34,12 +34,12 @@ const Booking = () => {
 
     useEffect(() => {
         const url = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000'
-        fetch(`${url}/api/destinations`)
+        fetch(`${url}/api/destinations?t=${Date.now()}`)
             .then(res => res.json())
             .then(data => setDbDestinations(data))
             .catch(err => console.error("Error fetching destinations for booking:", err))
             
-        fetch(`${url}/api/tours`)
+        fetch(`${url}/api/tours?t=${Date.now()}`)
             .then(res => res.json())
             .then(data => setDbTours(data))
             .catch(err => console.error("Error fetching tours for booking:", err))

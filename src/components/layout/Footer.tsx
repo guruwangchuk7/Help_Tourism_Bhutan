@@ -44,10 +44,10 @@ const Footer = () => {
           {/* Logo & Bio */}
           <div className="lg:col-span-3">
             <Link to="/" className="flex items-center space-x-2 sm:space-x-3 group mb-6">
-              <img 
-                src={logoImg} 
-                alt="Help Tourism Bhutan Logo" 
-                className="h-14 sm:h-18 w-auto object-contain transition-transform duration-500 group-hover:rotate-12 group-hover:scale-105" 
+              <img
+                src={logoImg}
+                alt="Help Tourism Bhutan Logo"
+                className="h-14 sm:h-18 w-auto object-contain transition-transform duration-500 group-hover:rotate-12 group-hover:scale-105"
               />
               <div className="flex flex-col items-center -space-y-0.5">
                 <span className="text-base sm:text-lg md:text-xl font-heading font-semibold text-primary tracking-wide">

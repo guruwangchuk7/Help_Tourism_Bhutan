@@ -45,9 +45,9 @@ const Header = () => {
 
   // Animation variants for smooth sticky transition
   const headerVariants = {
-    initial: { 
-      background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 100%)', 
-      boxShadow: 'none', 
+    initial: {
+      background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 100%)',
+      boxShadow: 'none',
       borderBottom: '1px solid transparent',
       paddingTop: '32px',
       paddingBottom: '32px',
@@ -76,20 +76,18 @@ const Header = () => {
       <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
         {/* Left: Brand Logo */}
         <Link to="/" className="flex items-center space-x-2 sm:space-x-3 group relative z-[130] -top-[2px]">
-          <img 
-            src={logoImg} 
-            alt="Help Tourism Bhutan Logo" 
-            className="h-14 sm:h-18 w-auto object-contain transition-transform duration-500 group-hover:rotate-12 group-hover:scale-105" 
+          <img
+            src={logoImg}
+            alt="Help Tourism Bhutan Logo"
+            className="h-14 sm:h-18 w-auto object-contain transition-transform duration-500 group-hover:rotate-12 group-hover:scale-105"
           />
           <div className="flex flex-col items-center -space-y-0.5">
-            <span className={`text-base sm:text-lg md:text-xl font-heading font-semibold tracking-wide transition-colors duration-300 ${
-              activeHeader || mobileMenuOpen ? 'text-primary' : 'text-white [text-shadow:0_1px_4px_rgba(0,0,0,0.3)]'
-            }`}>
+            <span className={`text-base sm:text-lg md:text-xl font-heading font-semibold tracking-wide transition-colors duration-300 ${activeHeader || mobileMenuOpen ? 'text-primary' : 'text-white [text-shadow:0_1px_4px_rgba(0,0,0,0.3)]'
+              }`}>
               Help Tourism
             </span>
-            <div className={`flex items-center space-x-1.5 transition-colors duration-300 ${
-              activeHeader || mobileMenuOpen ? 'text-primary' : 'text-white [text-shadow:0_1px_4px_rgba(0,0,0,0.3)]'
-            }`}>
+            <div className={`flex items-center space-x-1.5 transition-colors duration-300 ${activeHeader || mobileMenuOpen ? 'text-primary' : 'text-white [text-shadow:0_1px_4px_rgba(0,0,0,0.3)]'
+              }`}>
               <div className="h-[1px] w-4 sm:w-6 bg-current opacity-40"></div>
               <span className="font-heading font-bold text-[11px] sm:text-xs tracking-wider">
                 Bhutan

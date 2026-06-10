@@ -1,4 +1,4 @@
-﻿import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { motion } from "framer-motion"
 import { Star, Heart, MapPin } from "lucide-react"
 import { useState } from "react"
@@ -15,6 +15,11 @@ type Props = {
 const DestinationCard = ({ id, name, image, location = "Bhutan", price = "$120", rating = 4.8 }: Props) => {
   const navigate = useNavigate()
   const [isFavorite, setIsFavorite] = useState(false)
+  const [mountTime] = useState(() => Date.now())
+
+  const cacheBustedImage = (image && typeof image === 'string' && !image.startsWith('data:') && !image.includes('?t='))
+    ? `${image}${image.includes('?') ? '&' : '?'}t=${mountTime}`
+    : image
 
   return (
     <motion.div
@@ -28,7 +33,7 @@ const DestinationCard = ({ id, name, image, location = "Bhutan", price = "$120",
         {/* Thumbnail Image with Zoom Effect */}
         <div className="relative aspect-[4/3] overflow-hidden">
           <img
-            src={image}
+            src={cacheBustedImage}
             alt={name}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           />

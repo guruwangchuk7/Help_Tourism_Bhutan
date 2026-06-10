@@ -48,6 +48,11 @@ const DestinationDetail = () => {
   const [startDate, setStartDate] = useState(getTodayString())
   const [endDate, setEndDate] = useState(getTomorrowString())
   const [adults, setAdults] = useState(2)
+  const [mountTime] = useState(() => Date.now())
+
+  const cacheBustedImage = (destination && destination.image && typeof destination.image === 'string' && !destination.image.startsWith('data:') && !destination.image.includes('?t='))
+    ? `${destination.image}${destination.image.includes('?') ? '&' : '?'}t=${mountTime}`
+    : destination?.image || ''
 
   const seoSchema = useMemo(() => {
     if (!destination) return null
@@ -114,7 +119,7 @@ const DestinationDetail = () => {
   useEffect(() => {
     setLoading(true)
     setError(false)
-    fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000'}/api/destinations/${id}`)
+    fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000'}/api/destinations/${id}?t=${Date.now()}`)
       .then(res => {
         if (!res.ok) {
           throw new Error("Failed to fetch")
@@ -240,7 +245,7 @@ const DestinationDetail = () => {
             initial={{ scale: 1.1 }}
             animate={{ scale: 1 }}
             transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-            src={destination.image}
+            src={cacheBustedImage}
             alt={destination.name}
             className="w-full h-full object-cover"
           />
@@ -479,7 +484,7 @@ const DestinationDetail = () => {
                   </div>
 
                   <button
-                    onClick={() => navigate('/booking', { state: { adults, nights, startDate, endDate, destinationName: destination.name, totalPrice, image: destination.image } })}
+                    onClick={() => navigate('/booking', { state: { adults, nights, startDate, endDate, destinationName: destination.name, totalPrice, image: cacheBustedImage } })}
                     className="w-full btn-accent py-5 text-sm shadow-premium"
                   >
                     Secure Trip

@@ -25,7 +25,7 @@ const Destinations = () => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000'}/api/destinations`)
+    fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000'}/api/destinations?t=${Date.now()}`)
       .then(res => res.json())
       .then(data => {
         setDestinations(data)

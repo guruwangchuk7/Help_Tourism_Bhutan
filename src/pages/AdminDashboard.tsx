@@ -108,13 +108,13 @@ const AdminDashboard = () => {
     setLoading(true)
     try {
       const [destRes, toursRes, hotelsRes, aboutRes, contactRes, testimonialsRes, touristsRes] = await Promise.all([
-        fetch(`${API_BASE}/api/destinations`),
-        fetch(`${API_BASE}/api/tours`),
-        fetch(`${API_BASE}/api/hotels`),
-        fetch(`${API_BASE}/api/about`),
-        fetch(`${API_BASE}/api/contact`),
-        fetch(`${API_BASE}/api/testimonials`),
-        fetch(`${API_BASE}/api/tourists`)
+        fetch(`${API_BASE}/api/destinations?t=${Date.now()}`),
+        fetch(`${API_BASE}/api/tours?t=${Date.now()}`),
+        fetch(`${API_BASE}/api/hotels?t=${Date.now()}`),
+        fetch(`${API_BASE}/api/about?t=${Date.now()}`),
+        fetch(`${API_BASE}/api/contact?t=${Date.now()}`),
+        fetch(`${API_BASE}/api/testimonials?t=${Date.now()}`),
+        fetch(`${API_BASE}/api/tourists?t=${Date.now()}`)
       ])
 
       const destData = await destRes.json()
