@@ -15,6 +15,8 @@ const PORT = process.env.PORT || 5000;
 app.use((req, res, next) => {
     if (req.url.startsWith('/_/backend')) {
         req.url = req.url.replace('/_/backend', '');
+        // Clear Express cached parsed URL to force recalculation of req.path and req.query
+        req._parsedUrl = undefined;
     }
     next();
 });
@@ -42,7 +44,7 @@ app.use((req, res, next) => {
     res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-XSS-Protection', '1; mode=block');
-    if (req.path.startsWith('/api/')) {
+    if (req.path.startsWith('/api/') || req.path.startsWith('/_/backend/api/')) {
         res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
         res.setHeader('Pragma', 'no-cache');
         res.setHeader('Expires', '0');
@@ -95,7 +97,14 @@ app.get('/api/verify', authenticateAdmin, (req, res) => {
 // Caching Store & Helpers for high scalability
 const apiCache = new Map();
 const CACHE_TTL = 30 * 1000; // 30 seconds TTL
-function getCache(key) {
+function getCache(key, req) {
+    // Bypass cache if cache-busting headers or query parameters are sent
+    const bypass = req && (req.query.t !== undefined ||
+        req.headers['cache-control'] === 'no-cache' ||
+        req.headers['pragma'] === 'no-cache');
+    if (bypass) {
+        return null;
+    }
     const cached = apiCache.get(key);
     if (cached && cached.expiry > Date.now()) {
         return cached.data;
@@ -693,7 +702,7 @@ checkDb();
 // Routes
 app.get('/api/destinations', async (req, res) => {
     const cacheKey = 'destinations:list';
-    const cached = getCache(cacheKey);
+    const cached = getCache(cacheKey, req);
     if (cached)
         return res.json(cached);
     if (dbConnected) {
@@ -716,7 +725,7 @@ app.get('/api/destinations/:id', async (req, res) => {
     const idStr = req.params.id;
     const id = parseInt(idStr);
     const cacheKey = `destinations:${id}`;
-    const cached = getCache(cacheKey);
+    const cached = getCache(cacheKey, req);
     if (cached)
         return res.json(cached);
     if (dbConnected) {
@@ -748,7 +757,7 @@ app.get('/api/destinations/:id', async (req, res) => {
 });
 app.get('/api/tours', async (req, res) => {
     const cacheKey = 'tours:list';
-    const cached = getCache(cacheKey);
+    const cached = getCache(cacheKey, req);
     if (cached)
         return res.json(cached);
     if (dbConnected) {
@@ -771,7 +780,7 @@ app.get('/api/tours', async (req, res) => {
 });
 app.get('/api/tours/editions', async (req, res) => {
     const cacheKey = 'tours:editions';
-    const cached = getCache(cacheKey);
+    const cached = getCache(cacheKey, req);
     if (cached)
         return res.json(cached);
     if (dbConnected) {
@@ -789,7 +798,7 @@ app.get('/api/tours/editions', async (req, res) => {
 app.get('/api/tours/:id', async (req, res) => {
     const id = req.params.id;
     const cacheKey = `tours:${id}`;
-    const cached = getCache(cacheKey);
+    const cached = getCache(cacheKey, req);
     if (cached)
         return res.json(cached);
     if (dbConnected) {
@@ -817,7 +826,7 @@ app.get('/api/tours/:id', async (req, res) => {
 });
 app.get('/api/hotels', async (req, res) => {
     const cacheKey = 'hotels:list';
-    const cached = getCache(cacheKey);
+    const cached = getCache(cacheKey, req);
     if (cached)
         return res.json(cached);
     if (dbConnected) {
@@ -1210,7 +1219,7 @@ const defaultAboutData = {
 let memoryAbout = { ...defaultAboutData };
 app.get('/api/about', async (req, res) => {
     const cacheKey = 'about:data';
-    const cached = getCache(cacheKey);
+    const cached = getCache(cacheKey, req);
     if (cached)
         return res.json(cached);
     if (dbConnected) {
@@ -1296,7 +1305,7 @@ const defaultContactData = {
 let memoryContact = { ...defaultContactData };
 app.get('/api/contact', async (req, res) => {
     const cacheKey = 'contact:data';
-    const cached = getCache(cacheKey);
+    const cached = getCache(cacheKey, req);
     if (cached)
         return res.json(cached);
     if (dbConnected) {
@@ -1384,7 +1393,7 @@ const defaultTestimonials = [
 let memoryTestimonials = [...defaultTestimonials];
 app.get('/api/testimonials', async (req, res) => {
     const cacheKey = 'testimonials:list';
-    const cached = getCache(cacheKey);
+    const cached = getCache(cacheKey, req);
     if (cached)
         return res.json(cached);
     if (dbConnected) {
@@ -1447,7 +1456,7 @@ const defaultTourists = [];
 let memoryTourists = [];
 app.get('/api/tourists', async (req, res) => {
     const cacheKey = 'tourists:list';
-    const cached = getCache(cacheKey);
+    const cached = getCache(cacheKey, req);
     if (cached)
         return res.json(cached);
     if (dbConnected) {
