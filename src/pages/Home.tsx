@@ -116,6 +116,38 @@ const Home = () => {
   const navigate = useNavigate()
   const [destinations, setDestinations] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [activeDestIndex, setActiveDestIndex] = useState(0)
+  const [activeTourIndex, setActiveTourIndex] = useState(0)
+
+  const handleDestScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const container = e.currentTarget
+    const scrollLeft = container.scrollLeft
+    const card = container.querySelector('[data-card="dest"]')
+    if (card) {
+      const cardWidth = card.clientWidth
+      const gap = 16 // gap-4 is 16px
+      const index = Math.round(scrollLeft / (cardWidth + gap))
+      const safeIndex = Math.max(0, Math.min(index, destinations.length - 1))
+      if (safeIndex !== activeDestIndex) {
+        setActiveDestIndex(safeIndex)
+      }
+    }
+  }
+
+  const handleTourScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const container = e.currentTarget
+    const scrollLeft = container.scrollLeft
+    const card = container.querySelector('[data-card="tour"]')
+    if (card) {
+      const cardWidth = card.clientWidth
+      const gap = 16 // gap-4 is 16px
+      const index = Math.round(scrollLeft / (cardWidth + gap))
+      const safeIndex = Math.max(0, Math.min(index, topTours.length - 1))
+      if (safeIndex !== activeTourIndex) {
+        setActiveTourIndex(safeIndex)
+      }
+    }
+  }
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000'}/api/destinations?t=${Date.now()}`)
@@ -181,31 +213,95 @@ const Home = () => {
           </motion.div>
 
           {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <CardSkeleton key={i} />
-              ))}
-            </div>
+            <>
+              {/* Desktop view */}
+              <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <CardSkeleton key={i} />
+                ))}
+              </div>
+              {/* Mobile view */}
+              <div className="flex md:hidden overflow-x-auto no-scrollbar gap-4 px-[15vw] pb-4">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="w-[70vw] shrink-0 opacity-60">
+                    <CardSkeleton />
+                  </div>
+                ))}
+              </div>
+            </>
           ) : (
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6"
-            >
-              {destinations.map((dest) => (
-                <DestinationCard
-                  key={dest.id}
-                  id={dest.id}
-                  name={dest.name}
-                  image={dest.image}
-                  price={dest.price}
-                  rating={dest.rating}
-                  location={dest.location}
-                />
-              ))}
-            </motion.div>
+            <>
+              {/* Mobile View: Swipe Carousel (< 768px) */}
+              <div className="block md:hidden">
+                <div
+                  onScroll={handleDestScroll}
+                  className="flex items-stretch overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar gap-4 px-[15vw] pb-4"
+                  style={{ WebkitOverflowScrolling: "touch" }}
+                  role="region"
+                  aria-label="Popular Destinations Carousel"
+                >
+                  {destinations.map((dest, idx) => {
+                    const isActive = idx === activeDestIndex;
+                    return (
+                      <div
+                        data-card="dest"
+                        key={dest.id}
+                        className={`w-[70vw] shrink-0 snap-center flex flex-col transition-all duration-500 ease-out transform ${
+                          isActive ? "scale-100 opacity-100" : "scale-[0.93] opacity-65"
+                        }`}
+                      >
+                        <DestinationCard
+                          id={dest.id}
+                          name={dest.name}
+                          image={dest.image}
+                          price={dest.price}
+                          rating={dest.rating}
+                          location={dest.location}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+                {/* Pagination Indicator */}
+                <div className="flex items-center justify-center space-x-3.5 mt-6">
+                  <span className="text-[11px] font-bold text-primary/70 tracking-widest font-body">
+                    {activeDestIndex + 1} / {destinations.length}
+                  </span>
+                  <div className="h-3.5 w-[1px] bg-primary/10" />
+                  <div className="flex gap-1.5">
+                    {destinations.map((_, idx) => (
+                      <span
+                        key={idx}
+                        className={`h-1 rounded-full transition-all duration-300 ${
+                          idx === activeDestIndex ? "w-5 bg-accent" : "w-1 bg-primary/15"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Desktop View: Grid (>= 768px) */}
+              <motion.div
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="hidden md:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6"
+              >
+                {destinations.map((dest) => (
+                  <DestinationCard
+                    key={dest.id}
+                    id={dest.id}
+                    name={dest.name}
+                    image={dest.image}
+                    price={dest.price}
+                    rating={dest.rating}
+                    location={dest.location}
+                  />
+                ))}
+              </motion.div>
+            </>
           )}
         </section>
 
@@ -235,7 +331,76 @@ const Home = () => {
               </Link>
             </motion.div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {/* Mobile View: Swipe Carousel (< 768px) */}
+            <div className="block md:hidden">
+              <div
+                onScroll={handleTourScroll}
+                className="flex items-stretch overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar gap-4 px-[15vw] pb-4"
+                style={{ WebkitOverflowScrolling: "touch" }}
+                role="region"
+                aria-label="Top Tours Carousel"
+              >
+                {topTours.map((tour, idx) => {
+                  const isActive = idx === activeTourIndex;
+                  return (
+                    <div
+                      data-card="tour"
+                      key={idx}
+                      className={`w-[70vw] shrink-0 snap-center flex flex-col transition-all duration-500 ease-out transform ${
+                        isActive ? "scale-100 opacity-100" : "scale-[0.93] opacity-65"
+                      }`}
+                      onClick={() => navigate(`/tours/${tour.id}`)}
+                    >
+                      <div className="bg-white rounded-[2.5rem] overflow-hidden shadow-minimal hover:shadow-premium group border border-primary/5 p-5 flex flex-col h-full transition-all duration-300 cursor-pointer">
+                        <div className="relative aspect-[4/3] rounded-3xl overflow-hidden shrink-0">
+                          <img src={tour.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={tour.title} />
+                          <span className="absolute top-4 left-4 bg-primary text-white text-[9px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full">
+                            {tour.duration}
+                          </span>
+                        </div>
+                        <div className="flex flex-col flex-1 pt-6 px-2">
+                          <h3 className="text-xl font-heading font-medium text-primary leading-tight mb-3 group-hover:text-accent transition-colors">{tour.title}</h3>
+                          <p className="text-secondary font-light text-sm mb-6 leading-relaxed flex-1">{tour.desc}</p>
+
+                          <div className="flex items-center justify-between pt-5 border-t border-primary/5 mt-auto">
+                            <div className="flex flex-col">
+                              <span className="text-[9px] font-semibold text-secondary/60 uppercase tracking-wider mb-0.5">Price starting</span>
+                              <span className="text-lg font-heading font-semibold text-primary">{tour.price}</span>
+                            </div>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); navigate(`/tours/${tour.id}`); }}
+                              className="btn-accent !px-5 !py-2.5 !text-[10px] !rounded-full font-bold uppercase tracking-wider cursor-pointer"
+                            >
+                              Explore
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              {/* Pagination Indicator */}
+              <div className="flex items-center justify-center space-x-3.5 mt-6">
+                <span className="text-[11px] font-bold text-primary/70 tracking-widest font-body">
+                  {activeTourIndex + 1} / {topTours.length}
+                </span>
+                <div className="h-3.5 w-[1px] bg-primary/10" />
+                <div className="flex gap-1.5">
+                  {topTours.map((_, idx) => (
+                    <span
+                      key={idx}
+                      className={`h-1 rounded-full transition-all duration-300 ${
+                        idx === activeTourIndex ? "w-5 bg-accent" : "w-1 bg-primary/15"
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Desktop View: Grid (>= 768px) */}
+            <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {topTours.map((tour, idx) => (
                 <motion.div
                   key={idx}
