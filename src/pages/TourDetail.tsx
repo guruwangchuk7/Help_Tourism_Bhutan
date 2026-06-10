@@ -221,22 +221,23 @@ const TourDetail = () => {
             {/* Left Content Area (8 cols) */}
             <div className="lg:col-span-8">
               {/* Tab Navigation */}
-              <div className="flex border-b border-primary/5 mb-10 overflow-x-auto gap-8 scrollbar-hide">
+              <div className="grid grid-cols-3 gap-1 bg-bg-alt p-1 rounded-xl mb-10 border border-primary/5">
                 {[
-                  { id: "itinerary", label: "Daily Itinerary" },
-                  { id: "inclusions", label: "What's Enveloped" },
-                  { id: "essential", label: "Practical Advice" }
+                  { id: "itinerary", label: "Daily Itinerary", mobileLabel: "Itinerary" },
+                  { id: "inclusions", label: "What's Enveloped", mobileLabel: "Inclusions" },
+                  { id: "essential", label: "Practical Advice", mobileLabel: "Advice" }
                 ].map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as any)}
-                    className={`pb-4 text-[10px] font-bold uppercase tracking-[0.2em] border-b-2 transition-all shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-4 rounded ${
+                    className={`py-3 text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.1em] sm:tracking-[0.2em] rounded-lg transition-all duration-300 cursor-pointer text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 ${
                       activeTab === tab.id
-                        ? "border-accent text-primary font-bold"
-                        : "border-transparent text-secondary/60 hover:text-primary"
+                        ? "bg-white text-primary shadow-sm font-bold"
+                        : "text-secondary/65 hover:text-primary hover:bg-white/40"
                     }`}
                   >
-                    {tab.label}
+                    <span className="hidden sm:inline">{tab.label}</span>
+                    <span className="inline sm:hidden">{tab.mobileLabel}</span>
                   </button>
                 ))}
               </div>
