@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Instagram, Facebook, Youtube, Video, ArrowUpRight, Compass, Phone, Mail, MessageCircle, MapPin } from 'lucide-react'
+import { Instagram, Facebook, Youtube, Video, ArrowUpRight, Phone, Mail, MessageCircle, MapPin } from 'lucide-react'
+import logoImg from '../../assets/logo/index.png'
 
 type FooterContactData = {
   footerPhone: string
@@ -42,9 +43,24 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 pb-20 border-b border-gray-100">
           {/* Logo & Bio */}
           <div className="lg:col-span-3">
-            <Link to="/" className="flex items-center space-x-3 group mb-6">
-              <Compass className="w-8 h-8 text-accent transition-all duration-500 group-hover:rotate-45" />
-              <span className="text-xl sm:text-2xl md:text-3xl font-heading font-semibold text-primary tracking-wide">Help Tourism Bhutan</span>
+            <Link to="/" className="flex items-center space-x-2 sm:space-x-3 group mb-6">
+              <img 
+                src={logoImg} 
+                alt="Help Tourism Bhutan Logo" 
+                className="h-14 sm:h-18 w-auto object-contain transition-transform duration-500 group-hover:rotate-12 group-hover:scale-105" 
+              />
+              <div className="flex flex-col items-center -space-y-0.5">
+                <span className="text-base sm:text-lg md:text-xl font-heading font-semibold text-primary tracking-wide">
+                  Help Tourism
+                </span>
+                <div className="flex items-center space-x-1.5 text-primary">
+                  <div className="h-[1px] w-4 sm:w-6 bg-current opacity-40"></div>
+                  <span className="font-heading font-bold text-[11px] sm:text-xs tracking-wider">
+                    Bhutan
+                  </span>
+                  <div className="h-[1px] w-4 sm:w-6 bg-current opacity-40"></div>
+                </div>
+              </div>
             </Link>
             <p className="text-secondary text-sm font-light leading-relaxed max-w-sm tracking-wide">
               Your gateway to authentic Bhutanese luxury. We curate experiences that connect you with the soul of the Dragon Kingdom.
@@ -133,7 +149,7 @@ const Footer = () => {
             </div>
           </div>
         </div>
-        
+
 
 
 

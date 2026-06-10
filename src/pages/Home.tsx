@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import Hero from "../components/hero/Hero"
 import DestinationCard from "../components/destinations/DestinationCard"
@@ -6,14 +7,26 @@ import { ArrowRight, Compass, ShieldCheck, Heart, Headphones, Instagram } from "
 import { Link, useNavigate } from "react-router-dom"
 import PageTransition from "../components/common/PageTransition"
 import SEO from "../components/common/SEO"
+import { CardSkeleton } from "../components/common/Skeleton"
 
-const popularDestinations = [
+const fallbackDestinations = [
   { id: 2, name: "Paro", image: "/paro-taksang.jpg", location: "Paro", price: "$150", rating: 4.9 },
   { id: 4, name: "Thimphu", image: "/thimphu.jpg", location: "Thimphu", price: "$110", rating: 4.6 },
   { id: 1, name: "Punakha", image: "/punakha-dzong.jpg", location: "Punakha", price: "$120", rating: 4.8 },
   { id: 6, name: "Bumthang", image: "/airport.jpg", location: "Bumthang", price: "$140", rating: 4.9 },
   { id: 5, name: "Phobjikha", image: "/monk.jpg", location: "Wangdue Phodrang", price: "$130", rating: 4.8 },
 ]
+
+const getShortName = (id: number, fullName: string) => {
+  switch(id) {
+    case 1: return "Punakha";
+    case 2: return "Paro";
+    case 4: return "Thimphu";
+    case 5: return "Phobjikha";
+    case 6: return "Bumthang";
+    default: return fullName;
+  }
+}
 
 const topTours = [
   {
@@ -101,6 +114,34 @@ const homeSchema = [
 
 const Home = () => {
   const navigate = useNavigate()
+  const [destinations, setDestinations] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000'}/api/destinations`)
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          const targetIds = [2, 4, 1, 6, 5];
+          const sorted = data
+            .filter((d: any) => targetIds.includes(d.id))
+            .sort((a: any, b: any) => targetIds.indexOf(a.id) - targetIds.indexOf(b.id))
+            .map((d: any) => ({
+              ...d,
+              name: getShortName(d.id, d.name)
+            }));
+          setDestinations(sorted);
+        } else {
+          setDestinations(fallbackDestinations)
+        }
+        setLoading(false)
+      })
+      .catch(err => {
+        console.error("Failed to fetch destinations for homepage:", err)
+        setDestinations(fallbackDestinations)
+        setLoading(false)
+      })
+  }, [])
 
   return (
     <PageTransition>
@@ -139,25 +180,33 @@ const Home = () => {
             </Link>
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6"
-          >
-            {popularDestinations.map((dest) => (
-              <DestinationCard
-                key={dest.id}
-                id={dest.id}
-                name={dest.name}
-                image={dest.image}
-                price={dest.price}
-                rating={dest.rating}
-                location={dest.location}
-              />
-            ))}
-          </motion.div>
+          {loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <CardSkeleton key={i} />
+              ))}
+            </div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6"
+            >
+              {destinations.map((dest) => (
+                <DestinationCard
+                  key={dest.id}
+                  id={dest.id}
+                  name={dest.name}
+                  image={dest.image}
+                  price={dest.price}
+                  rating={dest.rating}
+                  location={dest.location}
+                />
+              ))}
+            </motion.div>
+          )}
         </section>
 
         {/* Section 3: Top Tours */}

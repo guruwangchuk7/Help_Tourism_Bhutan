@@ -1,7 +1,8 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, Compass, Globe } from 'lucide-react'
+import { Menu, X, Globe } from 'lucide-react'
+import logoImg from '../../assets/logo/index.png'
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -74,11 +75,28 @@ const Header = () => {
     >
       <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
         {/* Left: Brand Logo */}
-        <Link to="/" className="flex items-center space-x-2 sm:space-x-3 group relative z-[130] -top-[4px]">
-          <Compass className={`w-6 h-6 sm:w-7 sm:h-7 transition-all duration-300 group-hover:rotate-45 ${activeHeader || mobileMenuOpen ? 'text-accent' : 'text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)]'}`} />
-          <span className={`text-base sm:text-xl md:text-2xl font-heading font-semibold tracking-wide ${activeHeader || mobileMenuOpen ? 'text-primary' : 'text-white [text-shadow:0_1px_4px_rgba(0,0,0,0.3)]'}`}>
-            Help Tourism Bhutan
-          </span>
+        <Link to="/" className="flex items-center space-x-2 sm:space-x-3 group relative z-[130] -top-[2px]">
+          <img 
+            src={logoImg} 
+            alt="Help Tourism Bhutan Logo" 
+            className="h-14 sm:h-18 w-auto object-contain transition-transform duration-500 group-hover:rotate-12 group-hover:scale-105" 
+          />
+          <div className="flex flex-col items-center -space-y-0.5">
+            <span className={`text-base sm:text-lg md:text-xl font-heading font-semibold tracking-wide transition-colors duration-300 ${
+              activeHeader || mobileMenuOpen ? 'text-primary' : 'text-white [text-shadow:0_1px_4px_rgba(0,0,0,0.3)]'
+            }`}>
+              Help Tourism
+            </span>
+            <div className={`flex items-center space-x-1.5 transition-colors duration-300 ${
+              activeHeader || mobileMenuOpen ? 'text-primary' : 'text-white [text-shadow:0_1px_4px_rgba(0,0,0,0.3)]'
+            }`}>
+              <div className="h-[1px] w-4 sm:w-6 bg-current opacity-40"></div>
+              <span className="font-heading font-bold text-[11px] sm:text-xs tracking-wider">
+                Bhutan
+              </span>
+              <div className="h-[1px] w-4 sm:w-6 bg-current opacity-40"></div>
+            </div>
+          </div>
         </Link>
 
         {/* Center: Navigation Links */}
