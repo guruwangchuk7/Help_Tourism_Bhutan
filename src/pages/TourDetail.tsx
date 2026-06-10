@@ -221,7 +221,7 @@ const TourDetail = () => {
             {/* Left Content Area (8 cols) */}
             <div className="lg:col-span-8">
               {/* Tab Navigation */}
-              <div className="flex border-b border-primary/5 mb-10 overflow-x-auto gap-8">
+              <div className="flex border-b border-primary/5 mb-10 overflow-x-auto gap-8 scrollbar-hide">
                 {[
                   { id: "itinerary", label: "Daily Itinerary" },
                   { id: "inclusions", label: "What's Enveloped" },
