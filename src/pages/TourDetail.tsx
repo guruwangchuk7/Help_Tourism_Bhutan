@@ -221,7 +221,7 @@ const TourDetail = () => {
             {/* Left Content Area (8 cols) */}
             <div className="lg:col-span-8">
               {/* Tab Navigation */}
-              <div className="grid grid-cols-3 gap-1 bg-bg-alt p-1 rounded-xl mb-10 border border-primary/5">
+              <div className="grid grid-cols-3 border-b border-primary/5 mb-10 text-center">
                 {[
                   { id: "itinerary", label: "Daily Itinerary", mobileLabel: "Itinerary" },
                   { id: "inclusions", label: "What's Enveloped", mobileLabel: "Inclusions" },
@@ -230,10 +230,10 @@ const TourDetail = () => {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as any)}
-                    className={`py-1.5 sm:py-2 text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.1em] sm:tracking-[0.2em] rounded-lg transition-all duration-300 cursor-pointer text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 ${
+                    className={`pb-4 text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.1em] sm:tracking-[0.2em] border-b-2 transition-all cursor-pointer text-center focus-visible:outline-none ${
                       activeTab === tab.id
-                        ? "bg-white text-primary shadow-sm font-bold"
-                        : "text-secondary/65 hover:text-primary hover:bg-white/40"
+                        ? "border-accent text-primary font-bold"
+                        : "border-transparent text-secondary/60 hover:text-primary"
                     }`}
                   >
                     <span className="hidden sm:inline">{tab.label}</span>
