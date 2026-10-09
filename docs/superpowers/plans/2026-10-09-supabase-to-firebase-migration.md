@@ -4,9 +4,9 @@
 
 **Goal:** Replace Supabase (Postgres via PostgREST + Storage REST) with Firebase (Firestore + Cloud Storage) as the backend's data layer, with zero changes to the frontend.
 
-**Architecture:** Replace the Supabase PostgREST/Storage REST calls in the single-file Express backend (`backend/src/index.ts`) with Firebase Admin SDK calls against Firestore and Cloud Storage, keeping route paths, request/response shapes, and the existing in-memory/file fallback pattern unchanged. A one-off Node script restores the downloaded Postgres backup into a throwaway local database, reads it with correct native types, and writes the data into Firestore and Storage before the route code is swapped over.
+**Architecture:** Replace the Supabase PostgREST/Storage REST calls in the single-file Express backend (`backend/src/index.ts`) with Firebase Admin SDK (Firestore only) calls for data, static frontend assets for the 20 already-recovered images, and Cloudinary for future admin uploads — keeping route paths, request/response shapes, and the existing in-memory/file fallback pattern unchanged. (Revised from an earlier Firebase-Storage-based design after discovering Firebase Storage now requires the paid Blaze plan even at zero usage; Firestore itself stays on the free Spark plan.) A one-off Node script restores the downloaded Postgres backup into a throwaway local database, reads it with correct native types, copies the recovered image files into the frontend's `public/` folder, and writes the data into Firestore before the route code is swapped over.
 
-**Tech Stack:** Node.js + Express 4 + TypeScript (existing), `firebase-admin` SDK (new), Docker + local Postgres + `pg` (one-off migration tooling only, removed after use).
+**Tech Stack:** Node.js + Express 4 + TypeScript (existing), `firebase-admin` SDK for Firestore (new), `cloudinary` SDK for uploads (new), Docker + local Postgres + `pg` (one-off migration tooling only, removed after use).
 
 **Spec:** `docs/superpowers/specs/2026-10-09-supabase-to-firebase-migration-design.md`
 
@@ -15,45 +15,50 @@
 - No route path, request body shape, or response JSON shape may change — the frontend (`src/pages/AdminDashboard.tsx` and public pages) makes zero code changes.
 - This backend has no existing test framework (`backend/package.json` has no test runner). Verification in this plan uses the dev server + `curl` against real endpoints, matching the project's existing convention of ad-hoc connectivity scripts (seen in `backend/dist/test_*.js`) rather than introducing a new test framework the codebase doesn't use.
 - Firestore collection/field names, exactly as decided in the spec's Data Model Mapping: collections `destinations`, `attractions` (FK field renamed `destinationId`), `tours`, `tourEditions` (FK field renamed `tourId`), `hotels`, `settings` (doc ID = key, field `value`), `tourists`. All other fields keep their original Postgres column names (e.g. `price_val`, `description`, `check_in_date`).
-- Firebase credentials delivered via exactly two env vars: `FIREBASE_SERVICE_ACCOUNT` (the service account JSON, stringified) and `FIREBASE_STORAGE_BUCKET`. No other credential mechanism.
-- Never print or commit the actual `ADMIN_API_KEY`/`FIREBASE_SERVICE_ACCOUNT` values anywhere in code, logs, or docs — curl examples in this plan read secrets from the shell environment, never inline them.
+- Firebase credentials delivered via exactly one env var: `FIREBASE_SERVICE_ACCOUNT` (the service account JSON, stringified) — Firestore only, no Firebase Storage. Cloudinary credentials delivered via `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`. No other credential mechanism.
+- Never print or commit the actual `ADMIN_API_KEY`/`FIREBASE_SERVICE_ACCOUNT`/`CLOUDINARY_API_SECRET` values anywhere in code, logs, or docs — curl examples in this plan read secrets from the shell environment, never inline them.
 - No live-traffic cutover plan needed — the Supabase project is already paused, so there is no concurrent production traffic.
 
 ## Review Focus
 
 - **Empty `tourists` collection on first write** — the auto-increment-by-max-id logic used for creating a new tourist must not crash when the collection has zero documents (today's real state). Covered in Task 8.
-- **Image URL rewriting correctness** — the 6 rows (across `destinations`/`hotels`) that point at the now-dead `https://sahdrcajbflinfhlwgmb.supabase.co/storage/...` URLs must end up pointing at valid, loadable Firebase Storage URLs after migration, not left dangling. Covered in Task 3 (migration script) and spot-checked in Task 11.
+- **Image URL rewriting correctness** — the 5 rows (1 destination, 4 hotels) that point at the now-dead `https://sahdrcajbflinfhlwgmb.supabase.co/storage/...` URLs must end up pointing at valid, loadable local static-asset paths after migration, not left dangling. Covered in Task 3 (migration script) and spot-checked in Task 11.
 - **JSONB fields surviving the transfer as real structures, not strings** — `tours.inclusions`/`exclusions`/`itinerary` must arrive in Firestore as native arrays/maps so the frontend's `.map()` calls over them keep working, not as a stringified JSON blob. Covered in Task 3 and Task 5.
 - **Write endpoints must not crash when Firestore is unreachable** — today's code falls back to in-memory data when Supabase is down; the Firestore version must preserve that same resilience (no unhandled exceptions, no 500s on a config problem) rather than being a regression from the current behavior. The `if (firestoreConnected && db) {...} else {...}` pattern is identical across every migrated route; Task 4 Step 5 explicitly verifies the fallback once (disabling `FIREBASE_SERVICE_ACCOUNT` and confirming `/api/destinations` still serves mock data without crashing) and the same unmodified pattern is reused as-is in Tasks 5-9, so it is not re-verified per task.
-- **Upload validation surviving the storage-backend swap** — the 5MB size cap, image-extension allowlist, and filename sanitization in `/api/upload` live outside the Supabase-specific code and must remain intact after swapping to Firebase Storage. Covered in Task 9.
+- **Upload validation surviving the storage-backend swap** — the 5MB size cap, image-extension allowlist, and filename sanitization in `/api/upload` live outside the Supabase-specific code and must remain intact after swapping to Cloudinary. Covered in Task 9.
 
 ---
 
-### Task 1: Firebase project creation & Admin SDK bootstrap
+### Task 1: Firebase (Firestore) & Cloudinary bootstrap
 
 **Files:**
 - Create: `backend/src/firebase.ts`
+- Create: `backend/src/cloudinary.ts`
 - Modify: `backend/package.json`
 - Modify: `backend/.env` (local only, not committed)
 - Create: `backend/.env.example`
 
 **Interfaces:**
-- Produces: `db: admin.firestore.Firestore | null` and `bucket: import('@google-cloud/storage').Bucket | null`, exported from `backend/src/firebase.ts`. Every later task imports these two names from `./firebase`.
+- Produces: `db: admin.firestore.Firestore | null`, exported from `backend/src/firebase.ts`. Every Firestore-using task imports this from `./firebase`.
+- Produces: `cloudinary` (configured `v2` instance) and `isCloudinaryConfigured(): boolean`, exported from `backend/src/cloudinary.ts`. Task 9 imports these.
 
-- [ ] **Step 1: Create the Firebase project (manual, human action)**
+- [ ] **Step 1: Create the Firebase project (manual, human action — already done)**
 
-In the [Firebase console](https://console.firebase.google.com/):
-1. Create a new project (this is the project you'll hand to the client).
-2. Enable **Firestore** (Native mode, any region close to your users).
-3. Enable **Storage**, and note the default bucket name shown (looks like `<project-id>.appspot.com` or `<project-id>.firebasestorage.app`).
-4. Go to Project Settings → Service Accounts → "Generate new private key". This downloads a JSON file — keep it secret, never commit it.
+Firestore (Native mode, Spark/free plan) is already created per the earlier setup. No Firebase Storage is needed or used.
 
-- [ ] **Step 2: Add the Firebase Admin SDK dependency**
+Go to Project Settings → Service Accounts → "Generate new private key". This downloads a JSON file — keep it secret, never commit it.
+
+- [ ] **Step 2: Create a Cloudinary account (manual, human action)**
+
+At [cloudinary.com](https://cloudinary.com/), sign up for the free tier (no credit card required). From the Dashboard, note three values: **Cloud Name**, **API Key**, **API Secret**.
+
+- [ ] **Step 3: Add the SDK dependencies**
 
 Edit `backend/package.json`, add to `dependencies`:
 
 ```json
-"firebase-admin": "^13.0.0"
+"firebase-admin": "^13.0.0",
+"cloudinary": "^2.5.0"
 ```
 
 Run:
@@ -61,7 +66,7 @@ Run:
 cd backend && npm install
 ```
 
-- [ ] **Step 3: Create the Firebase init module**
+- [ ] **Step 4: Create the Firebase init module**
 
 Create `backend/src/firebase.ts`:
 
@@ -71,33 +76,56 @@ import admin from 'firebase-admin';
 let firebaseApp: admin.app.App | null = null;
 
 const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT;
-const storageBucketName = process.env.FIREBASE_STORAGE_BUCKET;
 
 if (serviceAccountJson) {
   try {
     const serviceAccount = JSON.parse(serviceAccountJson);
     firebaseApp = admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
-      storageBucket: storageBucketName,
     });
   } catch (err: any) {
     console.error('Failed to initialize Firebase Admin SDK:', err.message);
   }
 } else {
-  console.warn('WARNING: FIREBASE_SERVICE_ACCOUNT is not defined. Firestore/Storage are unavailable.');
+  console.warn('WARNING: FIREBASE_SERVICE_ACCOUNT is not defined. Firestore is unavailable.');
 }
 
 export const db: admin.firestore.Firestore | null = firebaseApp ? admin.firestore(firebaseApp) : null;
-export const bucket = firebaseApp && storageBucketName ? admin.storage(firebaseApp).bucket() : null;
 ```
 
-- [ ] **Step 4: Add env vars**
+- [ ] **Step 5: Create the Cloudinary init module**
 
-In `backend/.env`, replace the Supabase/Postgres lines with (paste the actual downloaded JSON as a single-line string for `FIREBASE_SERVICE_ACCOUNT`, and your bucket name for `FIREBASE_STORAGE_BUCKET`):
+Create `backend/src/cloudinary.ts`:
+
+```ts
+import { v2 as cloudinary } from 'cloudinary';
+
+const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+const apiKey = process.env.CLOUDINARY_API_KEY;
+const apiSecret = process.env.CLOUDINARY_API_SECRET;
+
+if (cloudName && apiKey && apiSecret) {
+  cloudinary.config({ cloud_name: cloudName, api_key: apiKey, api_secret: apiSecret });
+} else {
+  console.warn('WARNING: CLOUDINARY_CLOUD_NAME/API_KEY/API_SECRET are not fully defined. Uploads will use the local fallback.');
+}
+
+export function isCloudinaryConfigured(): boolean {
+  return Boolean(cloudName && apiKey && apiSecret);
+}
+
+export { cloudinary };
+```
+
+- [ ] **Step 6: Add env vars**
+
+In `backend/.env`, add (paste the actual downloaded JSON as a single-line string for `FIREBASE_SERVICE_ACCOUNT`, and your Cloudinary dashboard values for the other three):
 
 ```
 FIREBASE_SERVICE_ACCOUNT={"type":"service_account",...}
-FIREBASE_STORAGE_BUCKET=<your-project-id>.appspot.com
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
 PORT=5000
 ADMIN_API_KEY=guru1234
 ```
@@ -108,45 +136,53 @@ Create `backend/.env.example` (this one IS committed, documents required vars wi
 
 ```
 FIREBASE_SERVICE_ACCOUNT=
-FIREBASE_STORAGE_BUCKET=
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
 PORT=5000
 ADMIN_API_KEY=
 ```
 
-- [ ] **Step 5: Verify the connection**
+- [ ] **Step 7: Verify both connections**
 
 Create a throwaway check file `backend/scripts/check-firebase.ts`:
 
 ```ts
-import { db, bucket } from '../src/firebase';
+import { db } from '../src/firebase';
+import { cloudinary, isCloudinaryConfigured } from '../src/cloudinary';
 
 async function main() {
-  if (!db || !bucket) {
-    console.error('FAIL: db or bucket is null — check FIREBASE_SERVICE_ACCOUNT / FIREBASE_STORAGE_BUCKET');
+  if (!db) {
+    console.error('FAIL: db is null — check FIREBASE_SERVICE_ACCOUNT');
     process.exit(1);
   }
   await db.collection('__healthcheck').doc('ping').set({ at: new Date().toISOString() });
   const doc = await db.collection('__healthcheck').doc('ping').get();
   console.log('Firestore write/read OK:', doc.data());
-  const [exists] = await bucket.exists();
-  console.log('Storage bucket exists:', exists);
   await db.collection('__healthcheck').doc('ping').delete();
+
+  if (!isCloudinaryConfigured()) {
+    console.error('FAIL: Cloudinary is not configured — check CLOUDINARY_* env vars');
+    process.exit(1);
+  }
+  const pingResult = await cloudinary.api.ping();
+  console.log('Cloudinary ping OK:', pingResult);
 }
 
 main().then(() => process.exit(0)).catch(err => { console.error('FAIL:', err.message); process.exit(1); });
 ```
 
 Run: `cd backend && npx ts-node scripts/check-firebase.ts`
-Expected: prints `Firestore write/read OK: { at: '...' }` and `Storage bucket exists: true`, exits 0.
+Expected: prints `Firestore write/read OK: { at: '...' }` and `Cloudinary ping OK: { status: 'ok' }`, exits 0.
 
 Delete `backend/scripts/check-firebase.ts` once it passes (one-off check, not needed after this task).
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 8: Commit**
 
 ```bash
 cd "D:/My Files/Help_Tourism_Bhutan"
-git add backend/package.json backend/package-lock.json backend/src/firebase.ts backend/.env.example
-git commit -m "feat(backend): add Firebase Admin SDK bootstrap"
+git add backend/package.json backend/package-lock.json backend/src/firebase.ts backend/src/cloudinary.ts backend/.env.example
+git commit -m "feat(backend): add Firebase Admin SDK (Firestore) and Cloudinary bootstrap"
 ```
 
 ---
@@ -165,7 +201,7 @@ git commit -m "feat(backend): add Firebase Admin SDK bootstrap"
 In `backend/src/index.ts`, after the existing imports (after line 5, `import path from 'path';`), add:
 
 ```ts
-import { db, bucket } from './firebase';
+import { db } from './firebase';
 ```
 
 - [ ] **Step 2: Add the health-check flag and function**
@@ -232,8 +268,8 @@ git commit -m "feat(backend): add Firestore health check alongside existing Supa
 - Create: `backend/scripts/migrate-to-firebase.ts`
 
 **Interfaces:**
-- Consumes: `db`, `bucket` from `./firebase` (Task 1); reads `D:\My Files\Help_Tourism_Bhutan\databasedoc\db_cluster.sql` and `databasedoc/sahdrcajbflinfhlwgmb/cms-media/*`.
-- Produces: populated Firestore collections (`destinations`, `attractions`, `tours`, `tourEditions`, `hotels`, `settings`, `tourists`) and uploaded Storage objects under `cms-media/` — consumed by Tasks 4-9's manual route verification and Task 11's end-to-end check.
+- Consumes: `db` from `./firebase` (Task 1); reads `D:\My Files\Help_Tourism_Bhutan\databasedoc\db_cluster.sql` and `databasedoc/sahdrcajbflinfhlwgmb/cms-media/*`.
+- Produces: populated Firestore collections (`destinations`, `attractions`, `tours`, `tourEditions`, `hotels`, `settings`, `tourists`) and the 20 recovered image files copied into `public/cms-media/` (frontend static assets) — consumed by Tasks 4-9's manual route verification and Task 11's end-to-end check.
 
 - [ ] **Step 1: Restore the dump into a throwaway local Postgres**
 
@@ -265,43 +301,36 @@ Create `backend/scripts/migrate-to-firebase.ts`:
 import { Client } from 'pg';
 import * as fs from 'fs';
 import * as path from 'path';
-import { db, bucket } from '../src/firebase';
+import { db } from '../src/firebase';
 
 const LOCAL_PG_CONNECTION = 'postgresql://postgres:postgres@localhost:5433/postgres';
 const STORAGE_DIR = path.join(__dirname, '../../databasedoc/sahdrcajbflinfhlwgmb/cms-media');
+const FRONTEND_PUBLIC_DIR = path.join(__dirname, '../../public/cms-media');
 const SUPABASE_URL_PREFIX = 'https://sahdrcajbflinfhlwgmb.supabase.co/storage/v1/object/public/cms-media/';
 
-function guessMimeType(filename: string): string {
-  const ext = path.extname(filename).toLowerCase();
-  const map: Record<string, string> = {
-    '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png',
-    '.webp': 'image/webp', '.gif': 'image/gif', '.svg': 'image/svg+xml',
-  };
-  return map[ext] || 'application/octet-stream';
-}
-
 async function main() {
-  if (!db || !bucket) {
-    throw new Error('Firebase not initialized — check FIREBASE_SERVICE_ACCOUNT and FIREBASE_STORAGE_BUCKET env vars');
+  if (!db) {
+    throw new Error('Firebase not initialized — check FIREBASE_SERVICE_ACCOUNT env var');
   }
 
   const pg = new Client({ connectionString: LOCAL_PG_CONNECTION });
   await pg.connect();
 
-  // 1. Upload storage files first, build URL rewrite map
+  // 1. Copy storage files into the frontend's public folder, build URL rewrite map
+  if (!fs.existsSync(FRONTEND_PUBLIC_DIR)) {
+    fs.mkdirSync(FRONTEND_PUBLIC_DIR, { recursive: true });
+  }
   const urlRewriteMap: Record<string, string> = {};
   const files = fs.readdirSync(STORAGE_DIR);
   for (const filename of files) {
-    const filePath = path.join(STORAGE_DIR, filename);
-    const buffer = fs.readFileSync(filePath);
-    const file = bucket.file(`cms-media/${filename}`);
-    await file.save(buffer, { metadata: { contentType: guessMimeType(filename) } });
-    await file.makePublic();
-    const newUrl = `https://storage.googleapis.com/${bucket.name}/cms-media/${filename}`;
+    const srcPath = path.join(STORAGE_DIR, filename);
+    const destPath = path.join(FRONTEND_PUBLIC_DIR, filename);
+    fs.copyFileSync(srcPath, destPath);
+    const newUrl = `/cms-media/${filename}`;
     urlRewriteMap[`${SUPABASE_URL_PREFIX}${filename}`] = newUrl;
-    console.log(`Uploaded ${filename} -> ${newUrl}`);
+    console.log(`Copied ${filename} -> ${newUrl}`);
   }
-  console.log(`Uploaded ${files.length} storage files.`);
+  console.log(`Copied ${files.length} image files into public/cms-media/.`);
 
   const rewriteImage = (url: string) => urlRewriteMap[url] || url;
 
@@ -468,15 +497,21 @@ cd "D:/My Files/Help_Tourism_Bhutan/backend"
 npx ts-node scripts/migrate-to-firebase.ts
 ```
 
-Expected: 20 "Uploaded ..." lines, then per-table "Migrated N ..." lines matching 6/3/13/4/4/3/0, then the verification counts block showing every count matching its expected value, then `Migration complete.`, exit code 0.
+Expected: 20 "Copied ..." lines, then per-table "Migrated N ..." lines matching 6/3/13/4/4/3/0, then the verification counts block showing every count matching its expected value, then `Migration complete.`, exit code 0.
+
+Also verify the files actually landed in the frontend's public folder:
+```bash
+ls "D:/My Files/Help_Tourism_Bhutan/public/cms-media" | wc -l
+```
+Expected: `20`.
 
 - [ ] **Step 4: Spot-check the image URL rewrite**
 
 ```bash
-node -e "const {db}=require('./dist/firebase'); (async()=>{const d=await db.collection('destinations').doc('6').get(); console.log(d.data().image);})()" 2>/dev/null || npx ts-node -e "import('./src/firebase').then(async ({db}) => { const d = await db!.collection('destinations').doc('6').get(); console.log(d.data()!.image); })"
+npx ts-node -e "import('./src/firebase').then(async ({db}) => { const d = await db!.collection('destinations').doc('6').get(); console.log(d.data()!.image); })"
 ```
 
-Expected: a `https://storage.googleapis.com/...` URL (destination id 6, Bumthang Valley, was the one pointing at the dead Supabase storage URL per the spec's schema appendix). It must NOT contain `supabase.co`.
+Expected: `/cms-media/<filename>` (destination id 6, Bumthang Valley, was the one pointing at the dead Supabase storage URL per the spec's schema appendix). It must NOT contain `supabase.co`. Also confirm the file is actually servable once the frontend dev server is running later (Task 11).
 
 - [ ] **Step 5: Tear down the throwaway Postgres**
 
@@ -488,8 +523,8 @@ docker rm -f migration-pg
 
 ```bash
 cd "D:/My Files/Help_Tourism_Bhutan"
-git add backend/scripts/migrate-to-firebase.ts
-git commit -m "feat(backend): add one-off Supabase-to-Firestore/Storage migration script"
+git add backend/scripts/migrate-to-firebase.ts public/cms-media
+git commit -m "feat: add Supabase-to-Firestore migration script and recovered CMS images"
 ```
 
 (The script file itself is deleted in Task 10 once the migration has run — it's one-off tooling, not part of the running app.)
@@ -802,7 +837,7 @@ In another terminal:
 curl -s http://localhost:5000/api/destinations | head -c 300
 curl -s http://localhost:5000/api/destinations/6
 ```
-Expected: the list returns 6 destinations ordered by id; `/api/destinations/6` returns Bumthang Valley with an `attractions` array and an `image` URL that is a `storage.googleapis.com` link, not a `supabase.co` one.
+Expected: the list returns 6 destinations ordered by id; `/api/destinations/6` returns Bumthang Valley with an `attractions` array and an `image` value of `/cms-media/<filename>` (a local static asset path), not a `supabase.co` URL.
 
 ```bash
 curl -s -X POST http://localhost:5000/api/destinations \
@@ -2086,15 +2121,20 @@ git commit -m "feat(backend): migrate tourists routes to Firestore"
 
 ---
 
-### Task 9: File upload → Firebase Storage
+### Task 9: File upload → Cloudinary
 
 **Files:**
 - Modify: `backend/src/index.ts`
 
 **Interfaces:**
-- Consumes: `bucket` from `./firebase` (Task 1).
+- Consumes: `cloudinary`, `isCloudinaryConfigured` from `./cloudinary` (Task 1).
 
 - [ ] **Step 1: Replace the Supabase Storage upload helper**
+
+In `backend/src/index.ts`, add the import near the top (alongside the `./firebase` import added in Task 2):
+```ts
+import { cloudinary, isCloudinaryConfigured } from './cloudinary';
+```
 
 Find:
 ```ts
@@ -2123,15 +2163,19 @@ async function uploadToSupabaseStorage(filename: string, buffer: Buffer, mimeTyp
 
 Replace with:
 ```ts
-// Helper to upload files to Firebase Storage
-async function uploadToFirebaseStorage(filename: string, buffer: Buffer, mimeType: string): Promise<string> {
-  if (!bucket) {
-    throw new Error('Firebase Storage is not configured (missing FIREBASE_STORAGE_BUCKET)');
+// Helper to upload files to Cloudinary
+async function uploadToCloudinary(filename: string, buffer: Buffer, mimeType: string): Promise<string> {
+  if (!isCloudinaryConfigured()) {
+    throw new Error('Cloudinary is not configured (missing CLOUDINARY_CLOUD_NAME/API_KEY/API_SECRET)');
   }
-  const file = bucket.file(`cms-media/${filename}`);
-  await file.save(buffer, { metadata: { contentType: mimeType } });
-  await file.makePublic();
-  return `https://storage.googleapis.com/${bucket.name}/cms-media/${filename}`;
+  const publicId = filename.replace(/\.[^.]+$/, ''); // Cloudinary appends its own extension
+  const dataUri = `data:${mimeType};base64,${buffer.toString('base64')}`;
+  const result = await cloudinary.uploader.upload(dataUri, {
+    public_id: publicId,
+    folder: 'cms-media',
+    overwrite: true,
+  });
+  return result.secure_url;
 }
 ```
 
@@ -2159,19 +2203,19 @@ Find:
 
 Replace with:
 ```ts
-    // Try uploading to Firebase Storage first (for production)
-    if (firestoreConnected && bucket) {
+    // Try uploading to Cloudinary first (for production)
+    if (isCloudinaryConfigured()) {
       try {
         const mimeMatch = data.match(/^data:(image\/\w+);base64,/);
         const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
 
-        const publicUrl = await uploadToFirebaseStorage(filename, buffer, mimeType);
-        console.log("Successfully uploaded file to Firebase Storage cms-media:", filename);
+        const publicUrl = await uploadToCloudinary(filename, buffer, mimeType);
+        console.log("Successfully uploaded file to Cloudinary cms-media:", filename);
         return res.json({ url: publicUrl });
       } catch (err: any) {
-        console.warn("Firebase Storage upload failed, falling back to local file:", err.message);
+        console.warn("Cloudinary upload failed, falling back to local file:", err.message);
         if (process.env.NODE_ENV === 'production' || process.env.VERCEL || process.env.VERCEL_ENV) {
-          return res.status(500).json({ error: `Firebase Storage upload failed: ${err.message}` });
+          return res.status(500).json({ error: `Cloudinary upload failed: ${err.message}` });
         }
       }
     }
@@ -2193,7 +2237,7 @@ print(json.dumps({'name':'test.jpg','data':f'data:image/jpeg;base64,{b64}'}))
 " > /tmp/upload-payload.json
 curl -s -X POST http://localhost:5000/api/upload -H "Authorization: Bearer $ADMIN_API_KEY" -H "Content-Type: application/json" -d @/tmp/upload-payload.json
 ```
-Expected: `{"url":"https://storage.googleapis.com/<bucket>/cms-media/<timestamp>-test.jpg"}`. Open that URL in a browser — the image loads.
+Expected: `{"url":"https://res.cloudinary.com/<cloud-name>/image/upload/.../cms-media/<timestamp>-test.jpg"}`. Open that URL in a browser — the image loads.
 
 Verify validation still rejects bad input:
 ```bash
@@ -2206,7 +2250,7 @@ Expected: `{"error":"Invalid file extension. Only images are allowed."}`.
 ```bash
 cd "D:/My Files/Help_Tourism_Bhutan"
 git add backend/src/index.ts
-git commit -m "feat(backend): migrate file upload endpoint to Firebase Storage"
+git commit -m "feat(backend): migrate file upload endpoint to Cloudinary"
 ```
 
 ---
@@ -2304,7 +2348,8 @@ Edit `backend/package.json`, remove the `pg` line from `dependencies` and `@type
   "cors": "^2.8.5",
   "dotenv": "^16.4.7",
   "express": "^4.21.2",
-  "firebase-admin": "^13.0.0"
+  "firebase-admin": "^13.0.0",
+  "cloudinary": "^2.5.0"
 },
 "devDependencies": {
   "@types/cors": "^2.8.17",
@@ -2326,7 +2371,7 @@ rm backend/src/db.ts backend/src/seed.ts backend/schema.sql backend/scripts/migr
 
 - [ ] **Step 4: Remove Supabase/Postgres env vars**
 
-Edit `backend/.env`, remove the `SUPABASE_URL`, `SUPABASE_KEY`, and `DATABASE_URL` lines (keep `FIREBASE_SERVICE_ACCOUNT`, `FIREBASE_STORAGE_BUCKET`, `PORT`, `ADMIN_API_KEY`).
+Edit `backend/.env`, remove the `SUPABASE_URL`, `SUPABASE_KEY`, and `DATABASE_URL` lines (keep `FIREBASE_SERVICE_ACCOUNT`, `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `PORT`, `ADMIN_API_KEY`).
 
 - [ ] **Step 5: Fix the committed-secret issue**
 
@@ -2387,7 +2432,7 @@ With the backend also running, open the site in a browser and check:
 - Homepage loads destinations and tours.
 - A destination detail page shows its attractions.
 - A tour detail page shows inclusions/exclusions/itinerary correctly rendered (not `[object Object]` or raw JSON text — confirms Review Focus item 3 end-to-end through the UI, not just the API).
-- The images that were rewritten (Bumthang Valley destination, and the 4 hotels) load correctly from `storage.googleapis.com`.
+- The images that were rewritten (Bumthang Valley destination, and the 4 hotels) load correctly as static assets from `public/cms-media/`.
 - Log into `/admin`, open each tab (Destinations, Tours, Hotels, About, Contact, Testimonials, Tourists), and perform one edit + save in each, confirming it persists after a page refresh.
 - Upload a new image via the admin media upload control and confirm it appears and loads.
 

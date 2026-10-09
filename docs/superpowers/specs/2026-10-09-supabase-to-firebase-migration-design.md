@@ -42,7 +42,7 @@ This means the migration surface is fully bounded: 7 tables + 1 bucket with 20 f
 | `settings(key varchar PK, value jsonb)` | `settings/{key}` | Doc fields: `{ value: <existing jsonb> }`. |
 | `tourists(id int, name, nationality, passport_number, email, phone, tour_name, check_in_date date, check_out_date date, sdf_status, special_requests)` | `tourists/{id}` | Table is empty — collection created but no migration data needed. `check_in_date`/`check_out_date` stored as Firestore Timestamps going forward. |
 
-**Image URL rewriting**: 6 rows (in `destinations` and `hotels`) have `image` values pointing to `https://sahdrcajbflinfhlwgmb.supabase.co/storage/v1/object/public/cms-media/<file>`. The migration script detects this exact URL pattern and rewrites it to a local static-asset path (`/cms-media/<file>`), matching the already-recovered file copied into the frontend's `public/cms-media/` folder. All other `image` values (e.g. `/paro-taksang.jpg`) are frontend static assets and are left untouched.
+**Image URL rewriting**: 5 rows (1 in `destinations`, 4 in `hotels`) have `image` values pointing to `https://sahdrcajbflinfhlwgmb.supabase.co/storage/v1/object/public/cms-media/<file>`. The migration script detects this exact URL pattern and rewrites it to a local static-asset path (`/cms-media/<file>`), matching the already-recovered file copied into the frontend's `public/cms-media/` folder. All other `image` values (e.g. `/paro-taksang.jpg`) are frontend static assets and are left untouched.
 
 ## Migration Script
 
