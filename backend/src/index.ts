@@ -1556,20 +1556,21 @@ app.post('/api/tourists', authenticateAdmin, async (req, res) => {
       const existingSnap = await db.collection('tourists').orderBy('id', 'desc').limit(1).get();
       const newId = existingSnap.empty ? 1 : existingSnap.docs[0].data().id + 1;
       const t = { id: newId, ...dbPayload };
-      await db.collection('tourists').doc(String(newId)).set(t);
+      const cleanPayload = Object.fromEntries(Object.entries(t).filter(([_, v]) => v !== undefined));
+      await db.collection('tourists').doc(String(newId)).set(cleanPayload);
       clearCache('tourists:');
       return res.json({
-        id: t.id,
-        name: t.name,
-        nationality: t.nationality,
-        passportNumber: t.passport_number,
-        email: t.email,
-        phone: t.phone,
-        tourName: t.tour_name,
-        checkInDate: t.check_in_date,
-        checkOutDate: t.check_out_date,
-        sdfStatus: t.sdf_status,
-        specialRequests: t.special_requests
+        id: cleanPayload.id,
+        name: cleanPayload.name,
+        nationality: cleanPayload.nationality,
+        passportNumber: cleanPayload.passport_number,
+        email: cleanPayload.email,
+        phone: cleanPayload.phone,
+        tourName: cleanPayload.tour_name,
+        checkInDate: cleanPayload.check_in_date,
+        checkOutDate: cleanPayload.check_out_date,
+        sdfStatus: cleanPayload.sdf_status,
+        specialRequests: cleanPayload.special_requests
       });
     } catch (err: any) {
       console.error("Firestore insert error for tourists:", err.message);
@@ -1612,20 +1613,21 @@ app.put('/api/tourists/:id', authenticateAdmin, async (req, res) => {
   if (firestoreConnected && db) {
     try {
       const t = { id, ...dbPayload };
-      await db.collection('tourists').doc(String(id)).set(t, { merge: true });
+      const cleanPayload = Object.fromEntries(Object.entries(t).filter(([_, v]) => v !== undefined));
+      await db.collection('tourists').doc(String(id)).set(cleanPayload, { merge: true });
       clearCache('tourists:');
       return res.json({
-        id: t.id,
-        name: t.name,
-        nationality: t.nationality,
-        passportNumber: t.passport_number,
-        email: t.email,
-        phone: t.phone,
-        tourName: t.tour_name,
-        checkInDate: t.check_in_date,
-        checkOutDate: t.check_out_date,
-        sdfStatus: t.sdf_status,
-        specialRequests: t.special_requests
+        id: cleanPayload.id,
+        name: cleanPayload.name,
+        nationality: cleanPayload.nationality,
+        passportNumber: cleanPayload.passport_number,
+        email: cleanPayload.email,
+        phone: cleanPayload.phone,
+        tourName: cleanPayload.tour_name,
+        checkInDate: cleanPayload.check_in_date,
+        checkOutDate: cleanPayload.check_out_date,
+        sdfStatus: cleanPayload.sdf_status,
+        specialRequests: cleanPayload.special_requests
       });
     } catch (err: any) {
       console.error("Firestore update error for tourists:", err.message);
