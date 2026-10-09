@@ -746,17 +746,17 @@ app.get('/api/destinations', async (req, res) => {
   const cached = getCache(cacheKey, req);
   if (cached) return res.json(cached);
 
-  if (dbConnected) {
+  if (firestoreConnected && db) {
     try {
-      const data = await supabaseFetch('/destinations?select=*&order=id.asc');
-      const formatted = data.map((d: any) => ({
-        ...d,
-        rating: parseFloat(d.rating) || d.rating
-      }));
+      const snapshot = await db.collection('destinations').orderBy('id').get();
+      const formatted = snapshot.docs.map(doc => {
+        const d: any = doc.data();
+        return { ...d, rating: parseFloat(d.rating) || d.rating };
+      });
       setCache(cacheKey, formatted);
       return res.json(formatted);
     } catch (err: any) {
-      console.error("Supabase fetch error for destinations:", err.message);
+      console.error("Firestore fetch error for destinations:", err.message);
     }
   }
   res.json(memoryDestinations);
@@ -769,25 +769,25 @@ app.get('/api/destinations/:id', async (req, res) => {
   const cached = getCache(cacheKey, req);
   if (cached) return res.json(cached);
 
-  if (dbConnected) {
+  if (firestoreConnected && db) {
     try {
-      const destList = await supabaseFetch(`/destinations?id=eq.${id}&select=*`);
-      if (destList && destList.length > 0) {
-        const dest = destList[0];
+      const destDoc = await db.collection('destinations').doc(String(id)).get();
+      if (destDoc.exists) {
+        const dest: any = destDoc.data();
         dest.rating = parseFloat(dest.rating) || dest.rating;
-        const attractions = await supabaseFetch(`/attractions?destination_id=eq.${id}&select=name`);
+        const attractionsSnap = await db.collection('attractions').where('destinationId', '==', id).get();
         const result = {
           ...dest,
-          attractions: attractions.map((a: any) => a.name)
+          attractions: attractionsSnap.docs.map(a => a.data().name)
         };
         setCache(cacheKey, result);
         return res.json(result);
       }
     } catch (err: any) {
-      console.error(`Supabase fetch error for destination ${id}:`, err.message);
+      console.error(`Firestore fetch error for destination ${id}:`, err.message);
     }
   }
-  
+
   const dest = memoryDestinations.find(d => d.id === id);
   if (dest) {
     const attractions = mockAttractions.filter(a => a.destination_id === id).map(a => a.name);
@@ -889,22 +889,19 @@ app.get('/api/hotels', async (req, res) => {
 // CREATE Destination
 app.post('/api/destinations', authenticateAdmin, async (req, res) => {
   let { id, name, image, description, price, rating, location, altitude, ideal_stay, peak_period, language } = req.body;
-  const payload = { id: id ? parseInt(id) : undefined, name, image, description, price, rating: parseFloat(rating) || 4.8, location, altitude, ideal_stay, peak_period, language };
-  
-  if (dbConnected) {
+  const payload: any = { id: id ? parseInt(id) : undefined, name, image, description, price, rating: parseFloat(rating) || 4.8, location, altitude, ideal_stay, peak_period, language };
+
+  if (firestoreConnected && db) {
     try {
       if (!payload.id) {
-        const existing = await supabaseFetch('/destinations?select=id&order=id.desc&limit=1');
-        payload.id = existing && existing.length > 0 ? existing[0].id + 1 : 1;
+        const existingSnap = await db.collection('destinations').orderBy('id', 'desc').limit(1).get();
+        payload.id = existingSnap.empty ? 1 : existingSnap.docs[0].data().id + 1;
       }
-      await supabaseFetch('/destinations', {
-        method: 'POST',
-        body: JSON.stringify(payload)
-      });
+      await db.collection('destinations').doc(String(payload.id)).set(payload);
       clearCache('destinations');
       return res.status(201).json(payload);
     } catch (err: any) {
-      console.error("Create destination failed on Supabase:", err.message);
+      console.error("Create destination failed on Firestore:", err.message);
       return res.status(500).json({ error: `Database write failed: ${err.message}` });
     }
   }
@@ -921,42 +918,37 @@ app.post('/api/destinations', authenticateAdmin, async (req, res) => {
 app.put('/api/destinations/:id', authenticateAdmin, async (req, res) => {
   const id = parseInt(req.params.id as string);
   const { name, image, description, price, rating, location, altitude, ideal_stay, peak_period, language } = req.body;
-  const payload = { name, image, description, price, rating: parseFloat(rating) || 4.8, location, altitude, ideal_stay, peak_period, language };
+  const payload: any = { id, name, image, description, price, rating: parseFloat(rating) || 4.8, location, altitude, ideal_stay, peak_period, language };
 
-  if (dbConnected) {
+  if (firestoreConnected && db) {
     try {
-      await supabaseFetch(`/destinations?id=eq.${id}`, {
-        method: 'PATCH',
-        body: JSON.stringify(payload)
-      });
+      await db.collection('destinations').doc(String(id)).set(payload, { merge: true });
       clearCache('destinations');
-      return res.json({ id, ...payload });
+      return res.json(payload);
     } catch (err: any) {
-      console.error(`Update destination ${id} failed on Supabase:`, err.message);
+      console.error(`Update destination ${id} failed on Firestore:`, err.message);
       return res.status(500).json({ error: `Database write failed: ${err.message}` });
     }
   }
 
   const idx = memoryDestinations.findIndex(d => d.id === id);
   if (idx !== -1) {
-    memoryDestinations[idx] = { id, ...payload } as any;
+    memoryDestinations[idx] = payload as any;
   }
   clearCache('destinations');
-  res.json({ id, ...payload });
+  res.json(payload);
 });
 
 // DELETE Destination
 app.delete('/api/destinations/:id', authenticateAdmin, async (req, res) => {
   const id = parseInt(req.params.id as string);
-  if (dbConnected) {
+  if (firestoreConnected && db) {
     try {
-      await supabaseFetch(`/destinations?id=eq.${id}`, {
-        method: 'DELETE'
-      });
+      await db.collection('destinations').doc(String(id)).delete();
       clearCache('destinations');
       return res.json({ message: "Destination deleted successfully", id });
     } catch (err: any) {
-      console.error(`Delete destination ${id} failed on Supabase:`, err.message);
+      console.error(`Delete destination ${id} failed on Firestore:`, err.message);
       return res.status(500).json({ error: `Database write failed: ${err.message}` });
     }
   }
