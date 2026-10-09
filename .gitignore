@@ -30,3 +30,6 @@ dist-ssr
 
 # git worktrees (scratch workspaces)
 .worktrees/
+
+# one-off Supabase backup data used for Firebase migration (not committed)
+databasedoc/
