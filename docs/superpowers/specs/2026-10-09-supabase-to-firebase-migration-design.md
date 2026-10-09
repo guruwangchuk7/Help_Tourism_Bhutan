@@ -84,6 +84,93 @@ One-off script, not part of the running app, deleted after use (or kept under `b
 
 No live-traffic cutover risk — the Supabase project is already paused, so there is no concurrent production traffic to cut over. Sequence: create Firebase project → run migration script once → update backend code → update env vars (local + Vercel) → deploy → smoke test → hand the Firebase project over to the client.
 
+## Appendix: Current Supabase Schema (as-is, from `databasedoc/db_cluster.sql`)
+
+Exact DDL for the 7 `public` tables being migrated (primary keys, defaults, and constraints as they exist today — no RLS/triggers/functions apply to any of them, per the audit above):
+
+```sql
+CREATE TABLE public.destinations (
+    id integer NOT NULL,                                          -- PK
+    name character varying(255) NOT NULL,
+    image character varying(512) NOT NULL,
+    description text NOT NULL,
+    price character varying(50) NOT NULL,
+    rating numeric(3,2) NOT NULL,
+    location character varying(100) NOT NULL,
+    altitude character varying(50) DEFAULT '2,300m',
+    ideal_stay character varying(50) DEFAULT '4-5 Days',
+    peak_period character varying(50) DEFAULT 'Spring/Fall',
+    language character varying(50) DEFAULT 'Dzongkha'
+);
+
+CREATE TABLE public.attractions (
+    id integer NOT NULL,                                          -- PK
+    destination_id integer,                                       -- FK -> destinations.id
+    name character varying(255) NOT NULL,
+    description text NOT NULL,
+    image character varying(512) NOT NULL
+);
+
+CREATE TABLE public.tours (
+    id character varying(100) NOT NULL,                           -- PK (slug, e.g. "bhutan-highlights")
+    title character varying(255) NOT NULL,
+    duration character varying(50) NOT NULL,
+    nights integer NOT NULL,
+    price character varying(50) NOT NULL,
+    price_val integer NOT NULL,
+    image character varying(512) NOT NULL,
+    description text NOT NULL,
+    category character varying(100) NOT NULL,
+    difficulty character varying(50) NOT NULL,
+    inclusions jsonb DEFAULT '[]' NOT NULL,                       -- array of strings
+    exclusions jsonb DEFAULT '[]' NOT NULL,                       -- array of strings
+    itinerary jsonb DEFAULT '[]' NOT NULL                         -- array of {day, desc, ...}
+);
+
+CREATE TABLE public.tour_editions (
+    id integer NOT NULL,                                          -- PK, identity/sequence
+    tour_id character varying(100),                               -- FK -> tours.id
+    title character varying(255) NOT NULL,
+    period character varying(100) NOT NULL,
+    price character varying(50) NOT NULL,
+    image character varying(512) NOT NULL,
+    icon character varying(50) NOT NULL
+);
+
+CREATE TABLE public.hotels (
+    id integer NOT NULL,                                          -- PK
+    name character varying(255) NOT NULL,
+    location character varying(255) NOT NULL,
+    image character varying(512) NOT NULL,
+    rating numeric(3,2) NOT NULL,
+    price character varying(50) NOT NULL,
+    description text NOT NULL
+);
+
+CREATE TABLE public.settings (
+    key character varying(100) NOT NULL,                          -- PK ('about' | 'contact' | 'testimonials')
+    value jsonb NOT NULL
+);
+
+CREATE TABLE public.tourists (
+    id integer NOT NULL,                                          -- PK, identity/sequence (table empty, no rows)
+    name character varying NOT NULL,
+    nationality character varying NOT NULL,
+    passport_number character varying NOT NULL,
+    email character varying NOT NULL,
+    phone character varying NOT NULL,
+    tour_name character varying NOT NULL,
+    check_in_date date NOT NULL,
+    check_out_date date NOT NULL,
+    sdf_status character varying DEFAULT 'Paid',
+    special_requests text
+);
+```
+
+Row counts at time of backup (27 Jul 2026): `destinations` 6, `attractions` 3, `tours` 13, `tour_editions` 4, `hotels` 4, `settings` 3, `tourists` 0.
+
+This same appendix doubles as the database documentation to hand to the client alongside the Firebase project.
+
 ## Out of Scope
 
 - Supabase Auth, Realtime, Edge Functions, RPC — none are used, nothing to migrate.
