@@ -1497,26 +1497,29 @@ app.get('/api/tourists', async (req, res) => {
   const cached = getCache(cacheKey, req);
   if (cached) return res.json(cached);
 
-  if (dbConnected) {
+  if (firestoreConnected && db) {
     try {
-      const data = await supabaseFetch('/tourists?select=*&order=id.asc');
-      const formatted = data.map((t: any) => ({
-        id: t.id,
-        name: t.name,
-        nationality: t.nationality,
-        passportNumber: t.passport_number || t.passportNumber,
-        email: t.email,
-        phone: t.phone,
-        tourName: t.tour_name || t.tourName,
-        checkInDate: t.check_in_date || t.checkInDate,
-        checkOutDate: t.check_out_date || t.checkOutDate,
-        sdfStatus: t.sdf_status || t.sdfStatus,
-        specialRequests: t.special_requests || t.specialRequests
-      }));
+      const snapshot = await db.collection('tourists').orderBy('id').get();
+      const formatted = snapshot.docs.map(doc => {
+        const t: any = doc.data();
+        return {
+          id: t.id,
+          name: t.name,
+          nationality: t.nationality,
+          passportNumber: t.passport_number,
+          email: t.email,
+          phone: t.phone,
+          tourName: t.tour_name,
+          checkInDate: t.check_in_date,
+          checkOutDate: t.check_out_date,
+          sdfStatus: t.sdf_status,
+          specialRequests: t.special_requests
+        };
+      });
       setCache(cacheKey, formatted);
       return res.json(formatted);
     } catch (err: any) {
-      console.error("Supabase fetch error for tourists, falling back to local file:", err.message);
+      console.error("Firestore fetch error for tourists, falling back to local file:", err.message);
     }
   }
 
@@ -1548,32 +1551,28 @@ app.post('/api/tourists', authenticateAdmin, async (req, res) => {
     special_requests: body.specialRequests
   };
 
-  if (dbConnected) {
+  if (firestoreConnected && db) {
     try {
-      const inserted = await supabaseFetch('/tourists', {
-        method: 'POST',
-        headers: { 'Prefer': 'return=representation' },
-        body: JSON.stringify(dbPayload)
-      });
+      const existingSnap = await db.collection('tourists').orderBy('id', 'desc').limit(1).get();
+      const newId = existingSnap.empty ? 1 : existingSnap.docs[0].data().id + 1;
+      const t = { id: newId, ...dbPayload };
+      await db.collection('tourists').doc(String(newId)).set(t);
       clearCache('tourists:');
-      if (inserted && inserted.length > 0) {
-        const t = inserted[0];
-        return res.json({
-          id: t.id,
-          name: t.name,
-          nationality: t.nationality,
-          passportNumber: t.passport_number || t.passportNumber,
-          email: t.email,
-          phone: t.phone,
-          tourName: t.tour_name || t.tourName,
-          checkInDate: t.check_in_date || t.checkInDate,
-          checkOutDate: t.check_out_date || t.checkOutDate,
-          sdfStatus: t.sdf_status || t.sdfStatus,
-          specialRequests: t.special_requests || t.specialRequests
-        });
-      }
+      return res.json({
+        id: t.id,
+        name: t.name,
+        nationality: t.nationality,
+        passportNumber: t.passport_number,
+        email: t.email,
+        phone: t.phone,
+        tourName: t.tour_name,
+        checkInDate: t.check_in_date,
+        checkOutDate: t.check_out_date,
+        sdfStatus: t.sdf_status,
+        specialRequests: t.special_requests
+      });
     } catch (err: any) {
-      console.error("Supabase insert error for tourists:", err.message);
+      console.error("Firestore insert error for tourists:", err.message);
       return res.status(500).json({ error: `Database write failed: ${err.message}` });
     }
   }
@@ -1610,32 +1609,26 @@ app.put('/api/tourists/:id', authenticateAdmin, async (req, res) => {
     special_requests: body.specialRequests
   };
 
-  if (dbConnected) {
+  if (firestoreConnected && db) {
     try {
-      const updated = await supabaseFetch(`/tourists?id=eq.${id}`, {
-        method: 'PATCH',
-        headers: { 'Prefer': 'return=representation' },
-        body: JSON.stringify(dbPayload)
-      });
+      const t = { id, ...dbPayload };
+      await db.collection('tourists').doc(String(id)).set(t, { merge: true });
       clearCache('tourists:');
-      if (updated && updated.length > 0) {
-        const t = updated[0];
-        return res.json({
-          id: t.id,
-          name: t.name,
-          nationality: t.nationality,
-          passportNumber: t.passport_number || t.passportNumber,
-          email: t.email,
-          phone: t.phone,
-          tourName: t.tour_name || t.tourName,
-          checkInDate: t.check_in_date || t.checkInDate,
-          checkOutDate: t.check_out_date || t.checkOutDate,
-          sdfStatus: t.sdf_status || t.sdfStatus,
-          specialRequests: t.special_requests || t.specialRequests
-        });
-      }
+      return res.json({
+        id: t.id,
+        name: t.name,
+        nationality: t.nationality,
+        passportNumber: t.passport_number,
+        email: t.email,
+        phone: t.phone,
+        tourName: t.tour_name,
+        checkInDate: t.check_in_date,
+        checkOutDate: t.check_out_date,
+        sdfStatus: t.sdf_status,
+        specialRequests: t.special_requests
+      });
     } catch (err: any) {
-      console.error("Supabase update error for tourists:", err.message);
+      console.error("Firestore update error for tourists:", err.message);
       return res.status(500).json({ error: `Database write failed: ${err.message}` });
     }
   }
@@ -1660,14 +1653,12 @@ app.put('/api/tourists/:id', authenticateAdmin, async (req, res) => {
 app.delete('/api/tourists/:id', authenticateAdmin, async (req, res) => {
   const id = Number(req.params.id);
 
-  if (dbConnected) {
+  if (firestoreConnected && db) {
     try {
-      await supabaseFetch(`/tourists?id=eq.${id}`, {
-        method: 'DELETE'
-      });
+      await db.collection('tourists').doc(String(id)).delete();
       clearCache('tourists:');
     } catch (err: any) {
-      console.error("Supabase delete error for tourists:", err.message);
+      console.error("Firestore delete error for tourists:", err.message);
       return res.status(500).json({ error: `Database write failed: ${err.message}` });
     }
   }
