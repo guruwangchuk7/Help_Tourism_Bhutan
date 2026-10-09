@@ -802,19 +802,17 @@ app.get('/api/tours', async (req, res) => {
   const cached = getCache(cacheKey, req);
   if (cached) return res.json(cached);
 
-  if (dbConnected) {
+  if (firestoreConnected && db) {
     try {
-      const data = await supabaseFetch('/tours?select=*');
-      // Format backend key 'price_val' to matches frontend 'priceVal' and 'description' to 'desc'
-      const formatted = data.map((t: any) => ({
-        ...t,
-        priceVal: t.price_val,
-        desc: t.description
-      }));
+      const snapshot = await db.collection('tours').get();
+      const formatted = snapshot.docs.map(doc => {
+        const t: any = doc.data();
+        return { ...t, priceVal: t.price_val, desc: t.description };
+      });
       setCache(cacheKey, formatted);
       return res.json(formatted);
     } catch (err: any) {
-      console.error("Supabase fetch error for tours:", err.message);
+      console.error("Firestore fetch error for tours:", err.message);
     }
   }
   res.json(memoryTours);
@@ -825,13 +823,14 @@ app.get('/api/tours/editions', async (req, res) => {
   const cached = getCache(cacheKey, req);
   if (cached) return res.json(cached);
 
-  if (dbConnected) {
+  if (firestoreConnected && db) {
     try {
-      const data = await supabaseFetch('/tour_editions?select=*&order=id.asc');
+      const snapshot = await db.collection('tourEditions').orderBy('id').get();
+      const data = snapshot.docs.map(doc => doc.data());
       setCache(cacheKey, data);
       return res.json(data);
     } catch (err: any) {
-      console.error("Supabase fetch error for tour editions:", err.message);
+      console.error("Firestore fetch error for tour editions:", err.message);
     }
   }
   res.json(mockEditions);
@@ -843,21 +842,17 @@ app.get('/api/tours/:id', async (req, res) => {
   const cached = getCache(cacheKey, req);
   if (cached) return res.json(cached);
 
-  if (dbConnected) {
+  if (firestoreConnected && db) {
     try {
-      const tourList = await supabaseFetch(`/tours?id=eq.${id}&select=*`);
-      if (tourList && tourList.length > 0) {
-        const tour = tourList[0];
-        const result = {
-          ...tour,
-          priceVal: tour.price_val,
-          desc: tour.description
-        };
+      const tourDoc = await db.collection('tours').doc(id).get();
+      if (tourDoc.exists) {
+        const tour: any = tourDoc.data();
+        const result = { ...tour, priceVal: tour.price_val, desc: tour.description };
         setCache(cacheKey, result);
         return res.json(result);
       }
     } catch (err: any) {
-      console.error(`Supabase fetch error for tour ${id}:`, err.message);
+      console.error(`Firestore fetch error for tour ${id}:`, err.message);
     }
   }
   const tour = mockTours.find(t => t.id === id);
@@ -980,16 +975,14 @@ app.post('/api/tours', authenticateAdmin, async (req, res) => {
     itinerary: Array.isArray(itinerary) ? itinerary : []
   };
 
-  if (dbConnected) {
+  if (firestoreConnected && db) {
     try {
-      await supabaseFetch('/tours', {
-        method: 'POST',
-        body: JSON.stringify(payload)
-      });
+      const cleanPayload = Object.fromEntries(Object.entries(payload).filter(([_, v]) => v !== undefined));
+      await db.collection('tours').doc(id).set(cleanPayload);
       clearCache('tours');
       return res.status(201).json({ ...payload, priceVal: payload.price_val, desc: payload.description });
     } catch (err: any) {
-      console.error("Create tour failed on Supabase:", err.message);
+      console.error("Create tour failed on Firestore:", err.message);
       return res.status(500).json({ error: `Database write failed: ${err.message}` });
     }
   }
@@ -1024,16 +1017,14 @@ app.put('/api/tours/:id', authenticateAdmin, async (req, res) => {
       itinerary: Array.isArray(itinerary) ? itinerary : []
     };
 
-    if (dbConnected) {
+    if (firestoreConnected && db) {
       try {
-        await supabaseFetch(`/tours?id=eq.${id}`, {
-          method: 'PATCH',
-          body: JSON.stringify(payload)
-        });
+        const cleanPayload = Object.fromEntries(Object.entries(payload).filter(([_, v]) => v !== undefined));
+        await db.collection('tours').doc(id).set(cleanPayload, { merge: true });
         clearCache('tours');
         return res.json({ id, ...payload, priceVal: payload.price_val, desc: payload.description });
       } catch (err: any) {
-        console.error(`Update tour ${id} failed on Supabase:`, err.message);
+        console.error(`Update tour ${id} failed on Firestore:`, err.message);
         return res.status(500).json({ error: `Database write failed: ${err.message}` });
       }
     }
@@ -1054,15 +1045,13 @@ app.put('/api/tours/:id', authenticateAdmin, async (req, res) => {
 // DELETE Tour
 app.delete('/api/tours/:id', authenticateAdmin, async (req, res) => {
   const id = req.params.id;
-  if (dbConnected) {
+  if (firestoreConnected && db) {
     try {
-      await supabaseFetch(`/tours?id=eq.${id}`, {
-        method: 'DELETE'
-      });
+      await db.collection('tours').doc(id).delete();
       clearCache('tours');
       return res.json({ message: "Tour deleted successfully", id });
     } catch (err: any) {
-      console.error(`Delete tour ${id} failed on Supabase:`, err.message);
+      console.error(`Delete tour ${id} failed on Firestore:`, err.message);
       return res.status(500).json({ error: `Database write failed: ${err.message}` });
     }
   }
