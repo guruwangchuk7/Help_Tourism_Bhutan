@@ -1267,16 +1267,16 @@ app.get('/api/about', async (req, res) => {
   const cached = getCache(cacheKey, req);
   if (cached) return res.json(cached);
 
-  if (dbConnected) {
+  if (firestoreConnected && db) {
     try {
-      const data = await supabaseFetch('/settings?key=eq.about&select=value');
-      if (data && data.length > 0) {
-        const value = data[0].value;
+      const doc = await db.collection('settings').doc('about').get();
+      if (doc.exists) {
+        const value = doc.data()!.value;
         setCache(cacheKey, value);
         return res.json(value);
       }
     } catch (err: any) {
-      console.error("Supabase fetch error for about, falling back to local file:", err.message);
+      console.error("Firestore fetch error for about, falling back to local file:", err.message);
     }
   }
 
@@ -1294,17 +1294,13 @@ app.get('/api/about', async (req, res) => {
 });
 
 app.put('/api/about', authenticateAdmin, async (req, res) => {
-  if (dbConnected) {
+  if (firestoreConnected && db) {
     try {
-      await supabaseFetch('/settings', {
-        method: 'POST',
-        headers: { 'Prefer': 'resolution=merge-duplicates' },
-        body: JSON.stringify({ key: 'about', value: req.body })
-      });
+      await db.collection('settings').doc('about').set({ key: 'about', value: req.body });
       clearCache('about:');
       return res.json(req.body);
     } catch (err: any) {
-      console.error("Supabase save error for about:", err.message);
+      console.error("Firestore save error for about:", err.message);
       return res.status(500).json({ error: `Database write failed: ${err.message}` });
     }
   }
@@ -1355,16 +1351,16 @@ app.get('/api/contact', async (req, res) => {
   const cached = getCache(cacheKey, req);
   if (cached) return res.json(cached);
 
-  if (dbConnected) {
+  if (firestoreConnected && db) {
     try {
-      const data = await supabaseFetch('/settings?key=eq.contact&select=value');
-      if (data && data.length > 0) {
-        const value = data[0].value;
+      const doc = await db.collection('settings').doc('contact').get();
+      if (doc.exists) {
+        const value = doc.data()!.value;
         setCache(cacheKey, value);
         return res.json(value);
       }
     } catch (err: any) {
-      console.error("Supabase fetch error for contact, falling back to local file:", err.message);
+      console.error("Firestore fetch error for contact, falling back to local file:", err.message);
     }
   }
 
@@ -1382,17 +1378,13 @@ app.get('/api/contact', async (req, res) => {
 });
 
 app.put('/api/contact', authenticateAdmin, async (req, res) => {
-  if (dbConnected) {
+  if (firestoreConnected && db) {
     try {
-      await supabaseFetch('/settings', {
-        method: 'POST',
-        headers: { 'Prefer': 'resolution=merge-duplicates' },
-        body: JSON.stringify({ key: 'contact', value: req.body })
-      });
+      await db.collection('settings').doc('contact').set({ key: 'contact', value: req.body });
       clearCache('contact:');
       return res.json(req.body);
     } catch (err: any) {
-      console.error("Supabase save error for contact:", err.message);
+      console.error("Firestore save error for contact:", err.message);
       return res.status(500).json({ error: `Database write failed: ${err.message}` });
     }
   }
@@ -1445,16 +1437,16 @@ app.get('/api/testimonials', async (req, res) => {
   const cached = getCache(cacheKey, req);
   if (cached) return res.json(cached);
 
-  if (dbConnected) {
+  if (firestoreConnected && db) {
     try {
-      const data = await supabaseFetch('/settings?key=eq.testimonials&select=value');
-      if (data && data.length > 0) {
-        const value = data[0].value;
+      const doc = await db.collection('settings').doc('testimonials').get();
+      if (doc.exists) {
+        const value = doc.data()!.value;
         setCache(cacheKey, value);
         return res.json(value);
       }
     } catch (err: any) {
-      console.error("Supabase fetch error for testimonials, falling back to local file:", err.message);
+      console.error("Firestore fetch error for testimonials, falling back to local file:", err.message);
     }
   }
 
@@ -1472,17 +1464,13 @@ app.get('/api/testimonials', async (req, res) => {
 });
 
 app.put('/api/testimonials', authenticateAdmin, async (req, res) => {
-  if (dbConnected) {
+  if (firestoreConnected && db) {
     try {
-      await supabaseFetch('/settings', {
-        method: 'POST',
-        headers: { 'Prefer': 'resolution=merge-duplicates' },
-        body: JSON.stringify({ key: 'testimonials', value: req.body })
-      });
+      await db.collection('settings').doc('testimonials').set({ key: 'testimonials', value: req.body });
       clearCache('testimonials:');
       return res.json(req.body);
     } catch (err: any) {
-      console.error("Supabase save error for testimonials:", err.message);
+      console.error("Firestore save error for testimonials:", err.message);
       return res.status(500).json({ error: `Database write failed: ${err.message}` });
     }
   }
