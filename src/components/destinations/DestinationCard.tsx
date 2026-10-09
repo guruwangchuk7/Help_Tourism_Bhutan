@@ -10,9 +10,10 @@ type Props = {
   location?: string
   price?: string
   rating?: number
+  showPrice?: boolean
 }
 
-const DestinationCard = ({ id, name, image, location = "Bhutan", price = "$120", rating = 4.8 }: Props) => {
+const DestinationCard = ({ id, name, image, location = "Bhutan", price = "$120", rating = 4.8, showPrice = true }: Props) => {
   const navigate = useNavigate()
   const [isFavorite, setIsFavorite] = useState(false)
   const [mountTime] = useState(() => Date.now())
@@ -69,14 +70,16 @@ const DestinationCard = ({ id, name, image, location = "Bhutan", price = "$120",
             {name}
           </h3>
 
-          <div className="mt-auto flex items-center justify-between pt-6 border-t border-primary/5">
-            <div className="flex flex-col">
-              <span className="text-[10px] text-secondary font-medium uppercase tracking-widest leading-none mb-2">Starting from</span>
-              <span className="text-xl font-heading font-medium text-primary leading-none">
-                {price} <span className="text-xs font-body font-normal text-secondary tracking-normal">/ night</span>
-              </span>
+          {showPrice && (
+            <div className="mt-auto flex items-center justify-between pt-6 border-t border-primary/5">
+              <div className="flex flex-col">
+                <span className="text-[10px] text-secondary font-medium uppercase tracking-widest leading-none mb-2">Starting from</span>
+                <span className="text-xl font-heading font-medium text-primary leading-none">
+                  {price} <span className="text-xs font-body font-normal text-secondary tracking-normal">/ night</span>
+                </span>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </motion.div>

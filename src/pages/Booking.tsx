@@ -19,9 +19,6 @@ const Booking = () => {
     } | null
 
     const [step, setStep] = useState(1)
-    const basePrice = locationState?.totalPrice || 1798.00
-    const tax = locationState ? 0 : 400.00
-    const totalPrice = basePrice + tax
 
     const [paymentMethod, setPaymentMethod] = useState<'email' | 'whatsapp' | 'offline'>('email')
     const [firstName, setFirstName] = useState("")
@@ -59,9 +56,8 @@ const Booking = () => {
 - *Email:* ${email || 'Not provided'}
 - *Guests:* ${locationState?.adults || 2} Guest(s)
 - *Duration:* ${locationState?.nights || 1} Night(s)
-- *Estimated Total:* $${totalPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
 
-Please assist me with finalizing this booking and completing the payment via bank wire/invoice.`
+Please assist me with finalizing this booking and sharing a personalized quote.`
 
         return `https://wa.me/97517934593?text=${encodeURIComponent(baseText)}`
     }
@@ -78,9 +74,8 @@ I would like to book a trip to Bhutan.
 - Email: ${email || 'Not provided'}
 - Guests: ${locationState?.adults || 2} Guest(s)
 - Duration: ${locationState?.nights || 1} Night(s)
-- Estimated Total: $${totalPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
 
-Please contact me to finalize the booking and coordinate payment.
+Please contact me to finalize the booking and share a personalized quote.
 
 Thank you!`
 
@@ -436,67 +431,14 @@ Thank you!`
                                     </div>
 
                                     <div className="space-y-4">
-                                        {locationState ? (
-                                            matchedTour ? (
-                                                <>
-                                                    <div className="flex justify-between items-center group">
-                                                        <span className="text-secondary font-light text-sm tracking-wide group-hover:text-primary transition-colors">
-                                                            Tour Package (x{locationState.adults || 2})
-                                                        </span>
-                                                        <span className="font-heading font-semibold text-primary tracking-wide">
-                                                            ${(matchedTour.priceVal * (locationState.adults || 2)).toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                                                        </span>
-                                                    </div>
-                                                    <div className="flex justify-between items-center group">
-                                                        <span className="text-secondary font-light text-sm tracking-wide group-hover:text-primary transition-colors">
-                                                            Government SDF & Visa
-                                                        </span>
-                                                        <span className="font-heading font-semibold text-accent tracking-wide">
-                                                            Included
-                                                        </span>
-                                                    </div>
-                                                </>
-                                            ) : (matchedDestination || locationState?.type === 'hotel') ? (
-                                                <>
-                                                    <div className="flex justify-between items-center group">
-                                                        <span className="text-secondary font-light text-sm tracking-wide group-hover:text-primary transition-colors">
-                                                            Stay Cost ({locationState.nights || 1} Night{locationState.nights && locationState.nights > 1 ? 's' : ''} x {locationState.adults || 2} Guest{locationState.adults && locationState.adults > 1 ? 's' : ''})
-                                                        </span>
-                                                        <span className="font-heading font-semibold text-primary tracking-wide">
-                                                            ${(locationState.totalPrice || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                                                        </span>
-                                                    </div>
-                                                    <div className="flex justify-between items-center group">
-                                                        <span className="text-secondary font-light text-sm tracking-wide group-hover:text-primary transition-colors">
-                                                            Government SDF Tax
-                                                        </span>
-                                                        <span className="font-heading font-semibold text-accent tracking-wide">
-                                                            Excluded
-                                                        </span>
-                                                    </div>
-                                                </>
-                                            ) : (
-                                                <div className="flex justify-between items-center group">
-                                                    <span className="text-secondary font-light text-sm tracking-wide group-hover:text-primary transition-colors">
-                                                        Base Itinerary
-                                                    </span>
-                                                    <span className="font-heading font-semibold text-primary tracking-wide">
-                                                        ${(locationState.totalPrice || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                                                    </span>
-                                                </div>
-                                            )
-                                        ) : (
-                                            <>
-                                                <div className="flex justify-between items-center group">
-                                                    <span className="text-secondary font-light text-sm tracking-wide group-hover:text-primary transition-colors">Base Itinerary (x2)</span>
-                                                    <span className="font-heading font-semibold text-primary tracking-wide">$1,798.00</span>
-                                                </div>
-                                                <div className="flex justify-between items-center group">
-                                                    <span className="text-secondary font-light text-sm tracking-wide group-hover:text-primary transition-colors">SDF Government Tax</span>
-                                                    <span className="font-heading font-semibold text-primary tracking-wide">$400.00</span>
-                                                </div>
-                                            </>
-                                        )}
+                                        <div className="flex justify-between items-center group">
+                                            <span className="text-secondary font-light text-sm tracking-wide group-hover:text-primary transition-colors">
+                                                Guests
+                                            </span>
+                                            <span className="font-heading font-semibold text-primary tracking-wide">
+                                                {locationState?.adults || 2}
+                                            </span>
+                                        </div>
                                         <div className="flex justify-between items-center group">
                                             <span className="text-secondary font-light text-sm tracking-wide group-hover:text-primary transition-colors">Concierge Assistance</span>
                                             <span className="font-heading font-semibold text-accent tracking-wide">FREE</span>
@@ -504,12 +446,12 @@ Thank you!`
                                     </div>
 
                                     <div className="mt-8 pt-8 border-t border-primary/10">
-                                        <div className="flex justify-between items-end">
+                                        <div className="flex items-center justify-between gap-4">
                                             <div className="flex flex-col gap-1">
-                                                <span className="block text-[9px] font-medium text-secondary/60 uppercase tracking-[0.2em]">Grand Total / Total Price</span>
-                                                <span className="text-3xl font-heading font-semibold text-primary tracking-tight">${totalPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                                <span className="block text-[9px] font-medium text-secondary/60 uppercase tracking-[0.2em] mb-1">Pricing</span>
+                                                <span className="text-sm font-heading font-medium text-primary tracking-wide">Confirmed by our team after review</span>
                                             </div>
-                                            <div className="bg-bg-alt p-3 rounded-full border border-primary/5">
+                                            <div className="bg-bg-alt p-3 rounded-full border border-primary/5 shrink-0">
                                                 <ShieldCheck className="w-5 h-5 text-accent" />
                                             </div>
                                         </div>

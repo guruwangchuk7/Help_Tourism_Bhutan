@@ -231,12 +231,10 @@ const Destinations = () => {
                       price={dest.price}
                       rating={dest.rating}
                       location={dest.location}
+                      showPrice={false}
                     />
                   </motion.div>
                 ))}
-              </div>
-              <div className="mt-16 text-center text-[10px] uppercase tracking-[0.15em] text-secondary/60 max-w-3xl mx-auto border-t border-primary/5 pt-8">
-                * Note: Lodging rates shown do not include the government Sustainable Development Fee (SDF) of $100 per night or visa processing fees.
               </div>
             </>
           ) : (

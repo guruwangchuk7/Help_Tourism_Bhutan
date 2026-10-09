@@ -257,6 +257,7 @@ const Home = () => {
                           price={dest.price}
                           rating={dest.rating}
                           location={dest.location}
+                          showPrice={false}
                         />
                       </div>
                     );
@@ -298,6 +299,7 @@ const Home = () => {
                     price={dest.price}
                     rating={dest.rating}
                     location={dest.location}
+                    showPrice={false}
                   />
                 ))}
               </motion.div>
@@ -362,11 +364,7 @@ const Home = () => {
                           <h3 className="text-xl font-heading font-medium text-primary leading-tight mb-3 group-hover:text-accent transition-colors">{tour.title}</h3>
                           <p className="text-secondary font-light text-sm mb-6 leading-relaxed flex-1">{tour.desc}</p>
 
-                          <div className="flex items-center justify-between pt-5 border-t border-primary/5 mt-auto">
-                            <div className="flex flex-col">
-                              <span className="text-[9px] font-semibold text-secondary/60 uppercase tracking-wider mb-0.5">Price starting</span>
-                              <span className="text-lg font-heading font-semibold text-primary">{tour.price}</span>
-                            </div>
+                          <div className="flex items-center justify-end pt-5 border-t border-primary/5 mt-auto">
                             <button
                               onClick={(e) => { e.stopPropagation(); navigate(`/tours/${tour.id}`); }}
                               className="btn-accent !px-5 !py-2.5 !text-[10px] !rounded-full font-bold uppercase tracking-wider cursor-pointer"
@@ -422,11 +420,7 @@ const Home = () => {
                     <h3 className="text-xl font-heading font-medium text-primary leading-tight mb-3 group-hover:text-accent transition-colors">{tour.title}</h3>
                     <p className="text-secondary font-light text-sm mb-6 leading-relaxed flex-1">{tour.desc}</p>
 
-                    <div className="flex items-center justify-between pt-5 border-t border-primary/5">
-                      <div className="flex flex-col">
-                        <span className="text-[9px] font-semibold text-secondary/60 uppercase tracking-wider mb-0.5">Price starting</span>
-                        <span className="text-lg font-heading font-semibold text-primary">{tour.price}</span>
-                      </div>
+                    <div className="flex items-center justify-end pt-5 border-t border-primary/5">
                       <button
                         onClick={(e) => { e.stopPropagation(); navigate(`/tours/${tour.id}`); }}
                         className="btn-accent !px-5 !py-2.5 !text-[10px] !rounded-full font-bold uppercase tracking-wider cursor-pointer"

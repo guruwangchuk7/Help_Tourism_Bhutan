@@ -357,15 +357,14 @@ const TourDetail = () => {
 
                 <div className="mb-8 pb-6 border-b border-primary/5">
                   <span className="text-[10px] font-bold text-secondary/60 uppercase tracking-widest block mb-1">
-                    Package Price (All-Inclusive)
+                    Package Price
                   </span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-heading font-bold text-primary">{tour.price}</span>
-                    <span className="text-xs text-secondary font-light">/ person</span>
+                    <span className="text-2xl font-heading font-bold text-primary">Available on request</span>
                   </div>
                   <p className="text-[9px] text-accent/80 font-bold uppercase tracking-wider mt-2 flex items-center gap-1">
                     <ShieldCheck className="w-3.5 h-3.5" />
-                    Includes $100/night government SDF & Visa fee
+                    All-inclusive, excludes government SDF & visa fee
                   </p>
                 </div>
 
@@ -377,7 +376,6 @@ const TourDetail = () => {
                           destinationName: tour.title,
                           nights: tour.nights,
                           adults: 2,
-                          totalPrice: tour.priceVal * 2, // standard 2 travelers
                           image: tour.image
                         }
                       })

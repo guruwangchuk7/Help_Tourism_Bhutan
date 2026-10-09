@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
-import { ArrowLeft, Users, MessageSquare, Heart, Share2, Star, ArrowRight, Wifi, Mountain, Bath, Car, Utensils, Sparkles, Minus, Plus } from "lucide-react"
+import { ArrowLeft, MessageSquare, Heart, Share2, Star, ArrowRight, Wifi, Mountain, Bath, Car, Utensils, Sparkles } from "lucide-react"
 import { useState, useEffect, useMemo } from "react"
 import PageTransition from "../components/common/PageTransition"
 import SEO from "../components/common/SEO"
@@ -34,20 +34,6 @@ const DestinationDetail = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [activeTab, setActiveTab] = useState('overview')
-  const getTodayString = () => {
-    const today = new Date()
-    return today.toISOString().split('T')[0]
-  }
-
-  const getTomorrowString = () => {
-    const tomorrow = new Date()
-    tomorrow.setDate(tomorrow.getDate() + 1)
-    return tomorrow.toISOString().split('T')[0]
-  }
-
-  const [startDate, setStartDate] = useState(getTodayString())
-  const [endDate, setEndDate] = useState(getTomorrowString())
-  const [adults, setAdults] = useState(2)
   const [mountTime] = useState(() => Date.now())
 
   const cacheBustedImage = (destination && destination.image && typeof destination.image === 'string' && !destination.image.startsWith('data:') && !destination.image.includes('?t='))
@@ -136,20 +122,6 @@ const DestinationDetail = () => {
         setLoading(false)
       })
   }, [id])
-
-  const calculateNights = () => {
-    if (!startDate || !endDate) return 1
-    const start = new Date(startDate)
-    const end = new Date(endDate)
-    if (isNaN(start.getTime()) || isNaN(end.getTime())) return 1
-    const diffTime = end.getTime() - start.getTime()
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    return diffDays > 0 ? diffDays : 1
-  }
-
-  const nights = calculateNights()
-  const priceNumber = destination ? Number(destination.price.replace(/[^0-9.-]+/g,"")) || 120 : 120
-  const totalPrice = priceNumber * nights * adults
 
   // Smooth scroll to top on enter
   useEffect(() => {
@@ -425,75 +397,18 @@ const DestinationDetail = () => {
                 <div className="absolute top-[-50px] right-[-50px] w-48 h-48 bg-accent/5 rounded-full blur-2xl pointer-events-none" />
 
                 <div className="relative z-10">
-                  <div className="flex items-end justify-between mb-8 pb-6 border-b border-primary/5">
-                    <div className="flex flex-col">
-                      <span className="text-secondary/60 text-[9px] font-semibold uppercase tracking-[0.2em] mb-2">Total Stay Cost</span>
-                      <span className="text-4xl font-heading font-semibold text-primary leading-none tracking-tight">${totalPrice}</span>
-                    </div>
-                    <div className="text-right flex flex-col justify-end">
-                      <span className="block font-medium text-[10px] uppercase tracking-widest text-secondary">{nights} Night{nights > 1 ? 's' : ''} / {adults} Guest{adults > 1 ? 's' : ''}</span>
-                      <span className="text-secondary/60 text-[9px] italic mt-1 font-light">{destination.price} per night</span>
-                    </div>
-                  </div>
-
-                  {/* Date Selectors */}
-                  <div className="grid grid-cols-2 gap-3 mb-4">
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[8px] font-bold uppercase tracking-wider text-secondary/60 pl-1">Check In</label>
-                      <input 
-                        type="date" 
-                        value={startDate} 
-                        onChange={(e) => setStartDate(e.target.value)} 
-                        className="w-full bg-bg-alt border border-primary/5 rounded-xl px-3 py-2.5 text-xs text-primary outline-none focus:border-accent/40 cursor-pointer min-h-[42px] appearance-none"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[8px] font-bold uppercase tracking-wider text-secondary/60 pl-1">Check Out</label>
-                      <input 
-                        type="date" 
-                        value={endDate} 
-                        onChange={(e) => setEndDate(e.target.value)} 
-                        className="w-full bg-bg-alt border border-primary/5 rounded-xl px-3 py-2.5 text-xs text-primary outline-none focus:border-accent/40 cursor-pointer min-h-[42px] appearance-none"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Travelers Selector */}
-                  <div className="flex items-center justify-between bg-bg-alt border border-primary/5 rounded-xl px-4 py-2.5 mb-6 text-primary">
-                    <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4 text-accent" />
-                      <span className="text-xs font-medium text-primary">Travelers</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <button
-                        type="button"
-                        onClick={() => { if (adults > 1) setAdults(adults - 1); }}
-                        className="w-6 h-6 rounded-full border border-primary/10 flex items-center justify-center text-primary hover:bg-bg-light text-xs transition-colors cursor-pointer"
-                      >
-                        <Minus className="w-2.5 h-2.5" />
-                      </button>
-                      <span className="font-semibold text-sm text-primary min-w-[12px] text-center">{adults}</span>
-                      <button
-                        type="button"
-                        onClick={() => setAdults(adults + 1)}
-                        className="w-6 h-6 rounded-full border border-primary/10 flex items-center justify-center text-primary hover:bg-bg-light text-xs transition-colors cursor-pointer"
-                      >
-                        <Plus className="w-2.5 h-2.5" />
-                      </button>
-                    </div>
-                  </div>
+                  <h3 className="font-heading font-semibold text-xl text-primary mb-2">Plan Your Visit</h3>
+                  <p className="text-secondary font-light text-sm leading-relaxed mb-8">
+                    Pricing depends on your dates, group size, and preferences — our team will confirm your quote once you request a booking.
+                  </p>
 
                   <button
-                    onClick={() => navigate('/booking', { state: { adults, nights, startDate, endDate, destinationName: destination.name, totalPrice, image: cacheBustedImage } })}
+                    onClick={() => navigate('/booking', { state: { destinationName: destination.name, image: cacheBustedImage } })}
                     className="w-full btn-accent py-5 text-sm shadow-premium"
                   >
-                    Secure Trip
+                    Plan Your Trip
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </button>
-
-                  <p className="mt-8 text-center text-[9px] font-medium text-secondary/40 uppercase tracking-[0.2em]">
-                    Instant Confirmation Required
-                  </p>
                 </div>
               </div>
 
