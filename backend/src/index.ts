@@ -865,17 +865,17 @@ app.get('/api/hotels', async (req, res) => {
   const cached = getCache(cacheKey, req);
   if (cached) return res.json(cached);
 
-  if (dbConnected) {
+  if (firestoreConnected && db) {
     try {
-      const data = await supabaseFetch('/hotels?select=*&order=id.asc');
-      const formatted = data.map((h: any) => ({
-        ...h,
-        rating: parseFloat(h.rating) || h.rating
-      }));
+      const snapshot = await db.collection('hotels').orderBy('id').get();
+      const formatted = snapshot.docs.map(doc => {
+        const h: any = doc.data();
+        return { ...h, rating: parseFloat(h.rating) || h.rating };
+      });
       setCache(cacheKey, formatted);
       return res.json(formatted);
     } catch (err: any) {
-      console.error("Supabase fetch error for hotels:", err.message);
+      console.error("Firestore fetch error for hotels:", err.message);
     }
   }
   res.json(memoryHotels);
@@ -1065,22 +1065,20 @@ app.delete('/api/tours/:id', authenticateAdmin, async (req, res) => {
 // CREATE Hotel
 app.post('/api/hotels', authenticateAdmin, async (req, res) => {
   let { id, name, location, image, rating, price, description } = req.body;
-  const payload = { id: id ? parseInt(id) : undefined, name, location, image, rating: parseFloat(rating) || 5.0, price, description };
+  const payload: any = { id: id ? parseInt(id) : undefined, name, location, image, rating: parseFloat(rating) || 5.0, price, description };
 
-  if (dbConnected) {
+  if (firestoreConnected && db) {
     try {
       if (!payload.id) {
-        const existing = await supabaseFetch('/hotels?select=id&order=id.desc&limit=1');
-        payload.id = existing && existing.length > 0 ? existing[0].id + 1 : 1;
+        const existingSnap = await db.collection('hotels').orderBy('id', 'desc').limit(1).get();
+        payload.id = existingSnap.empty ? 1 : existingSnap.docs[0].data().id + 1;
       }
-      await supabaseFetch('/hotels', {
-        method: 'POST',
-        body: JSON.stringify(payload)
-      });
+      const cleanPayload = Object.fromEntries(Object.entries(payload).filter(([_, v]) => v !== undefined));
+      await db.collection('hotels').doc(String(payload.id)).set(cleanPayload);
       clearCache('hotels');
       return res.status(201).json(payload);
     } catch (err: any) {
-      console.error("Create hotel failed on Supabase:", err.message);
+      console.error("Create hotel failed on Firestore:", err.message);
       return res.status(500).json({ error: `Database write failed: ${err.message}` });
     }
   }
@@ -1098,18 +1096,16 @@ app.post('/api/hotels', authenticateAdmin, async (req, res) => {
 app.put('/api/hotels/:id', authenticateAdmin, async (req, res) => {
   const id = parseInt(req.params.id as string);
   const { name, location, image, rating, price, description } = req.body;
-  const payload = { name, location, image, rating: parseFloat(rating) || 5.0, price, description };
+  const payload: any = { id, name, location, image, rating: parseFloat(rating) || 5.0, price, description };
 
-  if (dbConnected) {
+  if (firestoreConnected && db) {
     try {
-      await supabaseFetch(`/hotels?id=eq.${id}`, {
-        method: 'PATCH',
-        body: JSON.stringify(payload)
-      });
+      const cleanPayload = Object.fromEntries(Object.entries(payload).filter(([_, v]) => v !== undefined));
+      await db.collection('hotels').doc(String(id)).set(cleanPayload, { merge: true });
       clearCache('hotels');
-      return res.json({ id, ...payload });
+      return res.json(payload);
     } catch (err: any) {
-      console.error(`Update hotel ${id} failed on Supabase:`, err.message);
+      console.error(`Update hotel ${id} failed on Firestore:`, err.message);
       return res.status(500).json({ error: `Database write failed: ${err.message}` });
     }
   }
@@ -1117,24 +1113,22 @@ app.put('/api/hotels/:id', authenticateAdmin, async (req, res) => {
   // Fallback to in-memory
   const idx = memoryHotels.findIndex(h => h.id === id);
   if (idx !== -1) {
-    memoryHotels[idx] = { id, ...payload } as any;
+    memoryHotels[idx] = payload as any;
   }
   clearCache('hotels');
-  res.json({ id, ...payload });
+  res.json(payload);
 });
 
 // DELETE Hotel
 app.delete('/api/hotels/:id', authenticateAdmin, async (req, res) => {
   const id = parseInt(req.params.id as string);
-  if (dbConnected) {
+  if (firestoreConnected && db) {
     try {
-      await supabaseFetch(`/hotels?id=eq.${id}`, {
-        method: 'DELETE'
-      });
+      await db.collection('hotels').doc(String(id)).delete();
       clearCache('hotels');
       return res.json({ message: "Hotel deleted successfully", id });
     } catch (err: any) {
-      console.error(`Delete hotel ${id} failed on Supabase:`, err.message);
+      console.error(`Delete hotel ${id} failed on Firestore:`, err.message);
       return res.status(500).json({ error: `Database write failed: ${err.message}` });
     }
   }
