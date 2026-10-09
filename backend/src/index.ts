@@ -1560,17 +1560,17 @@ app.post('/api/tourists', authenticateAdmin, async (req, res) => {
       await db.collection('tourists').doc(String(newId)).set(cleanPayload);
       clearCache('tourists:');
       return res.json({
-        id: cleanPayload.id,
-        name: cleanPayload.name,
-        nationality: cleanPayload.nationality,
-        passportNumber: cleanPayload.passport_number,
-        email: cleanPayload.email,
-        phone: cleanPayload.phone,
-        tourName: cleanPayload.tour_name,
-        checkInDate: cleanPayload.check_in_date,
-        checkOutDate: cleanPayload.check_out_date,
-        sdfStatus: cleanPayload.sdf_status,
-        specialRequests: cleanPayload.special_requests
+        id: t.id,
+        name: t.name,
+        nationality: t.nationality,
+        passportNumber: t.passport_number,
+        email: t.email,
+        phone: t.phone,
+        tourName: t.tour_name,
+        checkInDate: t.check_in_date,
+        checkOutDate: t.check_out_date,
+        sdfStatus: t.sdf_status,
+        specialRequests: t.special_requests
       });
     } catch (err: any) {
       console.error("Firestore insert error for tourists:", err.message);
@@ -1617,17 +1617,17 @@ app.put('/api/tourists/:id', authenticateAdmin, async (req, res) => {
       await db.collection('tourists').doc(String(id)).set(cleanPayload, { merge: true });
       clearCache('tourists:');
       return res.json({
-        id: cleanPayload.id,
-        name: cleanPayload.name,
-        nationality: cleanPayload.nationality,
-        passportNumber: cleanPayload.passport_number,
-        email: cleanPayload.email,
-        phone: cleanPayload.phone,
-        tourName: cleanPayload.tour_name,
-        checkInDate: cleanPayload.check_in_date,
-        checkOutDate: cleanPayload.check_out_date,
-        sdfStatus: cleanPayload.sdf_status,
-        specialRequests: cleanPayload.special_requests
+        id: t.id,
+        name: t.name,
+        nationality: t.nationality,
+        passportNumber: t.passport_number,
+        email: t.email,
+        phone: t.phone,
+        tourName: t.tour_name,
+        checkInDate: t.check_in_date,
+        checkOutDate: t.check_out_date,
+        sdfStatus: t.sdf_status,
+        specialRequests: t.special_requests
       });
     } catch (err: any) {
       console.error("Firestore update error for tourists:", err.message);
