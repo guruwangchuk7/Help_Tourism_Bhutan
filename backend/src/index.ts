@@ -892,7 +892,8 @@ app.post('/api/destinations', authenticateAdmin, async (req, res) => {
         const existingSnap = await db.collection('destinations').orderBy('id', 'desc').limit(1).get();
         payload.id = existingSnap.empty ? 1 : existingSnap.docs[0].data().id + 1;
       }
-      await db.collection('destinations').doc(String(payload.id)).set(payload);
+      const cleanPayload = Object.fromEntries(Object.entries(payload).filter(([_, v]) => v !== undefined));
+      await db.collection('destinations').doc(String(payload.id)).set(cleanPayload);
       clearCache('destinations');
       return res.status(201).json(payload);
     } catch (err: any) {
@@ -917,7 +918,8 @@ app.put('/api/destinations/:id', authenticateAdmin, async (req, res) => {
 
   if (firestoreConnected && db) {
     try {
-      await db.collection('destinations').doc(String(id)).set(payload, { merge: true });
+      const cleanPayload = Object.fromEntries(Object.entries(payload).filter(([_, v]) => v !== undefined));
+      await db.collection('destinations').doc(String(id)).set(cleanPayload, { merge: true });
       clearCache('destinations');
       return res.json(payload);
     } catch (err: any) {
