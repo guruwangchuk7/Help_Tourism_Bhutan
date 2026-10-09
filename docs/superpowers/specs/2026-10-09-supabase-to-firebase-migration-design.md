@@ -23,9 +23,12 @@ This means the migration surface is fully bounded: 7 tables + 1 bucket with 20 f
 - **Firestore** replaces Postgres/PostgREST for the 7 tables, modeled as flat top-level collections (not subcollections, not denormalized) — closest to current shape, least rewrite:
   - `destinations/{id}`, `attractions/{id}` (field `destinationId` holds the old FK), `tours/{id}`, `tourEditions/{id}` (field `tourId` holds the old FK), `hotels/{id}`, `tourists/{id}` — same data, Firestore-native types (arrays/maps instead of JSONB).
   - `settings/{key}` — one doc per key (`about`, `contact`, `testimonials`), with the existing JSON value stored under a `value` field.
-- **Firebase Storage** replaces Supabase Storage for the `cms-media` bucket. Files keep their existing names/paths under a `cms-media/` prefix in the default bucket.
-- **Backend** (`backend/src/index.ts`) gets a Firestore/Storage data-access layer via `firebase-admin`, replacing `supabaseFetch()` / `uploadToSupabaseStorage()`. Route paths, request/response shapes, and the `ADMIN_API_KEY` auth middleware are unchanged, so the frontend (including `AdminDashboard.tsx`) requires no changes.
-- **Credentials**: a Firebase service-account JSON (generated from the new Firebase project you create and hand to the client) stored as an env var (`FIREBASE_SERVICE_ACCOUNT`, JSON string) plus `FIREBASE_STORAGE_BUCKET`. Matches how `DATABASE_URL` is handled today — one secret env var, no cloud-specific IAM setup, works unchanged on Vercel.
+  - Firestore stays on the free **Spark** plan — no billing account needed for the data layer.
+- **No Firebase Storage** (revised after discovering Firebase Storage now requires the paid Blaze plan even at zero usage). Instead, storage is split by purpose:
+  - The 20 already-recovered images become **static files committed into the frontend's `public/` folder** (`public/cms-media/`), served exactly like the site's existing hardcoded images (`/paro-taksang.jpg` etc.) — no cloud storage, no cost.
+  - **Future image uploads** through the admin dashboard go to **Cloudinary's free tier** (25 credits/month, no card required) instead of a Firebase bucket. This is the only piece of the stack that isn't Firebase; it exists solely because Vercel's serverless backend has no persistent filesystem to save uploads to.
+- **Backend** (`backend/src/index.ts`) gets a Firestore data-access layer via `firebase-admin`, replacing `supabaseFetch()`, and a Cloudinary upload helper replacing `uploadToSupabaseStorage()`. Route paths, request/response shapes, and the `ADMIN_API_KEY` auth middleware are unchanged, so the frontend (including `AdminDashboard.tsx`) requires no changes.
+- **Credentials**: a Firebase service-account JSON (generated from the new Firebase project you create and hand to the client) stored as an env var (`FIREBASE_SERVICE_ACCOUNT`, JSON string), plus three Cloudinary env vars (`CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`) from a free Cloudinary account. Matches how `DATABASE_URL` is handled today — secret env vars, no cloud-specific IAM setup, works unchanged on Vercel.
 
 ## Data Model Mapping
 
@@ -39,7 +42,7 @@ This means the migration surface is fully bounded: 7 tables + 1 bucket with 20 f
 | `settings(key varchar PK, value jsonb)` | `settings/{key}` | Doc fields: `{ value: <existing jsonb> }`. |
 | `tourists(id int, name, nationality, passport_number, email, phone, tour_name, check_in_date date, check_out_date date, sdf_status, special_requests)` | `tourists/{id}` | Table is empty — collection created but no migration data needed. `check_in_date`/`check_out_date` stored as Firestore Timestamps going forward. |
 
-**Image URL rewriting**: 6 rows (in `destinations` and `hotels`) have `image` values pointing to `https://sahdrcajbflinfhlwgmb.supabase.co/storage/v1/object/public/cms-media/<file>`. The migration script detects this exact URL pattern and rewrites it to the new Firebase Storage public URL for the same filename. All other `image` values (e.g. `/paro-taksang.jpg`) are frontend static assets and are left untouched.
+**Image URL rewriting**: 6 rows (in `destinations` and `hotels`) have `image` values pointing to `https://sahdrcajbflinfhlwgmb.supabase.co/storage/v1/object/public/cms-media/<file>`. The migration script detects this exact URL pattern and rewrites it to a local static-asset path (`/cms-media/<file>`), matching the already-recovered file copied into the frontend's `public/cms-media/` folder. All other `image` values (e.g. `/paro-taksang.jpg`) are frontend static assets and are left untouched.
 
 ## Migration Script
 
@@ -47,24 +50,24 @@ One-off script, not part of the running app, deleted after use (or kept under `b
 
 1. Restore `databasedoc/db_cluster.sql` into a throwaway local Postgres via Docker (`docker run postgres:17` + `psql -f db_cluster.sql`) rather than hand-parsing the dump's tab-delimited `COPY` blocks — the JSONB columns contain raw commas/quotes/backslashes that a hand-rolled parser risks corrupting.
 2. Node script connects to that local Postgres with `pg`, reads each of the 7 `public.*` tables with correct native types (JSONB already parsed to JS objects by `pg`).
-3. For each row, write a corresponding Firestore document via `firebase-admin`'s batched writes (`WriteBatch`), applying the URL-rewrite rule above where applicable.
-4. Upload the 20 files from `databasedoc/sahdrcajbflinfhlwgmb/cms-media/` to Firebase Storage under `cms-media/`, making them public the same way the Supabase bucket was public.
+3. Copy the 20 files from `databasedoc/sahdrcajbflinfhlwgmb/cms-media/` into the frontend's `public/cms-media/` folder (plain filesystem copy, no upload/network call), building a rewrite map of old Supabase URL → new local path (`/cms-media/<file>`).
+4. For each row, write a corresponding Firestore document via `firebase-admin`'s batched writes (`WriteBatch`), applying the URL-rewrite map above where applicable.
 5. Tear down the Docker container.
 6. Spot-check: print row counts written per collection and confirm they match source counts (6/3/13/4/4/3/0).
 
 ## Backend Code Changes
 
-- Add `firebase-admin` dependency; remove `pg` (no longer needed once the one-off migration script has run — the script itself can use a scratch dependency or the same `pg` before it's removed, order: run migration first, then strip `pg` from `package.json`).
-- Initialize `firebase-admin` once at startup from `FIREBASE_SERVICE_ACCOUNT` (parsed JSON) + `FIREBASE_STORAGE_BUCKET`.
-- Replace `supabaseFetch()` with thin Firestore helpers (get collection / get doc / set / update / delete) used by each route handler; replace `uploadToSupabaseStorage()` with a Firebase Storage upload helper returning a public URL. Keep the existing local-`public/uploads/` fallback behavior for non-production environments.
+- Add `firebase-admin` dependency (Firestore only — no Storage) and `cloudinary` dependency (for the upload endpoint); remove `pg` (no longer needed once the one-off migration script has run — the script itself can use a scratch dependency or the same `pg` before it's removed, order: run migration first, then strip `pg` from `package.json`).
+- Initialize `firebase-admin` once at startup from `FIREBASE_SERVICE_ACCOUNT` (parsed JSON). Initialize the `cloudinary` SDK from `CLOUDINARY_CLOUD_NAME`/`CLOUDINARY_API_KEY`/`CLOUDINARY_API_SECRET`.
+- Replace `supabaseFetch()` with thin Firestore helpers (get collection / get doc / set / update / delete) used by each route handler; replace `uploadToSupabaseStorage()` with a Cloudinary upload helper returning a public URL. Keep the existing local-`public/uploads/` fallback behavior for non-production environments.
 - No route paths, request bodies, or response JSON shapes change.
 - Delete dead code made obsolete by this migration: `backend/src/db.ts`, `backend/src/seed.ts` (direct-Postgres path already unused by the live server, only used by the old seeding flow), `backend/schema.sql` (superseded by Firestore, no longer the source of truth).
 
 ## Config Changes
 
 - Remove: `SUPABASE_URL`, `SUPABASE_KEY`, `DATABASE_URL` from `backend/.env`.
-- Add: `FIREBASE_SERVICE_ACCOUNT`, `FIREBASE_STORAGE_BUCKET`.
-- Create `backend/.env.example` (didn't exist before) documenting all required vars: `FIREBASE_SERVICE_ACCOUNT`, `FIREBASE_STORAGE_BUCKET`, `PORT`, `ADMIN_API_KEY`.
+- Add: `FIREBASE_SERVICE_ACCOUNT`, `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`.
+- Create `backend/.env.example` (didn't exist before) documenting all required vars: `FIREBASE_SERVICE_ACCOUNT`, `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `PORT`, `ADMIN_API_KEY`.
 - Update the same vars in the Vercel project settings for the backend deployment.
 
 ## Security Side-Fixes (opportunistic, in scope since touching these files anyway)
@@ -78,11 +81,11 @@ One-off script, not part of the running app, deleted after use (or kept under `b
 - After migration script runs: verify Firestore collection counts match source table counts exactly (6/3/13/4/4/3/0).
 - Start the backend locally against the new Firebase project; exercise each route (`GET`/`POST`/`PUT`/`DELETE` for destinations, tours, hotels; `GET`/`PUT` for about/contact/testimonials; upload endpoint) and confirm responses match the shapes the frontend expects.
 - Run the existing frontend against the migrated backend and manually click through: homepage, destination detail, tour detail/booking tabs, admin dashboard CRUD for each entity, image upload in admin.
-- Confirm the 6 rewritten image URLs load correctly from Firebase Storage.
+- Confirm the 6 rewritten image URLs load correctly as static assets from the frontend's `public/cms-media/` folder, and that a new admin upload round-trips through Cloudinary correctly.
 
 ## Rollout
 
-No live-traffic cutover risk — the Supabase project is already paused, so there is no concurrent production traffic to cut over. Sequence: create Firebase project → run migration script once → update backend code → update env vars (local + Vercel) → deploy → smoke test → hand the Firebase project over to the client.
+No live-traffic cutover risk — the Supabase project is already paused, so there is no concurrent production traffic to cut over. Sequence: create Firebase project (Firestore, Spark plan) + Cloudinary account (free tier) → run migration script once → update backend code → update env vars (local + Vercel) → deploy → smoke test → hand the Firebase project over to the client.
 
 ## Appendix: Current Supabase Schema (as-is, from `databasedoc/db_cluster.sql`)
 
@@ -174,5 +177,6 @@ This same appendix doubles as the database documentation to hand to the client a
 ## Out of Scope
 
 - Supabase Auth, Realtime, Edge Functions, RPC — none are used, nothing to migrate.
-- The 4 unused Storage buckets (`tour-assets`, `destination-assets`, `user-profiles`, `documents`) — empty, not recreated in Firebase.
-- Any change to frontend code — it never talks to Supabase/Firebase directly.
+- The 4 unused Storage buckets (`tour-assets`, `destination-assets`, `user-profiles`, `documents`) — empty, not recreated anywhere.
+- Firebase Storage — not used at all (requires the paid Blaze plan even at zero usage); replaced by static frontend assets for existing images and Cloudinary for future uploads.
+- Frontend code changes beyond adding the 20 recovered images as static files under `public/cms-media/` — the backend API contract is unchanged, so no frontend logic/component changes are needed.
