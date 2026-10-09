@@ -1,10 +1,11 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
-
-dotenv.config();
+import { db } from './firebase';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -719,6 +720,25 @@ const checkDb = async () => {
   }
 };
 checkDb();
+
+// Firestore health check (replaces checkDb/dbConnected route-by-route; see Task 10 cleanup)
+let firestoreConnected = false;
+const checkFirestore = async () => {
+  if (!db) {
+    firestoreConnected = false;
+    console.warn("Firebase Admin SDK not initialized (missing FIREBASE_SERVICE_ACCOUNT). Firestore-backed routes operate in Mock-Fallback mode.");
+    return;
+  }
+  try {
+    await db.collection('destinations').limit(1).get();
+    firestoreConnected = true;
+    console.log("Firestore connected and verified successfully!");
+  } catch (err: any) {
+    firestoreConnected = false;
+    console.warn("Firestore connection failed. Server is operating in Mock-Fallback mode. Error:", err.message);
+  }
+};
+checkFirestore();
 
 // Routes
 app.get('/api/destinations', async (req, res) => {
