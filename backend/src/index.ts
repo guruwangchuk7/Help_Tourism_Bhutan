@@ -869,7 +869,7 @@ app.get('/api/hotels', async (req, res) => {
 // CREATE Destination
 app.post('/api/destinations', authenticateAdmin, async (req, res) => {
   let { id, name, image, description, price, rating, location, altitude, ideal_stay, peak_period, language } = req.body;
-  const payload = { id: id ? parseInt(id) : undefined, name, image, description, price, rating: parseFloat(rating) || 4.8, location, altitude, ideal_stay, peak_period, language };
+  const payload = { id: id ? parseInt(id) : undefined, name, image, description, price: price || 'Available on request', rating: parseFloat(rating) || 4.8, location, altitude, ideal_stay, peak_period, language };
   
   if (dbConnected) {
     try {
@@ -957,7 +957,7 @@ app.post('/api/tours', authenticateAdmin, async (req, res) => {
     title,
     duration,
     nights: parseInt(nights) || 0,
-    price,
+    price: price || 'Available on request',
     price_val: parseInt(priceVal) || 0,
     image,
     description: desc,
@@ -1064,7 +1064,7 @@ app.delete('/api/tours/:id', authenticateAdmin, async (req, res) => {
 // CREATE Hotel
 app.post('/api/hotels', authenticateAdmin, async (req, res) => {
   let { id, name, location, image, rating, price, description } = req.body;
-  const payload = { id: id ? parseInt(id) : undefined, name, location, image, rating: parseFloat(rating) || 5.0, price, description };
+  const payload = { id: id ? parseInt(id) : undefined, name, location, image, rating: parseFloat(rating) || 5.0, price: price || 'Available on request', description };
 
   if (dbConnected) {
     try {

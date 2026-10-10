@@ -73,7 +73,7 @@ const AdminDashboard = () => {
 
   // Search and sorting states
   const [searchQuery, setSearchQuery] = useState('')
-  const [sortBy, setSortBy] = useState<'name' | 'price' | 'rating' | 'default'>('default')
+  const [sortBy, setSortBy] = useState<'name' | 'rating' | 'default'>('default')
 
   // Form States (Modal)
   const [showModal, setShowModal] = useState(false)
@@ -328,7 +328,7 @@ const AdminDashboard = () => {
       setEditId(null)
       if (type === 'destinations') {
         setDestForm({
-          name: '', image: '', description: '', price: '', rating: 4.8, location: '',
+          name: '', image: '', description: '', rating: 4.8, location: '',
           descriptionText: '',
           itinerary: [
             { day: "01", title: "Arrival", detail: "Transfer and checking into hotel." },
@@ -350,7 +350,7 @@ const AdminDashboard = () => {
         })
       } else if (type === 'tours') {
         setTourForm({
-          id: '', title: '', duration: '', nights: 3, price: '', priceVal: 999, image: '',
+          id: '', title: '', duration: '', nights: 3, image: '',
           desc: '', category: 'Cultural', difficulty: 'Easy', inclusions: [], exclusions: [],
           itinerary: [
             { day: 1, title: 'Arrival', desc: 'Transfer and check into hotel.' },
@@ -364,7 +364,7 @@ const AdminDashboard = () => {
         })
       } else if (type === 'hotels') {
         setHotelForm({
-          name: '', location: '', image: '', rating: 5.0, price: '', description: ''
+          name: '', location: '', image: '', rating: 5.0, description: ''
         })
       }
     }
@@ -732,12 +732,6 @@ const AdminDashboard = () => {
         result.sort((a, b) => a.name.localeCompare(b.name))
       } else if (sortBy === 'rating') {
         result.sort((a, b) => b.rating - a.rating)
-      } else if (sortBy === 'price') {
-        result.sort((a, b) => {
-          const valA = parseFloat(a.price.replace(/[^0-9.]/g, '')) || 0
-          const valB = parseFloat(b.price.replace(/[^0-9.]/g, '')) || 0
-          return valA - valB
-        })
       }
       return result
     } else if (activeTab === 'tours') {
@@ -751,10 +745,6 @@ const AdminDashboard = () => {
       }
       if (sortBy === 'name') {
         result.sort((a, b) => a.title.localeCompare(b.title))
-      } else if (sortBy === 'rating') {
-        // Tours do not have ratings in type, skip or sort by duration
-      } else if (sortBy === 'price') {
-        result.sort((a, b) => a.priceVal - b.priceVal)
       }
       return result
     } else {
@@ -769,12 +759,6 @@ const AdminDashboard = () => {
         result.sort((a, b) => a.name.localeCompare(b.name))
       } else if (sortBy === 'rating') {
         result.sort((a, b) => b.rating - a.rating)
-      } else if (sortBy === 'price') {
-        result.sort((a, b) => {
-          const valA = parseFloat(a.price.replace(/[^0-9.]/g, '')) || 0
-          const valB = parseFloat(b.price.replace(/[^0-9.]/g, '')) || 0
-          return valA - valB
-        })
       }
       return result
     }
@@ -1154,7 +1138,6 @@ const AdminDashboard = () => {
                 <option value="default">Default / ID</option>
                 <option value="name">Name / Title</option>
                 {activeTab !== 'tours' && <option value="rating">Rating</option>}
-                <option value="price">Starting Price</option>
               </select>
             </div>
           </div>
@@ -2149,7 +2132,6 @@ const AdminDashboard = () => {
                           <th className="p-4 w-20 pl-6">ID</th>
                           <th className="p-4">Name & Description</th>
                           <th className="p-4">Location</th>
-                          <th className="p-4">Price</th>
                           <th className="p-4">Rating</th>
                           <th className="p-4 text-right pr-6">Actions</th>
                         </tr>
@@ -2166,7 +2148,6 @@ const AdminDashboard = () => {
                               </div>
                             </td>
                             <td className="p-4 text-slate-600 text-sm">{d.location}</td>
-                            <td className="p-4 text-emerald-600 font-bold text-sm">{d.price}</td>
                             <td className="p-4 text-slate-705 text-sm">
                               <div className="flex items-center space-x-1">
                                 <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
@@ -2212,11 +2193,7 @@ const AdminDashboard = () => {
                             </div>
                           </div>
                           <p className="text-xs text-slate-600 line-clamp-2">{d.description}</p>
-                          <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-                            <div>
-                              <span className="text-[10px] text-slate-400 font-semibold block uppercase tracking-wider">Starting Price</span>
-                              <span className="text-sm font-bold text-emerald-600">{d.price}</span>
-                            </div>
+                          <div className="flex items-center justify-end pt-2 border-t border-slate-100">
                             <div className="flex space-x-1">
                               <button
                                 onClick={() => handleOpenEdit('destinations', d)}
@@ -2247,7 +2224,6 @@ const AdminDashboard = () => {
                           <th className="p-4 w-28 pl-6">Tour Code</th>
                           <th className="p-4">Title & Details</th>
                           <th className="p-4">Duration</th>
-                          <th className="p-4">Price</th>
                           <th className="p-4">Category</th>
                           <th className="p-4">Difficulty</th>
                           <th className="p-4 text-right pr-6">Actions</th>
@@ -2265,7 +2241,6 @@ const AdminDashboard = () => {
                               </div>
                             </td>
                             <td className="p-4 text-slate-600 text-sm">{t.duration} ({t.nights} Nights)</td>
-                            <td className="p-4 text-emerald-600 font-bold text-sm">{t.price}</td>
                             <td className="p-4 text-slate-600 text-sm">{t.category}</td>
                             <td className="p-4">
                               <span className="px-2 py-0.5 rounded text-xs font-semibold border bg-slate-100 text-slate-750 border-slate-200">
@@ -2315,10 +2290,6 @@ const AdminDashboard = () => {
                               <span className="text-[10px] text-slate-400 font-semibold block uppercase tracking-wider">Tour Code</span>
                               <span className="text-xs font-mono text-slate-700">{t.id}</span>
                             </div>
-                            <div>
-                              <span className="text-[10px] text-slate-400 font-semibold block uppercase tracking-wider text-right">Price</span>
-                              <span className="text-sm font-bold text-emerald-600">{t.price}</span>
-                            </div>
                             <div className="flex space-x-1">
                               <button
                                 onClick={() => handleOpenEdit('tours', t)}
@@ -2349,7 +2320,6 @@ const AdminDashboard = () => {
                           <th className="p-4 w-20 pl-6">ID</th>
                           <th className="p-4">Name & Description</th>
                           <th className="p-4">Location</th>
-                          <th className="p-4">Starting Rate</th>
                           <th className="p-4">Rating</th>
                           <th className="p-4 text-right pr-6">Actions</th>
                         </tr>
@@ -2366,7 +2336,6 @@ const AdminDashboard = () => {
                               </div>
                             </td>
                             <td className="p-4 text-slate-600 text-sm">{h.location}</td>
-                            <td className="p-4 text-emerald-600 font-bold text-sm">{h.price} <span className="text-xs text-slate-400 font-medium">/ Night</span></td>
                             <td className="p-4 text-slate-705 text-sm">
                               <div className="flex items-center space-x-1">
                                 <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
@@ -2412,11 +2381,7 @@ const AdminDashboard = () => {
                             </div>
                           </div>
                           <p className="text-xs text-slate-600 line-clamp-2">{h.description}</p>
-                          <div className="flex justify-between items-center pt-2 border-t border-slate-100">
-                            <div>
-                              <span className="text-[10px] text-slate-400 font-semibold block uppercase tracking-wider">Starting Rate</span>
-                              <span className="text-sm font-bold text-emerald-600">{h.price} <span className="text-[10px] text-slate-400 font-medium">/ Night</span></span>
-                            </div>
+                          <div className="flex justify-end items-center pt-2 border-t border-slate-100">
                             <div className="flex space-x-1">
                               <button
                                 onClick={() => handleOpenEdit('hotels', h)}
@@ -2513,16 +2478,6 @@ const AdminDashboard = () => {
                             required
                             value={destForm.location || ''}
                             onChange={e => setDestForm({ ...destForm, location: e.target.value })}
-                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Starting Price (e.g. $120)</label>
-                          <input
-                            type="text"
-                            required
-                            value={destForm.price || ''}
-                            onChange={e => setDestForm({ ...destForm, price: e.target.value })}
                             className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
                           />
                         </div>
@@ -2876,26 +2831,6 @@ const AdminDashboard = () => {
                             className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
                           />
                         </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Price tag (e.g. $1,299)</label>
-                          <input
-                            type="text"
-                            required
-                            value={tourForm.price || ''}
-                            onChange={e => setTourForm({ ...tourForm, price: e.target.value })}
-                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Numerical price value (e.g. 1299)</label>
-                          <input
-                            type="number"
-                            required
-                            value={tourForm.priceVal || 0}
-                            onChange={e => setTourForm({ ...tourForm, priceVal: parseInt(e.target.value) || 0 })}
-                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
-                          />
-                        </div>
                         <ImageUploadField
                           label="Tour Photo"
                           value={tourForm.image || ''}
@@ -3092,16 +3027,6 @@ const AdminDashboard = () => {
                         required
                         value={hotelForm.location || ''}
                         onChange={e => setHotelForm({ ...hotelForm, location: e.target.value })}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Starting Rate per Night (e.g. $1,800)</label>
-                      <input
-                        type="text"
-                        required
-                        value={hotelForm.price || ''}
-                        onChange={e => setHotelForm({ ...hotelForm, price: e.target.value })}
                         className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
                       />
                     </div>
