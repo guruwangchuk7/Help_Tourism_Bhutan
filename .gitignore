@@ -30,3 +30,6 @@ dist-ssr
 
 # git worktrees (scratch workspaces)
 .worktrees/
+
+# local database dumps / backups (contain auth data — never commit)
+databasedoc/
