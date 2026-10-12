@@ -1,20 +1,10 @@
 import { useNavigate, useParams } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
-import { ArrowLeft, MessageSquare, Heart, Share2, Star, ArrowRight, Wifi, Mountain, Bath, Car, Utensils, Sparkles } from "lucide-react"
+import { ArrowLeft, MessageSquare, Heart, Share2, ArrowRight, Wifi, Mountain, Bath, Car, Utensils, Sparkles } from "lucide-react"
 import { useState, useEffect, useMemo } from "react"
 import PageTransition from "../components/common/PageTransition"
 import SEO from "../components/common/SEO"
 import { DetailSkeleton } from "../components/common/Skeleton"
-import avatarElena from "../assets/avatar-elena.png"
-import avatarMarcus from "../assets/avatar-marcus.png"
-import avatarUser from "../assets/avatar-user.png"
-
-const getLocalAvatar = (avatarUrl: string, name: string) => {
-  const url = avatarUrl || "";
-  if (url.includes("elena") || name.toLowerCase().includes("elena")) return avatarElena;
-  if (url.includes("marcus") || name.toLowerCase().includes("marcus")) return avatarMarcus;
-  return avatarUser;
-}
 
 type Destination = {
   id: number
@@ -23,7 +13,6 @@ type Destination = {
   description: string
   attractions: string[]
   price: string
-  rating: number
   location: string
 }
 
@@ -168,11 +157,6 @@ const DestinationDetail = () => {
     { icon: Car, label: "Bespoke Transfers", desc: "Assigned luxury SUV and driver for all localized tours and day trips." },
     { icon: Utensils, label: "Artisanal Kitchen", desc: "In-house culinary experiences focusing on organic farm-to-table cuisine." }
   ];
-  let displayReviews = [
-    { name: "Elena Rostova", date: "April 2026", rating: 5, avatar: "https://i.pravatar.cc/150?u=elena", text: "Beyond luxury. The silence here is healing. Watching the sunrise from the terrace with hot butter tea is an experience I will carry with me forever. The staff treated us like royalty." },
-    { name: "Marcus Thorne", date: "March 2026", rating: 5, avatar: "https://i.pravatar.cc/150?u=marcus", text: "Incredibly well organized. The local guides are extremely knowledgeable. We got access to temple corridors that are usually closed to the public. Fully worth the journey." }
-  ];
-
   try {
     if (destination.description.trim().startsWith('{')) {
       const parsed = JSON.parse(destination.description);
@@ -185,15 +169,6 @@ const DestinationDetail = () => {
           icon: iconMap[a.icon] || Sparkles,
           label: a.label || "Amenity",
           desc: a.desc || ""
-        }));
-      }
-      if (parsed.reviews && Array.isArray(parsed.reviews)) {
-        displayReviews = parsed.reviews.map((r: any) => ({
-          name: r.name || "Anonymous",
-          date: r.date || "Recent",
-          rating: r.rating || 5,
-          avatar: r.avatar || `https://i.pravatar.cc/150?u=${encodeURIComponent(r.name || 'user')}`,
-          text: r.text || ""
         }));
       }
     }
@@ -269,7 +244,7 @@ const DestinationDetail = () => {
           <div className="lg:col-span-8">
             {/* Custom Tabs */}
             <div className="flex space-x-6 md:space-x-12 border-b border-primary/5 mb-10 md:mb-16 overflow-x-auto scrollbar-hide pb-2 relative">
-              {['overview', 'itinerary', 'amenities', 'reviews'].map(tab => (
+              {['overview', 'itinerary', 'amenities'].map(tab => (
                 <button
                   key={tab}
                   className={`pb-4 relative font-medium text-[10px] uppercase tracking-[0.2em] transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-4 rounded ${activeTab === tab ? 'text-primary' : 'text-secondary/50 hover:text-primary'
@@ -355,36 +330,6 @@ const DestinationDetail = () => {
                   </motion.div>
                 )}
 
-                {activeTab === 'reviews' && (
-                  <motion.div
-                    key="reviews"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.3 }}
-                    className="space-y-8"
-                  >
-                    {displayReviews.map((review, idx) => (
-                      <div key={idx} className="p-8 bg-white rounded-[2rem] shadow-minimal border border-primary/5 space-y-6">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-4">
-                            <img src={getLocalAvatar(review.avatar, review.name)} alt={review.name} className="w-12 h-12 rounded-full object-cover grayscale" />
-                            <div>
-                              <h5 className="font-heading font-semibold text-primary text-base">{review.name}</h5>
-                              <span className="text-[10px] uppercase text-secondary/60 tracking-wider">{review.date}</span>
-                            </div>
-                          </div>
-                          <div className="flex space-x-1">
-                            {[...Array(review.rating)].map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-gold text-gold" />)}
-                          </div>
-                        </div>
-                        <p className="text-secondary font-light text-sm leading-relaxed tracking-wide italic">
-                          "{review.text}"
-                        </p>
-                      </div>
-                    ))}
-                  </motion.div>
-                )}
               </AnimatePresence>
             </div>
           </div>

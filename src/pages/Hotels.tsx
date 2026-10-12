@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { Star, MapPin, ArrowRight } from 'lucide-react'
+import { MapPin, ArrowRight } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import PageTransition from '../components/common/PageTransition'
 import SEO from '../components/common/SEO'
@@ -12,7 +12,6 @@ type Hotel = {
   name: string
   location: string
   image: string
-  rating: number
   price: string
   desc?: string
   description?: string
@@ -141,15 +140,9 @@ const Hotels = () => {
                   </div>
                   <div className="flex-1 flex flex-col justify-between py-2">
                     <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-1.5 text-accent">
-                          <MapPin className="w-3.5 h-3.5" />
-                          <span className="text-[10px] font-semibold uppercase tracking-wider">{hotel.location}</span>
-                        </div>
-                        <div className="flex items-center gap-1 bg-bg-light px-2 py-0.5 rounded-md">
-                          <Star className="w-3 h-3 text-accent fill-accent" />
-                          <span className="text-xs font-bold text-primary">{hotel.rating}</span>
-                        </div>
+                      <div className="flex items-center gap-1.5 text-accent mb-3">
+                        <MapPin className="w-3.5 h-3.5" />
+                        <span className="text-[10px] font-semibold uppercase tracking-wider">{hotel.location}</span>
                       </div>
                       <h3 className="text-2xl font-heading font-medium text-primary leading-tight mb-3 group-hover:text-accent transition-colors">{hotel.name}</h3>
                       <p className="text-secondary font-light text-sm leading-relaxed mb-6">{hotel.desc || hotel.description}</p>
