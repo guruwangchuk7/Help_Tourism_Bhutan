@@ -33,3 +33,4 @@ dist-ssr
 
 # local database dumps / backups (contain auth data — never commit)
 databasedoc/
+.gstack/

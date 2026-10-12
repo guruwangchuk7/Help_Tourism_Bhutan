@@ -13,10 +13,16 @@ const Header = () => {
     location.pathname.startsWith('/destinations')
 
   useEffect(() => {
+    let ticking = false
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50)
+      if (ticking) return
+      ticking = true
+      window.requestAnimationFrame(() => {
+        setIsScrolled(window.scrollY > 50)
+        ticking = false
+      })
     }
-    window.addEventListener('scroll', handleScroll)
+    window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
@@ -50,12 +56,10 @@ const Header = () => {
       boxShadow: 'none',
       borderBottom: '1px solid transparent',
       paddingTop: '32px',
-      paddingBottom: '32px',
-      backdropFilter: 'blur(0px)'
+      paddingBottom: '32px'
     },
     scrolled: {
-      background: 'rgba(250, 250, 250, 0.95)',
-      backdropFilter: 'blur(24px)',
+      background: 'rgba(250, 250, 250, 0.98)',
       boxShadow: '0 4px 30px rgba(0, 0, 0, 0.03)',
       borderBottom: '1px solid rgba(26, 26, 29, 0.05)',
       paddingTop: '20px',
@@ -72,6 +76,7 @@ const Header = () => {
       variants={headerVariants}
       transition={{ duration: 0.4, ease: "easeInOut" }}
       className="fixed top-0 left-0 w-full z-[100]"
+      style={{ willChange: 'background-color' }}
     >
       <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
         {/* Left: Brand Logo */}

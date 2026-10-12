@@ -48,6 +48,8 @@ const FeaturedDeals = () => {
                         <img
                             src={deal.image}
                             alt={deal.title}
+                            loading="lazy"
+                            decoding="async"
                             className="w-full h-full object-cover transition-all duration-1000 group-hover:scale-105"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-primary/95 via-primary/40 to-transparent p-10 flex flex-col justify-end">

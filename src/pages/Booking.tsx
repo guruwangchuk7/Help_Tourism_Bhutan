@@ -419,7 +419,7 @@ Thank you!`
 
                                     <div className="flex flex-col gap-6 mb-10 pb-8 border-b border-primary/5">
                                         <div className="w-full h-40 rounded-[2rem] overflow-hidden shadow-glass shrink-0 border border-primary/5">
-                                            <img src={displayImage} className="w-full h-full object-cover hover:scale-105 transition-all duration-700" alt={displayTitle} />
+                                            <img src={displayImage} loading="lazy" decoding="async" className="w-full h-full object-cover hover:scale-105 transition-all duration-700" alt={displayTitle} />
                                         </div>
                                         <div>
                                             <h4 className="font-heading font-semibold text-xl text-primary leading-tight mb-2 tracking-wide">{displayTitle}</h4>

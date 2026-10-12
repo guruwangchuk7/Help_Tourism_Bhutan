@@ -137,7 +137,7 @@ const Hotels = () => {
                   className="bg-white rounded-[2.5rem] overflow-hidden shadow-minimal hover:shadow-premium group border border-primary/5 p-6 flex flex-col md:flex-row gap-6 transition-all duration-300"
                 >
                   <div className="w-full md:w-56 h-56 rounded-3xl overflow-hidden shrink-0 relative">
-                    <img src={hotel.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={hotel.name} />
+                    <img src={hotel.image} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={hotel.name} />
                   </div>
                   <div className="flex-1 flex flex-col justify-between py-2">
                     <div>

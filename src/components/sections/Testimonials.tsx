@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react"
-import { motion } from "framer-motion"
 import { Star } from "lucide-react"
 import { Skeleton } from "../common/Skeleton"
 import avatarElena from "../../assets/avatar-elena.png"
@@ -114,13 +113,9 @@ const Testimonials = () => {
 
             {/* Desktop: 3-column grid */}
             <div className="hidden md:grid grid-cols-3 gap-8 max-w-7xl mx-auto px-6">
-                {list.slice(0, 3).map((t, idx) => (
-                    <motion.div
+                {list.slice(0, 3).map((t) => (
+                    <div
                         key={t.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: idx * 0.1 }}
                         className="flex flex-col bg-[#FAFAFA] p-8 rounded-3xl"
                     >
                         <div className="flex items-center gap-1 mb-5">
@@ -142,7 +137,7 @@ const Testimonials = () => {
                                 <span className="text-[11px] font-light text-secondary/60 block mt-0.5">{t.role}</span>
                             </div>
                         </div>
-                    </motion.div>
+                    </div>
                 ))}
             </div>
         </section>
