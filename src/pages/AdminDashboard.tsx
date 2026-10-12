@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   MapPin, Compass, Hotel, Plus, Edit, Trash2, Save, X,
-  ArrowLeft, Star, Search, SlidersHorizontal, ChevronRight,
+  ArrowLeft, Search, SlidersHorizontal, ChevronRight,
   HelpCircle, Upload, Phone, Users, KeyRound, ShieldCheck,
   Eye, EyeOff, LogOut
 } from 'lucide-react'
@@ -15,7 +15,6 @@ type Destination = {
   image: string
   description: string
   price: string
-  rating: number
   location: string
   altitude?: string
   ideal_stay?: string
@@ -24,7 +23,6 @@ type Destination = {
   descriptionText?: string
   itinerary?: { day: string; title: string; detail: string }[]
   amenities?: { icon: string; label: string; desc: string }[]
-  reviews?: { name: string; date: string; rating: number; text: string }[]
 }
 
 type Tour = {
@@ -52,7 +50,6 @@ type LuxuryHotel = {
   name: string
   location: string
   image: string
-  rating: number
   price: string
   description: string
 }
@@ -60,7 +57,7 @@ type LuxuryHotel = {
 const API_BASE = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000'
 
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState<'destinations' | 'tours' | 'hotels' | 'about' | 'contact' | 'testimonials' | 'tourists'>('destinations')
+  const [activeTab, setActiveTab] = useState<'destinations' | 'tours' | 'hotels' | 'about' | 'contact' | 'tourists'>('destinations')
 
   // Data States
   const [destinations, setDestinations] = useState<Destination[]>([])
@@ -73,16 +70,15 @@ const AdminDashboard = () => {
 
   // Search and sorting states
   const [searchQuery, setSearchQuery] = useState('')
-  const [sortBy, setSortBy] = useState<'name' | 'rating' | 'default'>('default')
+  const [sortBy, setSortBy] = useState<'name' | 'default'>('default')
 
   // Form States (Modal)
   const [showModal, setShowModal] = useState(false)
   const [editType, setEditType] = useState<'destinations' | 'tours' | 'hotels'>('destinations')
   const [editId, setEditId] = useState<string | number | null>(null) // null = create new
-  const [modalTab, setModalTab] = useState<'overview' | 'itinerary' | 'amenities' | 'reviews' | 'advice'>('overview')
+  const [modalTab, setModalTab] = useState<'overview' | 'itinerary' | 'amenities' | 'advice'>('overview')
   const [contactTab, setContactTab] = useState<'banner' | 'channels' | 'footer'>('banner')
   const [aboutTab, setAboutTab] = useState<'philosophy' | 'stats' | 'pillars'>('philosophy')
-  const [testimonialsTab, setTestimonialsTab] = useState<number>(0)
 
   // Form values
   const [destForm, setDestForm] = useState<Partial<Destination>>({})
@@ -90,7 +86,6 @@ const AdminDashboard = () => {
   const [hotelForm, setHotelForm] = useState<Partial<LuxuryHotel>>({})
   const [aboutForm, setAboutForm] = useState<any>({})
   const [contactForm, setContactForm] = useState<any>({})
-  const [testimonialsForm, setTestimonialsForm] = useState<any[]>([])
   const [touristForm, setTouristForm] = useState<any>({ name: "", nationality: "", passportNumber: "", email: "", phone: "", tourName: "", checkInDate: "", checkOutDate: "", sdfStatus: "Paid", specialRequests: "" })
   const [editTouristId, setEditTouristId] = useState<number | null>(null)
   const [showTouristModal, setShowTouristModal] = useState(false)
@@ -107,13 +102,12 @@ const AdminDashboard = () => {
   const fetchData = async () => {
     setLoading(true)
     try {
-      const [destRes, toursRes, hotelsRes, aboutRes, contactRes, testimonialsRes, touristsRes] = await Promise.all([
+      const [destRes, toursRes, hotelsRes, aboutRes, contactRes, touristsRes] = await Promise.all([
         fetch(`${API_BASE}/api/destinations?t=${Date.now()}`),
         fetch(`${API_BASE}/api/tours?t=${Date.now()}`),
         fetch(`${API_BASE}/api/hotels?t=${Date.now()}`),
         fetch(`${API_BASE}/api/about?t=${Date.now()}`),
         fetch(`${API_BASE}/api/contact?t=${Date.now()}`),
-        fetch(`${API_BASE}/api/testimonials?t=${Date.now()}`),
         fetch(`${API_BASE}/api/tourists?t=${Date.now()}`)
       ])
 
@@ -122,7 +116,6 @@ const AdminDashboard = () => {
       const hotelsData = await hotelsRes.json()
       const aboutData = await aboutRes.json()
       const contactData = await contactRes.json()
-      const testimonialsData = await testimonialsRes.json()
       const touristsData = await touristsRes.json()
 
       setDestinations(destData)
@@ -130,7 +123,6 @@ const AdminDashboard = () => {
       setHotels(hotelsData)
       setAboutForm(aboutData)
       setContactForm(contactData)
-      setTestimonialsForm(testimonialsData)
       setTourists(touristsData)
     } catch (err: any) {
       console.error(err)
@@ -275,18 +267,12 @@ const AdminDashboard = () => {
           { icon: "Car", label: "Bespoke Transfers", desc: "Assigned luxury SUV and driver for all localized tours and day trips." },
           { icon: "Utensils", label: "Artisanal Kitchen", desc: "In-house culinary experiences focusing on organic farm-to-table cuisine." }
         ]
-        let reviews = [
-          { name: "Elena Rostova", date: "April 2026", rating: 5, text: "Beyond luxury. The silence here is healing. Watching the sunrise from the terrace with hot butter tea is an experience I will carry with me forever. The staff treated us like royalty." },
-          { name: "Marcus Thorne", date: "March 2026", rating: 5, text: "Incredibly well organized. The local guides are extremely knowledgeable. We got access to temple corridors that are usually closed to the public. Fully worth the journey." }
-        ]
-
         try {
           if (item.description && item.description.trim().startsWith('{')) {
             const parsed = JSON.parse(item.description)
             if (parsed.text) text = parsed.text
             if (parsed.itinerary) itinerary = parsed.itinerary
             if (parsed.amenities) amenities = parsed.amenities
-            if (parsed.reviews) reviews = parsed.reviews
           }
         } catch (e) {
           // ignore error
@@ -296,8 +282,7 @@ const AdminDashboard = () => {
           ...item,
           descriptionText: text,
           itinerary,
-          amenities,
-          reviews
+          amenities
         })
       } else if (type === 'tours') {
         let text = item.desc || ''
@@ -328,7 +313,7 @@ const AdminDashboard = () => {
       setEditId(null)
       if (type === 'destinations') {
         setDestForm({
-          name: '', image: '', description: '', rating: 4.8, location: '',
+          name: '', image: '', description: '', location: '',
           descriptionText: '',
           itinerary: [
             { day: "01", title: "Arrival", detail: "Transfer and checking into hotel." },
@@ -343,9 +328,6 @@ const AdminDashboard = () => {
             { icon: "Bath", label: "Organic Spa & Baths", desc: "Traditional hot stone bath facilities using fresh mountain herbs." },
             { icon: "Car", label: "Bespoke Transfers", desc: "Assigned luxury SUV and driver for all localized tours and day trips." },
             { icon: "Utensils", label: "Artisanal Kitchen", desc: "In-house culinary experiences focusing organic farm-to-table cuisine." }
-          ],
-          reviews: [
-            { name: "Elena Rostova", date: "April 2026", rating: 5, text: "Beyond luxury. The silence here is healing." }
           ]
         })
       } else if (type === 'tours') {
@@ -364,7 +346,7 @@ const AdminDashboard = () => {
         })
       } else if (type === 'hotels') {
         setHotelForm({
-          name: '', location: '', image: '', rating: 5.0, description: ''
+          name: '', location: '', image: '', description: ''
         })
       }
     }
@@ -383,8 +365,7 @@ const AdminDashboard = () => {
       const compiledDescription = JSON.stringify({
         text: destForm.descriptionText || destForm.description || '',
         itinerary: destForm.itinerary || [],
-        amenities: destForm.amenities || [],
-        reviews: destForm.reviews || []
+        amenities: destForm.amenities || []
       })
       bodyData = {
         ...destForm,
@@ -393,7 +374,6 @@ const AdminDashboard = () => {
       delete bodyData.descriptionText
       delete bodyData.itinerary
       delete bodyData.amenities
-      delete bodyData.reviews
     } else if (editType === 'tours') {
       const compiledDescription = JSON.stringify({
         text: tourForm.descText || tourForm.desc || '',
@@ -448,7 +428,7 @@ const AdminDashboard = () => {
 
   const [uploading, setUploading] = useState(false)
 
-  const handleFileUpload = async (file: File, type: 'destinations' | 'tours' | 'hotels' | 'testimonials', index?: number) => {
+  const handleFileUpload = async (file: File, type: 'destinations' | 'tours' | 'hotels') => {
     setUploading(true)
     try {
       const reader = new FileReader()
@@ -481,12 +461,6 @@ const AdminDashboard = () => {
             setTourForm(prev => ({ ...prev, image: data.url }))
           } else if (type === 'hotels') {
             setHotelForm(prev => ({ ...prev, image: data.url }))
-          } else if (type === 'testimonials' && typeof index === 'number') {
-            setTestimonialsForm(prev => {
-              const updated = [...prev]
-              updated[index] = { ...updated[index], avatar: data.url }
-              return updated
-            })
           }
 
           showToast('Image uploaded successfully!', 'success')
@@ -501,35 +475,6 @@ const AdminDashboard = () => {
       console.error(err)
       showToast('Error reading file.', 'error')
       setUploading(false)
-    }
-  }
-
-  const handleSaveTestimonials = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    try {
-      const res = await fetch(`${API_BASE}/api/testimonials`, {
-        method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          ...getAuthHeader()
-        },
-        body: JSON.stringify(testimonialsForm)
-      })
-      if (!res.ok) {
-        if (res.status === 401 || res.status === 403) {
-          localStorage.removeItem('ADMIN_API_KEY')
-          setAdminKey(null)
-          setIsVerified(false)
-        }
-        throw new Error('Failed to save testimonials')
-      }
-      showToast('Customer reviews updated successfully!', 'success')
-      fetchData()
-    } catch (err: any) {
-      console.error(err)
-      showToast(err.message || 'Error saving testimonials.', 'error')
-      setLoading(false)
     }
   }
 
@@ -730,8 +675,6 @@ const AdminDashboard = () => {
       }
       if (sortBy === 'name') {
         result.sort((a, b) => a.name.localeCompare(b.name))
-      } else if (sortBy === 'rating') {
-        result.sort((a, b) => b.rating - a.rating)
       }
       return result
     } else if (activeTab === 'tours') {
@@ -757,8 +700,6 @@ const AdminDashboard = () => {
       }
       if (sortBy === 'name') {
         result.sort((a, b) => a.name.localeCompare(b.name))
-      } else if (sortBy === 'rating') {
-        result.sort((a, b) => b.rating - a.rating)
       }
       return result
     }
@@ -990,19 +931,6 @@ const AdminDashboard = () => {
             </button>
 
             <button
-              onClick={() => { setActiveTab('testimonials'); setSearchQuery(''); setIsSidebarOpen(false); }}
-              className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${activeTab === 'testimonials'
-                  ? 'bg-slate-100 text-slate-900 border-l-2 border-slate-900'
-                  : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
-                }`}
-            >
-              <div className="flex items-center space-x-3">
-                <Star className={`w-4 h-4 ${activeTab === 'testimonials' ? 'text-slate-900' : 'text-slate-400'}`} />
-                <span>Voice of the Valley</span>
-              </div>
-            </button>
-
-            <button
               onClick={() => { setActiveTab('tourists'); setSearchQuery(''); setIsSidebarOpen(false); }}
               className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${activeTab === 'tourists'
                   ? 'bg-slate-100 text-slate-900 border-l-2 border-slate-900'
@@ -1054,9 +982,7 @@ const AdminDashboard = () => {
                         ? 'About Us'
                         : activeTab === 'contact'
                           ? 'Contact Us'
-                          : activeTab === 'testimonials'
-                            ? 'Voice of the Valley'
-                            : 'Tourist Logbook'}
+                          : 'Tourist Logbook'}
               </span>
               <ChevronRight className="w-5 h-5 text-slate-400" />
               <span className="text-slate-500 text-lg font-medium">Dashboard</span>
@@ -1066,15 +992,13 @@ const AdminDashboard = () => {
                 ? 'Manage legacy stats, philosophy copy, and the four standards of integrity.'
                 : activeTab === 'contact'
                   ? 'Manage office locations, phone channels, and support email addresses.'
-                  : activeTab === 'testimonials'
-                    ? 'Manage Voice of the Valley Customer Reviews displayed on the home page.'
-                    : activeTab === 'tourists'
-                      ? 'Manage database records and registration logbook of tourists who have visited Bhutan.'
-                      : 'Manage database objects, details, ratings, and media galleries.'}
+                  : activeTab === 'tourists'
+                    ? 'Manage database records and registration logbook of tourists who have visited Bhutan.'
+                    : 'Manage database objects, details, and media galleries.'}
             </p>
           </div>
 
-          {activeTab !== 'about' && activeTab !== 'contact' && activeTab !== 'testimonials' && (
+          {activeTab !== 'about' && activeTab !== 'contact' && (
             <button
               onClick={() => {
                 if (activeTab === 'tourists') {
@@ -1114,7 +1038,7 @@ const AdminDashboard = () => {
         </AnimatePresence>
 
         {/* Controls Block (Search & Sort) */}
-        {activeTab !== 'about' && activeTab !== 'contact' && activeTab !== 'testimonials' && activeTab !== 'tourists' && (
+        {activeTab !== 'about' && activeTab !== 'contact' && activeTab !== 'tourists' && (
           <div className="bg-white border border-slate-200 p-4 rounded-t-xl flex flex-col md:flex-row md:items-center md:justify-between gap-4 shadow-sm">
             <div className="relative flex-1 max-w-md">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -1137,7 +1061,6 @@ const AdminDashboard = () => {
               >
                 <option value="default">Default / ID</option>
                 <option value="name">Name / Title</option>
-                {activeTab !== 'tours' && <option value="rating">Rating</option>}
               </select>
             </div>
           </div>
@@ -1778,178 +1701,6 @@ const AdminDashboard = () => {
               </button>
             </div>
           </form>
-        ) : activeTab === 'testimonials' ? (
-          <form onSubmit={handleSaveTestimonials} className="bg-white border border-slate-200 rounded-xl p-8 shadow-sm space-y-8 max-w-4xl mx-auto">
-            <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 pb-4 gap-4">
-                <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider flex items-center space-x-2">
-                  <span className="w-1.5 h-1.5 bg-slate-900 rounded-full"></span>
-                  <span>Voice of the Valley Customer Reviews</span>
-                </h3>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    const nextId = testimonialsForm.length > 0 ? Math.max(...testimonialsForm.map(t => t.id || 0)) + 1 : 1
-                    const newTestimonial = {
-                      id: nextId,
-                      name: '',
-                      role: '',
-                      content: '',
-                      avatar: 'https://i.pravatar.cc/200?u=new' + nextId,
-                      rating: 5
-                    }
-                    const updated = [...testimonialsForm, newTestimonial]
-                    setTestimonialsForm(updated)
-                    setTestimonialsTab(updated.length - 1)
-                  }}
-                  className="flex items-center space-x-1.5 px-3 py-1.5 bg-slate-900 hover:bg-black text-white rounded-lg text-xs font-semibold transition cursor-pointer self-start"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>Add Review</span>
-                </button>
-              </div>
-
-              {/* Review Tabs Navigation */}
-              {testimonialsForm.length > 0 ? (
-                <div className="flex flex-wrap gap-2 border-b border-slate-100 pb-2">
-                  {testimonialsForm.map((_, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => setTestimonialsTab(idx)}
-                      className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-colors border cursor-pointer ${testimonialsTab === idx
-                          ? 'bg-slate-900 text-white border-slate-900'
-                          : 'bg-slate-50 text-slate-500 hover:text-slate-900 hover:bg-slate-100 border-slate-200'
-                        }`}
-                    >
-                      Review #{idx + 1}
-                    </button>
-                  ))}
-                </div>
-              ) : null}
-
-              <div className="space-y-8">
-                {testimonialsForm.length > 0 && testimonialsForm[testimonialsTab] ? (
-                  <div className="p-6 bg-slate-50 rounded-xl border border-slate-200 space-y-4">
-                    <div className="flex items-center justify-between border-b border-slate-150 pb-2">
-                      <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Review #{testimonialsTab + 1} Settings</span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (window.confirm(`Are you sure you want to delete Review #${testimonialsTab + 1}?`)) {
-                            const updated = [...testimonialsForm]
-                            updated.splice(testimonialsTab, 1)
-                            setTestimonialsForm(updated)
-                            setTestimonialsTab(Math.max(0, testimonialsTab - 1))
-                          }
-                        }}
-                        className="flex items-center space-x-1 px-2.5 py-1 text-[10px] bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg font-bold uppercase tracking-wider transition cursor-pointer border border-rose-250"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                        <span>Delete Review</span>
-                      </button>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-[10px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">Customer Name</label>
-                        <input
-                          type="text"
-                          required
-                          value={testimonialsForm[testimonialsTab].name || ''}
-                          onChange={e => {
-                            const updated = [...testimonialsForm]
-                            updated[testimonialsTab] = { ...updated[testimonialsTab], name: e.target.value }
-                            setTestimonialsForm(updated)
-                          }}
-                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-[10px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">Role / Bio (e.g. Cultural Historian • Thimphu Resident)</label>
-                        <input
-                          type="text"
-                          required
-                          value={testimonialsForm[testimonialsTab].role || ''}
-                          onChange={e => {
-                            const updated = [...testimonialsForm]
-                            updated[testimonialsTab] = { ...updated[testimonialsTab], role: e.target.value }
-                            setTestimonialsForm(updated)
-                          }}
-                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
-                        />
-                      </div>
-
-                      <div className="md:col-span-2">
-                        <label className="block text-[10px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">Review Content</label>
-                        <textarea
-                          rows={3}
-                          required
-                          value={testimonialsForm[testimonialsTab].content || testimonialsForm[testimonialsTab].text || ''}
-                          onChange={e => {
-                            const updated = [...testimonialsForm]
-                            updated[testimonialsTab] = { ...updated[testimonialsTab], content: e.target.value, text: e.target.value }
-                            setTestimonialsForm(updated)
-                          }}
-                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-[10px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">Rating (1 to 5 Stars)</label>
-                        <input
-                          type="number"
-                          min={1}
-                          max={5}
-                          required
-                          value={testimonialsForm[testimonialsTab].rating || 5}
-                          onChange={e => {
-                            const updated = [...testimonialsForm]
-                            updated[testimonialsTab] = { ...updated[testimonialsTab], rating: parseInt(e.target.value) || 5 }
-                            setTestimonialsForm(updated)
-                          }}
-                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
-                        />
-                      </div>
-
-                      <div className="md:col-span-2">
-                        <ImageUploadField
-                          label={`Avatar Photo for Review #${testimonialsTab + 1}`}
-                          value={testimonialsForm[testimonialsTab].avatar || ''}
-                          onChange={val => {
-                            const updated = [...testimonialsForm]
-                            updated[testimonialsTab] = { ...updated[testimonialsTab], avatar: val }
-                            setTestimonialsForm(updated)
-                          }}
-                          onUpload={file => handleFileUpload(file, 'testimonials', testimonialsTab)}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center py-12 bg-slate-50 rounded-xl border border-slate-200 border-dashed">
-                    <span className="text-xs text-slate-400 font-semibold block">No customer reviews configured</span>
-                    <span className="text-[10px] text-slate-400 block mt-1">Click the "Add Review" button above to get started.</span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Save Button */}
-            {testimonialsForm.length > 0 && (
-              <div className="flex justify-end pt-4 border-t border-slate-100">
-                <button
-                  type="submit"
-                  className="flex items-center space-x-2 bg-slate-900 hover:bg-black text-white font-bold px-6 py-3 rounded-lg transition-all duration-200 shadow-sm active:scale-[0.98] cursor-pointer"
-                >
-                  <Save className="w-5 h-5" />
-                  <span>Save Customer Reviews</span>
-                </button>
-              </div>
-            )}
-          </form>
         ) : activeTab === 'tourists' ? (
           <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
             <div className="p-6 border-b border-slate-100">
@@ -2132,7 +1883,6 @@ const AdminDashboard = () => {
                           <th className="p-4 w-20 pl-6">ID</th>
                           <th className="p-4">Name & Description</th>
                           <th className="p-4">Location</th>
-                          <th className="p-4">Rating</th>
                           <th className="p-4 text-right pr-6">Actions</th>
                         </tr>
                       </thead>
@@ -2148,12 +1898,6 @@ const AdminDashboard = () => {
                               </div>
                             </td>
                             <td className="p-4 text-slate-600 text-sm">{d.location}</td>
-                            <td className="p-4 text-slate-705 text-sm">
-                              <div className="flex items-center space-x-1">
-                                <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
-                                <span className="font-semibold">{d.rating}</span>
-                              </div>
-                            </td>
                             <td className="p-4 text-right pr-6">
                               <div className="flex justify-end items-center space-x-1">
                                 <button
@@ -2186,10 +1930,6 @@ const AdminDashboard = () => {
                             <div className="flex-1 min-w-0">
                               <h4 className="font-bold text-slate-900 text-sm truncate">{d.name}</h4>
                               <p className="text-xs text-slate-505 truncate">{d.location}</p>
-                            </div>
-                            <div className="flex items-center space-x-1 bg-slate-50 px-2 py-1 rounded-lg border border-slate-100">
-                              <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-                              <span className="text-xs font-bold text-slate-700">{d.rating}</span>
                             </div>
                           </div>
                           <p className="text-xs text-slate-600 line-clamp-2">{d.description}</p>
@@ -2320,7 +2060,6 @@ const AdminDashboard = () => {
                           <th className="p-4 w-20 pl-6">ID</th>
                           <th className="p-4">Name & Description</th>
                           <th className="p-4">Location</th>
-                          <th className="p-4">Rating</th>
                           <th className="p-4 text-right pr-6">Actions</th>
                         </tr>
                       </thead>
@@ -2336,12 +2075,6 @@ const AdminDashboard = () => {
                               </div>
                             </td>
                             <td className="p-4 text-slate-600 text-sm">{h.location}</td>
-                            <td className="p-4 text-slate-705 text-sm">
-                              <div className="flex items-center space-x-1">
-                                <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
-                                <span className="font-semibold">{h.rating}</span>
-                              </div>
-                            </td>
                             <td className="p-4 text-right pr-6">
                               <div className="flex justify-end items-center space-x-1">
                                 <button
@@ -2374,10 +2107,6 @@ const AdminDashboard = () => {
                             <div className="flex-1 min-w-0">
                               <h4 className="font-bold text-slate-900 text-sm truncate">{h.name}</h4>
                               <p className="text-xs text-slate-505 truncate">{h.location}</p>
-                            </div>
-                            <div className="flex items-center space-x-1 bg-slate-50 px-2 py-1 rounded-lg border border-slate-100">
-                              <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-                              <span className="text-xs font-bold text-slate-700">{h.rating}</span>
                             </div>
                           </div>
                           <p className="text-xs text-slate-600 line-clamp-2">{h.description}</p>
@@ -2444,7 +2173,7 @@ const AdminDashboard = () => {
                   <div className="space-y-6">
                     {/* Modal Tab Buttons */}
                     <div className="flex space-x-6 border-b border-slate-200 pb-2 mb-4">
-                      {(['overview', 'itinerary', 'amenities', 'reviews'] as const).map(tab => (
+                      {(['overview', 'itinerary', 'amenities'] as const).map(tab => (
                         <button
                           key={tab}
                           type="button"
@@ -2487,19 +2216,6 @@ const AdminDashboard = () => {
                           onChange={val => setDestForm({ ...destForm, image: val })}
                           onUpload={file => handleFileUpload(file, 'destinations')}
                         />
-                        <div>
-                          <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Rating (1.0 to 5.0)</label>
-                          <input
-                            type="number"
-                            step="0.1"
-                            max="5"
-                            min="1"
-                            required
-                            value={destForm.rating || ''}
-                            onChange={e => setDestForm({ ...destForm, rating: parseFloat(e.target.value) })}
-                            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
-                          />
-                        </div>
 
                         <div className="col-span-1 md:col-span-2">
                           <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Description</label>
@@ -2673,97 +2389,6 @@ const AdminDashboard = () => {
                       </div>
                     )}
 
-                    {modalTab === 'reviews' && (
-                      <div className="space-y-4">
-                        <h4 className="text-sm font-bold text-slate-900 mb-3 uppercase tracking-wider">Reviews</h4>
-                        {(destForm.reviews || []).map((rv: any, idx: number) => (
-                          <div key={idx} className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3 relative group">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const newRv = [...(destForm.reviews || [])];
-                                newRv.splice(idx, 1);
-                                setDestForm({ ...destForm, reviews: newRv });
-                              }}
-                              className="absolute top-3 right-3 text-rose-500 hover:text-rose-700 p-1 hover:bg-slate-200 rounded transition cursor-pointer"
-                              title="Delete Review"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                              <div>
-                                <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Reviewer Name</label>
-                                <input
-                                  type="text"
-                                  value={rv.name || ''}
-                                  onChange={e => {
-                                    const newRv = [...(destForm.reviews || [])];
-                                    newRv[idx] = { ...newRv[idx], name: e.target.value };
-                                    setDestForm({ ...destForm, reviews: newRv });
-                                  }}
-                                  className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Date</label>
-                                <input
-                                  type="text"
-                                  value={rv.date || ''}
-                                  onChange={e => {
-                                    const newRv = [...(destForm.reviews || [])];
-                                    newRv[idx] = { ...newRv[idx], date: e.target.value };
-                                    setDestForm({ ...destForm, reviews: newRv });
-                                  }}
-                                  className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900 font-mono"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Rating (1 to 5)</label>
-                                <input
-                                  type="number"
-                                  min="1"
-                                  max="5"
-                                  value={rv.rating || 5}
-                                  onChange={e => {
-                                    const newRv = [...(destForm.reviews || [])];
-                                    newRv[idx] = { ...newRv[idx], rating: parseInt(e.target.value) || 5 };
-                                    setDestForm({ ...destForm, reviews: newRv });
-                                  }}
-                                  className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900 font-mono"
-                                />
-                              </div>
-                            </div>
-                            <div>
-                              <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Comment Text</label>
-                              <textarea
-                                rows={2}
-                                value={rv.text || ''}
-                                onChange={e => {
-                                  const newRv = [...(destForm.reviews || [])];
-                                  newRv[idx] = { ...newRv[idx], text: e.target.value };
-                                  setDestForm({ ...destForm, reviews: newRv });
-                                }}
-                                className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
-                              />
-                            </div>
-                          </div>
-                        ))}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const currentDate = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-                            setDestForm({
-                              ...destForm,
-                              reviews: [...(destForm.reviews || []), { name: '', date: currentDate, rating: 5, text: '' }]
-                            });
-                          }}
-                          className="flex items-center space-x-1.5 px-3 py-1.5 bg-slate-900 hover:bg-black text-white rounded-lg text-xs font-semibold transition cursor-pointer"
-                        >
-                          <Plus className="w-3.5 h-3.5" />
-                          <span>Add Review</span>
-                        </button>
-                      </div>
-                    )}
                   </div>
                 )}
 
@@ -3036,19 +2661,6 @@ const AdminDashboard = () => {
                       onChange={val => setHotelForm({ ...hotelForm, image: val })}
                       onUpload={file => handleFileUpload(file, 'hotels')}
                     />
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Rating (1.0 to 5.0)</label>
-                      <input
-                        type="number"
-                        step="0.1"
-                        max="5"
-                        min="1"
-                        required
-                        value={hotelForm.rating || ''}
-                        onChange={e => setHotelForm({ ...hotelForm, rating: parseFloat(e.target.value) })}
-                        className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition-all duration-200"
-                      />
-                    </div>
                     <div className="col-span-1 md:col-span-2">
                       <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Description</label>
                       <textarea

@@ -2,7 +2,6 @@ import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import Hero from "../components/hero/Hero"
 import DestinationCard from "../components/destinations/DestinationCard"
-import Testimonials from "../components/sections/Testimonials"
 import { ArrowRight, Compass, ShieldCheck, Heart, Headphones, Instagram } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import PageTransition from "../components/common/PageTransition"
@@ -10,11 +9,11 @@ import SEO from "../components/common/SEO"
 import { CardSkeleton } from "../components/common/Skeleton"
 
 const fallbackDestinations = [
-  { id: 2, name: "Paro", image: "/paro-taksang.jpg", location: "Paro", price: "$150", rating: 4.9 },
-  { id: 4, name: "Thimphu", image: "/thimphu.jpg", location: "Thimphu", price: "$110", rating: 4.6 },
-  { id: 1, name: "Punakha", image: "/punakha-dzong.jpg", location: "Punakha", price: "$120", rating: 4.8 },
-  { id: 6, name: "Bumthang", image: "/airport.jpg", location: "Bumthang", price: "$140", rating: 4.9 },
-  { id: 5, name: "Phobjikha", image: "/monk.jpg", location: "Wangdue Phodrang", price: "$130", rating: 4.8 },
+  { id: 2, name: "Paro", image: "/paro-taksang.jpg", location: "Paro", price: "$150" },
+  { id: 4, name: "Thimphu", image: "/thimphu.jpg", location: "Thimphu", price: "$110" },
+  { id: 1, name: "Punakha", image: "/punakha-dzong.jpg", location: "Punakha", price: "$120" },
+  { id: 6, name: "Bumthang", image: "/airport.jpg", location: "Bumthang", price: "$140" },
+  { id: 5, name: "Phobjikha", image: "/monk.jpg", location: "Wangdue Phodrang", price: "$130" },
 ]
 
 const getShortName = (id: number, fullName: string) => {
@@ -255,7 +254,6 @@ const Home = () => {
                           name={dest.name}
                           image={dest.image}
                           price={dest.price}
-                          rating={dest.rating}
                           location={dest.location}
                           showPrice={false}
                         />
@@ -297,7 +295,6 @@ const Home = () => {
                     name={dest.name}
                     image={dest.image}
                     price={dest.price}
-                    rating={dest.rating}
                     location={dest.location}
                     showPrice={false}
                   />
@@ -472,9 +469,6 @@ const Home = () => {
             </div>
           </div>
         </section>
-
-        {/* Section 5: Customer Reviews */}
-        <Testimonials />
 
         {/* Section 6: Instagram Gallery */}
         <section className="section-padding bg-bg-alt py-24 px-6">

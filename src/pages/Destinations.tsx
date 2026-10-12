@@ -13,7 +13,6 @@ type Destination = {
   description: string
   attractions: string[]
   price: string
-  rating: number
   location: string
 }
 
@@ -229,7 +228,6 @@ const Destinations = () => {
                       name={dest.name}
                       image={dest.image}
                       price={dest.price}
-                      rating={dest.rating}
                       location={dest.location}
                       showPrice={false}
                     />

@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom"
 import { motion } from "framer-motion"
-import { Star, Heart, MapPin } from "lucide-react"
+import { Heart, MapPin } from "lucide-react"
 import { useState } from "react"
 
 type Props = {
@@ -9,11 +9,10 @@ type Props = {
   image: string
   location?: string
   price?: string
-  rating?: number
   showPrice?: boolean
 }
 
-const DestinationCard = ({ id, name, image, location = "Bhutan", price = "$120", rating = 4.8, showPrice = true }: Props) => {
+const DestinationCard = ({ id, name, image, location = "Bhutan", price = "$120", showPrice = true }: Props) => {
   const navigate = useNavigate()
   const [isFavorite, setIsFavorite] = useState(false)
 
@@ -49,18 +48,11 @@ const DestinationCard = ({ id, name, image, location = "Bhutan", price = "$120",
           <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </div>
 
-        {/* Card Anatomy: Location, Rating, Price */}
-        {/* Card Anatomy: Location, Rating, Price */}
+        {/* Card Anatomy: Location, Price */}
         <div className="p-6 md:p-8 flex flex-col flex-1 bg-white">
-          <div className="flex justify-between items-start mb-2">
-            <div className="flex items-center space-x-2 text-accent">
-              <MapPin className="w-3.5 h-3.5" />
-              <span className="text-[10px] font-medium uppercase tracking-[0.2em]">{location}</span>
-            </div>
-            <div className="flex items-center gap-1 shrink-0 bg-bg-light px-2 py-1 rounded-md">
-              <Star className="w-3 h-3 text-accent fill-accent" />
-              <span className="text-xs font-bold text-primary">{rating}</span>
-            </div>
+          <div className="flex items-center space-x-2 text-accent mb-2">
+            <MapPin className="w-3.5 h-3.5" />
+            <span className="text-[10px] font-medium uppercase tracking-[0.2em]">{location}</span>
           </div>
 
           <h3 className="text-2xl font-heading font-medium text-primary mt-2 mb-4 group-hover:text-accent transition-colors truncate pr-2">
