@@ -148,7 +148,7 @@ const Tours = () => {
                   className="bg-white rounded-[2.5rem] overflow-hidden shadow-minimal hover:shadow-premium group border border-primary/5 p-5 flex flex-col transition-all duration-300 cursor-pointer"
                 >
                   <div className="relative aspect-[4/3] rounded-3xl overflow-hidden shrink-0">
-                    <img src={tour.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={tour.title} />
+                    <img src={tour.image} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={tour.title} />
                     <span className="absolute top-4 left-4 bg-primary text-white text-[9px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full">
                       {tour.duration}
                     </span>

@@ -16,11 +16,6 @@ type Props = {
 const DestinationCard = ({ id, name, image, location = "Bhutan", price = "$120", rating = 4.8, showPrice = true }: Props) => {
   const navigate = useNavigate()
   const [isFavorite, setIsFavorite] = useState(false)
-  const [mountTime] = useState(() => Date.now())
-
-  const cacheBustedImage = (image && typeof image === 'string' && !image.startsWith('data:') && !image.includes('?t='))
-    ? `${image}${image.includes('?') ? '&' : '?'}t=${mountTime}`
-    : image
 
   return (
     <motion.div
@@ -34,8 +29,10 @@ const DestinationCard = ({ id, name, image, location = "Bhutan", price = "$120",
         {/* Thumbnail Image with Zoom Effect */}
         <div className="relative aspect-[4/3] overflow-hidden">
           <img
-            src={cacheBustedImage}
+            src={image}
             alt={name}
+            loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
 

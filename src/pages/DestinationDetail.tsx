@@ -34,12 +34,6 @@ const DestinationDetail = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [activeTab, setActiveTab] = useState('overview')
-  const [mountTime] = useState(() => Date.now())
-
-  const cacheBustedImage = (destination && destination.image && typeof destination.image === 'string' && !destination.image.startsWith('data:') && !destination.image.includes('?t='))
-    ? `${destination.image}${destination.image.includes('?') ? '&' : '?'}t=${mountTime}`
-    : destination?.image || ''
-
   const seoSchema = useMemo(() => {
     if (!destination) return null
     let displayDescription = destination.description
@@ -217,7 +211,7 @@ const DestinationDetail = () => {
             initial={{ scale: 1.1 }}
             animate={{ scale: 1 }}
             transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-            src={cacheBustedImage}
+            src={destination.image}
             alt={destination.name}
             className="w-full h-full object-cover"
           />
@@ -403,7 +397,7 @@ const DestinationDetail = () => {
                   </p>
 
                   <button
-                    onClick={() => navigate('/booking', { state: { destinationName: destination.name, image: cacheBustedImage } })}
+                    onClick={() => navigate('/booking', { state: { destinationName: destination.name, image: destination.image } })}
                     className="w-full btn-accent py-5 text-sm shadow-premium"
                   >
                     Plan Your Trip

@@ -355,7 +355,7 @@ const Home = () => {
                     >
                       <div className="bg-white rounded-[2.5rem] overflow-hidden shadow-minimal hover:shadow-premium group border border-primary/5 p-5 flex flex-col h-full transition-all duration-300 cursor-pointer">
                         <div className="relative aspect-[4/3] rounded-3xl overflow-hidden shrink-0">
-                          <img src={tour.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={tour.title} />
+                          <img src={tour.image} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={tour.title} />
                           <span className="absolute top-4 left-4 bg-primary text-white text-[9px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full">
                             {tour.duration}
                           </span>
@@ -411,7 +411,7 @@ const Home = () => {
                   className="bg-white rounded-[2.5rem] overflow-hidden shadow-minimal hover:shadow-premium group border border-primary/5 p-5 flex flex-col transition-all duration-300 cursor-pointer"
                 >
                   <div className="relative aspect-[4/3] rounded-3xl overflow-hidden shrink-0">
-                    <img src={tour.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={tour.title} />
+                    <img src={tour.image} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={tour.title} />
                     <span className="absolute top-4 left-4 bg-primary text-white text-[9px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full">
                       {tour.duration}
                     </span>
@@ -479,13 +479,7 @@ const Home = () => {
         {/* Section 6: Instagram Gallery */}
         <section className="section-padding bg-bg-alt py-24 px-6">
           <div className="max-w-7xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.8 }}
-              className="text-center mb-16"
-            >
+            <div className="text-center mb-16">
               <div className="inline-flex items-center gap-2 text-accent font-semibold tracking-[0.3em] uppercase text-[10px] mb-4">
                 <Instagram className="w-3.5 h-3.5" />
                 <span>Our Live Feed</span>
@@ -494,23 +488,19 @@ const Home = () => {
               <p className="text-secondary max-w-2xl mx-auto mt-4 font-light text-base md:text-lg tracking-wide leading-relaxed">
                 Photos shared by our guests while journeying through the valleys of Bhutan.
               </p>
-            </motion.div>
+            </div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               {instagramPhotos.map((photo, index) => (
-                <motion.div
+                <div
                   key={index}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true, margin: "-150px" }}
-                  transition={{ duration: 0.6, delay: index * 0.05 }}
                   className="relative aspect-square rounded-2xl overflow-hidden group shadow-minimal border border-primary/5"
                 >
-                  <img src={photo} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={`Instagram Guest Photo ${index + 1}`} />
+                  <img src={photo} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={`Instagram Guest Photo ${index + 1}`} />
                   <div className="absolute inset-0 bg-primary/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                     <Instagram className="w-6 h-6 text-white" />
                   </div>
-                </motion.div>
+                </div>
               ))}
             </div>
           </div>
@@ -518,13 +508,7 @@ const Home = () => {
 
         {/* Section 7: Bottom Homepage CTA Section */}
         <section className="py-24 px-6 md:px-12 max-w-7xl mx-auto mb-16">
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.8 }}
-            className="bg-white text-primary border border-primary/5 rounded-[3rem] p-6 sm:p-12 md:p-20 text-center relative overflow-hidden shadow-minimal"
-          >
+          <div className="bg-white text-primary border border-primary/5 rounded-[3rem] p-6 sm:p-12 md:p-20 text-center relative overflow-hidden shadow-minimal">
             <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center">
               <h2 className="text-2xl sm:text-4xl md:text-6xl font-heading font-medium mb-6 leading-tight">Ready for Your Bhutan Adventure?</h2>
               <p className="text-secondary text-lg mb-10 font-light max-w-xl leading-relaxed">
@@ -534,7 +518,7 @@ const Home = () => {
                 Start Planning
               </Link>
             </div>
-          </motion.div>
+          </div>
         </section>
       </div>
     </PageTransition>
