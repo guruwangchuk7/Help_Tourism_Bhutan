@@ -6,6 +6,7 @@ import cors from 'cors';
 import fs from 'fs';
 import path from 'path';
 import { db } from './firebase';
+import { cloudinary, isCloudinaryConfigured } from './cloudinary';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -1141,26 +1142,19 @@ app.delete('/api/hotels/:id', authenticateAdmin, async (req, res) => {
   res.json({ message: "Hotel deleted successfully", id });
 });
 
-// Helper to upload files to Supabase Storage
-async function uploadToSupabaseStorage(filename: string, buffer: Buffer, mimeType: string): Promise<string> {
-  const url = `${SUPABASE_URL}/storage/v1/object/cms-media/${filename}`;
-  const headers: Record<string, string> = {
-    'Authorization': `Bearer ${SUPABASE_KEY}`,
-    'Content-Type': mimeType
-  };
-  if (SUPABASE_KEY) {
-    headers['apikey'] = SUPABASE_KEY;
+// Helper to upload files to Cloudinary
+async function uploadToCloudinary(filename: string, buffer: Buffer, mimeType: string): Promise<string> {
+  if (!isCloudinaryConfigured()) {
+    throw new Error('Cloudinary is not configured (missing CLOUDINARY_CLOUD_NAME/API_KEY/API_SECRET)');
   }
-  const response = await fetch(url, {
-    method: 'POST',
-    headers,
-    body: buffer
+  const publicId = filename.replace(/\.[^.]+$/, ''); // Cloudinary appends its own extension
+  const dataUri = `data:${mimeType};base64,${buffer.toString('base64')}`;
+  const result = await cloudinary.uploader.upload(dataUri, {
+    public_id: publicId,
+    folder: 'cms-media',
+    overwrite: true,
   });
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Supabase Storage upload failed: ${response.status} ${response.statusText} - ${errorText}`);
-  }
-  return `${SUPABASE_URL}/storage/v1/object/public/cms-media/${filename}`;
+  return result.secure_url;
 }
 
 // File upload endpoint with authentication and strict file typing/sizing verification
@@ -1196,19 +1190,19 @@ app.post('/api/upload', authenticateAdmin, async (req, res) => {
     const safeName = path.basename(name).replace(/[^a-zA-Z0-9.-]/g, '_');
     const filename = `${Date.now()}-${safeName}`;
 
-    // Try uploading to Supabase Storage first (for production)
-    if (dbConnected && SUPABASE_URL && SUPABASE_KEY) {
+    // Try uploading to Cloudinary first (for production)
+    if (isCloudinaryConfigured()) {
       try {
         const mimeMatch = data.match(/^data:(image\/\w+);base64,/);
         const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
-        
-        const publicUrl = await uploadToSupabaseStorage(filename, buffer, mimeType);
-        console.log("Successfully uploaded file to Supabase Storage cms-media:", filename);
+
+        const publicUrl = await uploadToCloudinary(filename, buffer, mimeType);
+        console.log("Successfully uploaded file to Cloudinary cms-media:", filename);
         return res.json({ url: publicUrl });
       } catch (err: any) {
-        console.warn("Supabase Storage upload failed, falling back to local file:", err.message);
+        console.warn("Cloudinary upload failed, falling back to local file:", err.message);
         if (process.env.NODE_ENV === 'production' || process.env.VERCEL || process.env.VERCEL_ENV) {
-          return res.status(500).json({ error: `Supabase Storage upload failed: ${err.message}` });
+          return res.status(500).json({ error: `Cloudinary upload failed: ${err.message}` });
         }
       }
     }
