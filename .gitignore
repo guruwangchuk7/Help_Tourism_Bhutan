@@ -37,3 +37,4 @@ databasedoc/
 .env.development
 # Note: .env.production is intentionally tracked (non-secret build config
 # the production frontend needs) — do not untrack it.
+.vercel
