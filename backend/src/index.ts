@@ -73,14 +73,8 @@ app.use((req, res, next) => {
   next();
 });
 
-// Securely check for required database parameters
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_KEY = process.env.SUPABASE_KEY;
+// Securely check for required parameters
 const ADMIN_API_KEY = process.env.ADMIN_API_KEY;
-
-if (!SUPABASE_URL || !SUPABASE_KEY) {
-  console.warn("WARNING: SUPABASE_URL and SUPABASE_KEY environment variables are not defined. Operating in local memory fallback mode.");
-}
 
 if (!ADMIN_API_KEY) {
   console.warn("WARNING: ADMIN_API_KEY is not defined. CMS operations will be locked.");
@@ -135,29 +129,6 @@ function clearCache(prefix: string) {
       apiCache.delete(key);
     }
   }
-}
-
-// Helper to fetch from Supabase REST API
-async function supabaseFetch(path: string, options: any = {}): Promise<any> {
-  const url = `${SUPABASE_URL}/rest/v1${path}`;
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      'apikey': SUPABASE_KEY,
-      'Authorization': `Bearer ${SUPABASE_KEY}`,
-      'Content-Type': 'application/json',
-      ...options.headers
-    }
-  });
-  if (!response.ok) {
-    const errorText = await response.text().catch(() => '');
-    throw new Error(`Supabase request failed: ${response.status} ${response.statusText} - ${errorText}`);
-  }
-  const contentType = response.headers.get('content-type');
-  if (contentType && contentType.includes('application/json')) {
-    return response.json();
-  }
-  return null;
 }
 
 // Fallback Mock Data in case DB connection fails or is not setup yet
@@ -708,21 +679,7 @@ let memoryDestinations = [...mockDestinations];
 let memoryTours = [...mockTours];
 let memoryHotels = [...mockHotels];
 
-// Helper to check DB health
-let dbConnected = false;
-const checkDb = async () => {
-  try {
-    await supabaseFetch('/destinations?select=id&limit=1');
-    dbConnected = true;
-    console.log("Supabase REST API database connected and verified successfully!");
-  } catch (err: any) {
-    dbConnected = false;
-    console.warn("Supabase REST API connection failed. Server is operating in Mock-Fallback mode. Error:", err.message);
-  }
-};
-checkDb();
-
-// Firestore health check (replaces checkDb/dbConnected route-by-route; see Task 10 cleanup)
+// Firestore health check
 let firestoreConnected = false;
 const checkFirestore = async () => {
   if (!db) {
