@@ -960,7 +960,7 @@ app.post('/api/tours', authenticateAdmin, async (req, res) => {
 // UPDATE Tour
 app.put('/api/tours/:id', authenticateAdmin, async (req, res) => {
   try {
-    const id = req.params.id;
+    const id = req.params.id as string;
     const { title, duration, nights, price, priceVal, image, desc, category, difficulty, inclusions, exclusions, itinerary } = req.body;
     const payload = {
       title,
@@ -1004,7 +1004,7 @@ app.put('/api/tours/:id', authenticateAdmin, async (req, res) => {
 
 // DELETE Tour
 app.delete('/api/tours/:id', authenticateAdmin, async (req, res) => {
-  const id = req.params.id;
+  const id = req.params.id as string;
   if (firestoreConnected && db) {
     try {
       await db.collection('tours').doc(id).delete();
@@ -1612,6 +1612,7 @@ app.delete('/api/tourists/:id', authenticateAdmin, async (req, res) => {
     try {
       await db.collection('tourists').doc(String(id)).delete();
       clearCache('tourists:');
+      return res.json({ success: true });
     } catch (err: any) {
       console.error("Firestore delete error for tourists:", err.message);
       return res.status(500).json({ error: `Database write failed: ${err.message}` });
