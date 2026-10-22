@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react"
 import { motion } from "framer-motion"
-import { Users, History, Award, Heart, ShieldCheck } from "lucide-react"
+import { History } from "lucide-react"
 import PageTransition from "../components/common/PageTransition"
 import SEO from "../components/common/SEO"
 
@@ -16,14 +16,14 @@ type AboutData = {
   stat3Val: string
   stat4Label: string
   stat4Val: string
-  pillar1Title: string
-  pillar1Desc: string
-  pillar2Title: string
-  pillar2Desc: string
-  pillar3Title: string
-  pillar3Desc: string
-  pillar4Title: string
-  pillar4Desc: string
+  pillar1Title?: string
+  pillar1Desc?: string
+  pillar2Title?: string
+  pillar2Desc?: string
+  pillar3Title?: string
+  pillar3Desc?: string
+  pillar4Title?: string
+  pillar4Desc?: string
 }
 
 const defaultAboutData: AboutData = {
@@ -184,46 +184,6 @@ const About = () => {
               </div>
             </div>
           </motion.div>
-        </section>
-
-        {/* Values */}
-        <section className="py-16 sm:py-24 md:py-32 bg-bg-light px-6 border-t border-primary/5">
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.8 }}
-            className="max-w-7xl mx-auto text-center mb-16 sm:mb-24"
-          >
-            <span className="text-accent font-semibold tracking-[0.3em] uppercase text-[10px] mb-4 sm:mb-6 block">Our Standards</span>
-            <h2 className="text-3xl sm:text-5xl font-heading font-medium text-primary tracking-tight mb-6">Built on <span className="italic font-normal text-accent">Integrity</span></h2>
-            <p className="text-secondary font-light tracking-wide max-w-xl mx-auto">Four pillars that define every Help Tourism Bhutan experience.</p>
-          </motion.div>
-
-          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-12">
-            {[
-              { icon: Users, title: data.pillar1Title, desc: data.pillar1Desc },
-              { icon: Award, title: data.pillar2Title, desc: data.pillar2Desc },
-              { icon: Heart, title: data.pillar3Title, desc: data.pillar3Desc },
-              { icon: ShieldCheck, title: data.pillar4Title, desc: data.pillar4Desc },
-            ].map((value, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: 0.8, delay: idx * 0.1 }}
-                whileHover={{ y: -10 }}
-                className="bg-white p-6 sm:p-12 rounded-[2rem] shadow-minimal hover:shadow-premium transition-all duration-500 border border-primary/5 flex flex-col items-center text-center group"
-              >
-                <div className="w-20 h-20 bg-bg-alt rounded-full flex items-center justify-center text-primary mb-8 transition-transform duration-500 group-hover:bg-accent group-hover:text-white group-hover:scale-110">
-                  <value.icon className="w-8 h-8 transition-colors" />
-                </div>
-                <h4 className="font-heading font-medium text-2xl mb-4 text-primary tracking-wide">{value.title}</h4>
-                <p className="text-secondary font-light leading-relaxed tracking-wide text-sm">{value.desc}</p>
-              </motion.div>
-            ))}
-          </div>
         </section>
 
       </div>

@@ -14,6 +14,7 @@ type Destination = {
   attractions: string[]
   price: string
   location: string
+  rating?: number
 }
 
 const Destinations = () => {
@@ -229,6 +230,7 @@ const Destinations = () => {
                       image={dest.image}
                       price={dest.price}
                       location={dest.location}
+                      rating={dest.rating}
                       showPrice={false}
                     />
                   </motion.div>

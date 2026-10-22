@@ -12,7 +12,6 @@ type Hotel = {
   name: string
   location: string
   image: string
-  price: string
   desc?: string
   description?: string
 }
@@ -148,17 +147,12 @@ const Hotels = () => {
                       <p className="text-secondary font-light text-sm leading-relaxed mb-6">{hotel.desc || hotel.description}</p>
                     </div>
 
-                    <div className="flex items-center justify-between pt-4 border-t border-primary/5">
-                      <div className="flex flex-col">
-                        <span className="text-[9px] font-semibold text-accent uppercase tracking-wider mb-0.5">Excludes $100/night government SDF</span>
-                        <span className="text-xl font-heading font-semibold text-primary">{hotel.price} <span className="text-xs font-normal text-secondary">/ night</span></span>
-                      </div>
+                    <div className="flex items-center justify-end pt-4 border-t border-primary/5">
                       <button
                         onClick={() => navigate('/booking', {
                           state: {
                             destinationName: hotel.name,
                             image: hotel.image,
-                            totalPrice: parseFloat(hotel.price.replace(/[^0-9.]/g, '')) || 1800,
                             nights: 1,
                             adults: 2,
                             type: 'hotel'

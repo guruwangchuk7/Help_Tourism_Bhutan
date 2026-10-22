@@ -111,9 +111,18 @@ const homeSchema = [
   }
 ]
 
+type HomeDestination = {
+  id: number
+  name: string
+  image: string
+  location: string
+  price: string
+  rating?: number
+}
+
 const Home = () => {
   const navigate = useNavigate()
-  const [destinations, setDestinations] = useState<any[]>([])
+  const [destinations, setDestinations] = useState<HomeDestination[]>([])
   const [loading, setLoading] = useState(true)
   const [activeDestIndex, setActiveDestIndex] = useState(0)
   const [activeTourIndex, setActiveTourIndex] = useState(0)
@@ -155,9 +164,9 @@ const Home = () => {
         if (Array.isArray(data) && data.length > 0) {
           const targetIds = [2, 4, 1, 6, 5];
           const sorted = data
-            .filter((d: any) => targetIds.includes(d.id))
-            .sort((a: any, b: any) => targetIds.indexOf(a.id) - targetIds.indexOf(b.id))
-            .map((d: any) => ({
+            .filter((d: HomeDestination) => targetIds.includes(d.id))
+            .sort((a: HomeDestination, b: HomeDestination) => targetIds.indexOf(a.id) - targetIds.indexOf(b.id))
+            .map((d: HomeDestination) => ({
               ...d,
               name: getShortName(d.id, d.name)
             }));
@@ -255,6 +264,7 @@ const Home = () => {
                           image={dest.image}
                           price={dest.price}
                           location={dest.location}
+                          rating={dest.rating}
                           showPrice={false}
                         />
                       </div>
@@ -296,6 +306,7 @@ const Home = () => {
                     image={dest.image}
                     price={dest.price}
                     location={dest.location}
+                    rating={dest.rating}
                     showPrice={false}
                   />
                 ))}
@@ -334,7 +345,7 @@ const Home = () => {
             <div className="block md:hidden">
               <div
                 onScroll={handleTourScroll}
-                className="flex items-stretch overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar gap-4 px-[15vw] pb-4"
+                className="flex items-stretch overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar gap-4 px-[7.5vw] pb-4"
                 style={{ WebkitOverflowScrolling: "touch" }}
                 role="region"
                 aria-label="Top Tours Carousel"
@@ -345,30 +356,30 @@ const Home = () => {
                     <div
                       data-card="tour"
                       key={idx}
-                      className={`w-[70vw] shrink-0 snap-center flex flex-col transition-all duration-500 ease-out transform ${
-                        isActive ? "scale-100 opacity-100" : "scale-[0.93] opacity-65"
+                      className={`w-[85vw] shrink-0 snap-center flex flex-col transition-all duration-500 ease-out transform ${
+                        isActive ? "scale-100 opacity-100" : "scale-[0.95] opacity-70"
                       }`}
                       onClick={() => navigate(`/tours/${tour.id}`)}
                     >
-                      <div className="bg-white rounded-[2.5rem] overflow-hidden shadow-minimal hover:shadow-premium group border border-primary/5 p-5 flex flex-col h-full transition-all duration-300 cursor-pointer">
-                        <div className="relative aspect-[4/3] rounded-3xl overflow-hidden shrink-0">
-                          <img src={tour.image} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={tour.title} />
-                          <span className="absolute top-4 left-4 bg-primary text-white text-[9px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full">
-                            {tour.duration}
-                          </span>
-                        </div>
-                        <div className="flex flex-col flex-1 pt-6 px-2">
-                          <h3 className="text-xl font-heading font-medium text-primary leading-tight mb-3 group-hover:text-accent transition-colors">{tour.title}</h3>
-                          <p className="text-secondary font-light text-sm mb-6 leading-relaxed flex-1">{tour.desc}</p>
+                      <div className="relative aspect-[16/10] min-h-[260px] rounded-3xl overflow-hidden shadow-minimal group cursor-pointer border border-white/10">
+                        <img
+                          src={tour.image}
+                          alt={tour.title}
+                          loading="lazy"
+                          decoding="async"
+                          className="w-full h-full object-cover"
+                        />
+                        {/* Frosted Bottom Gradient Overlay */}
+                        <div className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-black/85 via-black/45 to-transparent backdrop-blur-[1px] pointer-events-none" />
 
-                          <div className="flex items-center justify-end pt-5 border-t border-primary/5 mt-auto">
-                            <button
-                              onClick={(e) => { e.stopPropagation(); navigate(`/tours/${tour.id}`); }}
-                              className="btn-accent !px-5 !py-2.5 !text-[10px] !rounded-full font-bold uppercase tracking-wider cursor-pointer"
-                            >
-                              Explore
-                            </button>
-                          </div>
+                        {/* Text Overlay */}
+                        <div className="absolute inset-x-0 bottom-0 p-6 flex flex-col justify-end">
+                          <h3 className="text-xl sm:text-2xl font-heading font-semibold text-white tracking-tight mb-2 group-hover:text-accent transition-colors leading-snug">
+                            {tour.title}
+                          </h3>
+                          <p className="text-white/85 font-light text-xs sm:text-sm leading-relaxed line-clamp-2">
+                            {tour.desc}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -394,37 +405,38 @@ const Home = () => {
               </div>
             </div>
 
-            {/* Desktop View: Grid (>= 768px) */}
-            <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {/* Desktop View: 2x2 Grid (>= 768px) matching the reference */}
+            <div className="hidden md:grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
               {topTours.map((tour, idx) => (
                 <motion.div
                   key={idx}
-                  initial={{ opacity: 0, y: 40 }}
+                  initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-100px" }}
                   transition={{ duration: 0.8, delay: idx * 0.1 }}
-                  whileHover={{ y: -6 }}
                   onClick={() => navigate(`/tours/${tour.id}`)}
-                  className="bg-white rounded-[2.5rem] overflow-hidden shadow-minimal hover:shadow-premium group border border-primary/5 p-5 flex flex-col transition-all duration-300 cursor-pointer"
+                  className="relative aspect-[16/10] rounded-3xl overflow-hidden shadow-minimal hover:shadow-premium group cursor-pointer transition-all duration-300 border border-black/5"
                 >
-                  <div className="relative aspect-[4/3] rounded-3xl overflow-hidden shrink-0">
-                    <img src={tour.image} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={tour.title} />
-                    <span className="absolute top-4 left-4 bg-primary text-white text-[9px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full">
-                      {tour.duration}
-                    </span>
-                  </div>
-                  <div className="flex flex-col flex-1 pt-6 px-2">
-                    <h3 className="text-xl font-heading font-medium text-primary leading-tight mb-3 group-hover:text-accent transition-colors">{tour.title}</h3>
-                    <p className="text-secondary font-light text-sm mb-6 leading-relaxed flex-1">{tour.desc}</p>
+                  {/* Full Bleed Photographic Image (No zoom animation) */}
+                  <img
+                    src={tour.image}
+                    alt={tour.title}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-cover"
+                  />
 
-                    <div className="flex items-center justify-end pt-5 border-t border-primary/5">
-                      <button
-                        onClick={(e) => { e.stopPropagation(); navigate(`/tours/${tour.id}`); }}
-                        className="btn-accent !px-5 !py-2.5 !text-[10px] !rounded-full font-bold uppercase tracking-wider cursor-pointer"
-                      >
-                        Explore Tour
-                      </button>
-                    </div>
+                  {/* Frosted Bottom Gradient Overlay */}
+                  <div className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-black/85 via-black/45 to-transparent backdrop-blur-[1px] pointer-events-none" />
+
+                  {/* Text Overlay */}
+                  <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8 flex flex-col justify-end">
+                    <h3 className="text-2xl sm:text-3xl font-heading font-semibold text-white tracking-tight mb-2 group-hover:text-accent transition-colors leading-snug">
+                      {tour.title}
+                    </h3>
+                    <p className="text-white/85 font-light text-xs sm:text-sm md:text-base leading-relaxed line-clamp-2 max-w-xl">
+                      {tour.desc}
+                    </p>
                   </div>
                 </motion.div>
               ))}
@@ -449,21 +461,30 @@ const Home = () => {
               </p>
             </motion.div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 md:gap-12">
               {whyChooseUs.map((item, idx) => (
                 <motion.div
                   key={idx}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: idx * 0.08, duration: 0.5, ease: "easeOut" }}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.1, duration: 0.6, ease: "easeOut" }}
                   viewport={{ once: true }}
-                  className="why-card flex flex-col items-center text-center p-8 bg-[#FAFAFA] rounded-[2rem] hover:shadow-premium hover:bg-white transition-all duration-300 border border-primary/5"
+                  className="flex flex-col items-center text-center group"
                 >
-                  <div className="w-16 h-16 bg-accent/10 text-accent rounded-2xl flex items-center justify-center mb-6">
-                    <item.icon className="w-6 h-6" />
+                  {/* Minimal Soft Icon Badge */}
+                  <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-800 mb-5 group-hover:bg-primary group-hover:text-white transition-all duration-300 shadow-sm">
+                    <item.icon className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" />
                   </div>
-                  <h4 className="text-base font-body font-semibold text-primary mb-3 tracking-[0.08em] uppercase">{item.label}</h4>
-                  <p className="text-secondary text-sm leading-relaxed font-light">{item.detail}</p>
+
+                  {/* Title */}
+                  <h3 className="text-lg sm:text-xl font-heading font-semibold text-primary mb-3 group-hover:text-accent transition-colors leading-snug">
+                    {item.label}
+                  </h3>
+
+                  {/* Description */}
+                  <p className="text-secondary text-sm font-light leading-relaxed max-w-xs mx-auto">
+                    {item.detail}
+                  </p>
                 </motion.div>
               ))}
             </div>

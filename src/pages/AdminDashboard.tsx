@@ -50,7 +50,6 @@ type LuxuryHotel = {
   name: string
   location: string
   image: string
-  price: string
   description: string
 }
 
@@ -78,7 +77,7 @@ const AdminDashboard = () => {
   const [editId, setEditId] = useState<string | number | null>(null) // null = create new
   const [modalTab, setModalTab] = useState<'overview' | 'itinerary' | 'amenities' | 'advice'>('overview')
   const [contactTab, setContactTab] = useState<'banner' | 'channels' | 'footer'>('banner')
-  const [aboutTab, setAboutTab] = useState<'philosophy' | 'stats' | 'pillars'>('philosophy')
+  const [aboutTab, setAboutTab] = useState<'philosophy' | 'stats'>('philosophy')
 
   // Form values
   const [destForm, setDestForm] = useState<Partial<Destination>>({})
@@ -1075,13 +1074,12 @@ const AdminDashboard = () => {
             <div className="flex space-x-6 border-b border-slate-200 pb-2">
               {[
                 { id: 'philosophy', label: 'Philosophy' },
-                { id: 'stats', label: 'Key Statistics' },
-                { id: 'pillars', label: 'Standards & Pillars' }
+                { id: 'stats', label: 'Key Statistics' }
               ].map(tab => (
                 <button
                   key={tab.id}
                   type="button"
-                  onClick={() => setAboutTab(tab.id as any)}
+                  onClick={() => setAboutTab(tab.id as 'philosophy' | 'stats')}
                   className={`pb-2 text-xs font-bold uppercase tracking-wider transition-colors border-b-2 cursor-pointer ${aboutTab === tab.id
                       ? 'border-slate-900 text-slate-900'
                       : 'border-transparent text-slate-400 hover:text-slate-900'
@@ -1224,125 +1222,6 @@ const AdminDashboard = () => {
                           value={aboutForm.stat4Label || ''}
                           onChange={e => setAboutForm({ ...aboutForm, stat4Label: e.target.value })}
                           className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* TAB 3: STANDARDS & PILLARS */}
-            {aboutTab === 'pillars' && (
-              <div className="space-y-6">
-                <h3 className="text-sm font-bold text-slate-405 uppercase tracking-wider border-b border-slate-100 pb-1.5 flex items-center space-x-2">
-                  <span className="w-1.5 h-1.5 bg-slate-900 rounded-full"></span>
-                  <span>Standards of Integrity (4 Pillars)</span>
-                </h3>
-                <div className="grid grid-cols-1 gap-6">
-                  {/* Pillar 1 */}
-                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-150/60 space-y-3">
-                    <span className="text-xs font-bold text-slate-405 uppercase tracking-wider block">Pillar 1</span>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="md:col-span-1">
-                        <label className="block text-[10px] font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Title</label>
-                        <input
-                          type="text"
-                          required
-                          value={aboutForm.pillar1Title || ''}
-                          onChange={e => setAboutForm({ ...aboutForm, pillar1Title: e.target.value })}
-                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
-                        />
-                      </div>
-                      <div className="md:col-span-2">
-                        <label className="block text-[10px] font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Description</label>
-                        <input
-                          type="text"
-                          required
-                          value={aboutForm.pillar1Desc || ''}
-                          onChange={e => setAboutForm({ ...aboutForm, pillar1Desc: e.target.value })}
-                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Pillar 2 */}
-                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-150/60 space-y-3">
-                    <span className="text-xs font-bold text-slate-405 uppercase tracking-wider block">Pillar 2</span>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="md:col-span-1">
-                        <label className="block text-[10px] font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Title</label>
-                        <input
-                          type="text"
-                          required
-                          value={aboutForm.pillar2Title || ''}
-                          onChange={e => setAboutForm({ ...aboutForm, pillar2Title: e.target.value })}
-                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
-                        />
-                      </div>
-                      <div className="md:col-span-2">
-                        <label className="block text-[10px] font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Description</label>
-                        <input
-                          type="text"
-                          required
-                          value={aboutForm.pillar2Desc || ''}
-                          onChange={e => setAboutForm({ ...aboutForm, pillar2Desc: e.target.value })}
-                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Pillar 3 */}
-                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-150/60 space-y-3">
-                    <span className="text-xs font-bold text-slate-405 uppercase tracking-wider block">Pillar 3</span>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="md:col-span-1">
-                        <label className="block text-[10px] font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Title</label>
-                        <input
-                          type="text"
-                          required
-                          value={aboutForm.pillar3Title || ''}
-                          onChange={e => setAboutForm({ ...aboutForm, pillar3Title: e.target.value })}
-                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
-                        />
-                      </div>
-                      <div className="md:col-span-2">
-                        <label className="block text-[10px] font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Description</label>
-                        <input
-                          type="text"
-                          required
-                          value={aboutForm.pillar3Desc || ''}
-                          onChange={e => setAboutForm({ ...aboutForm, pillar3Desc: e.target.value })}
-                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Pillar 4 */}
-                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-150/60 space-y-3">
-                    <span className="text-xs font-bold text-slate-405 uppercase tracking-wider block">Pillar 4</span>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="md:col-span-1">
-                        <label className="block text-[10px] font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Title</label>
-                        <input
-                          type="text"
-                          required
-                          value={aboutForm.pillar4Title || ''}
-                          onChange={e => setAboutForm({ ...aboutForm, pillar4Title: e.target.value })}
-                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
-                        />
-                      </div>
-                      <div className="md:col-span-2">
-                        <label className="block text-[10px] font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Description</label>
-                        <input
-                          type="text"
-                          required
-                          value={aboutForm.pillar4Desc || ''}
-                          onChange={e => setAboutForm({ ...aboutForm, pillar4Desc: e.target.value })}
-                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
                         />
                       </div>
                     </div>
